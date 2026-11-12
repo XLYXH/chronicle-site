@@ -2,438 +2,378 @@
 <html lang="zh-CN" class="no-js">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#070605" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <title>CHRONICLE — Ideas take shape. · Chronicle-IRAS</title>
-    <meta name="description" content="CHRONICLE：Chronicle-IRAS 的个人编年史。在代码与想象之间，让每一个念头有形可见——开发者工具、AI 智能体与硬件界面的开源作品集。" />
+    <meta name="theme-color" content="#050506" />
+    <title>IRAS.OS — Chronicle-IRAS · 工具链、硬件与 AI</title>
+    <meta name="description" content="Chronicle-IRAS 的个人网站：Qt 蓝图生成器、ESP32 监控中台、Astro 博客等开源项目，以及一台可以输入命令的小终端。Everything is AI." />
     <meta name="author" content="Chronicle-IRAS" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://xlyxh.github.io/chronicle-site/" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="CHRONICLE" />
+    <meta property="og:site_name" content="IRAS.OS" />
     <meta property="og:locale" content="zh_CN" />
     <meta property="og:url" content="https://xlyxh.github.io/chronicle-site/" />
-    <meta property="og:title" content="CHRONICLE — Ideas take shape." />
-    <meta property="og:description" content="在代码与想象之间，让每一个念头有形可见。Chronicle-IRAS 的个人编年史。" />
+    <meta property="og:title" content="IRAS.OS — Chronicle-IRAS" />
+    <meta property="og:description" content="工具链、硬件与 AI。Everything is AI." />
     <meta property="og:image" content="https://xlyxh.github.io/chronicle-site/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="CHRONICLE — Projects, experiments and ideas." />
+    <meta property="og:image:alt" content="IRAS.OS — Chronicle-IRAS 的个人网站" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CHRONICLE — Ideas take shape." />
-    <meta name="twitter:description" content="在代码与想象之间，让每一个念头有形可见。" />
+    <meta name="twitter:title" content="IRAS.OS — Chronicle-IRAS" />
+    <meta name="twitter:description" content="工具链、硬件与 AI。Everything is AI." />
     <meta name="twitter:image" content="https://xlyxh.github.io/chronicle-site/og.png" />
     <link rel="icon" href="./favicon.ico" sizes="32x32" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./site.webmanifest" />
+    <link rel="preload" href="/src/assets/fonts/plex-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/fraunces-italic.woff2" as="font" type="font/woff2" crossorigin />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"Person","name":"Chronicle-IRAS","url":"https://xlyxh.github.io/chronicle-site/","sameAs":["https://github.com/Chronicle-IRAS"],"description":"Everything is AI."}
+      {"@context":"https://schema.org","@type":"Person","name":"Chronicle-IRAS","url":"https://xlyxh.github.io/chronicle-site/","sameAs":["https://github.com/Chronicle-IRAS"],"description":"Everything is AI"}
     </script>
-    <link rel="preload" href="/src/assets/fonts/inter-tight.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/src/assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       document.documentElement.classList.replace('no-js', 'js')
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced-motion')
+      else document.documentElement.classList.add('is-booting')
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">跳到正文</a>
+    <a class="skip" href="#main">跳到正文</a>
 
-    <!-- 开场：计数加载 + 幕布 -->
-    <div class="loader" aria-hidden="true">
-      <div class="loader__inner">
-        <svg class="loader__star" viewBox="0 0 64 64"><use href="#compass" /></svg>
-        <p class="loader__title"><span>CHRONICLE</span></p>
-        <p class="loader__count"><span class="loader__num">000</span><span class="loader__unit">%</span></p>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="sigil" viewBox="0 -0.5 5 5">
+        <path d="M0 0h1v2H0zM2 0h1v3H2zM4 0h1v2H4zM1 2h1v2H1zM3 2h1v2H3zM0 3h1v1H0zM4 3h1v1H4z" />
+      </symbol>
+      <symbol id="arrow" viewBox="0 0 12 12"><path d="M3 9 9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2" /></symbol>
+    </svg>
+
+    <!-- 开机自检：只在启用 JS 且非减少动态时显示 -->
+    <div class="boot" aria-hidden="true">
+      <div class="boot__inner">
+        <p class="boot__head"><span>IRAS.OS</span><span>BIOS v3.0 · 2026</span></p>
+        <ol class="boot__log"></ol>
+        <div class="boot__bar"><i></i></div>
+        <p class="boot__foot"><span class="boot__pct">000</span><span>PRESS ANY KEY TO SKIP</span></p>
       </div>
-      <div class="loader__bar"><i></i></div>
     </div>
 
-    <div class="grain" aria-hidden="true"></div>
-    <div class="cursor" aria-hidden="true"><div class="cursor__ring"><span class="cursor__label"></span></div><div class="cursor__dot"></div></div>
-    <div class="progress" aria-hidden="true"><i></i></div>
+    <div class="stage" aria-hidden="true">
+      <canvas class="stage__gl"></canvas>
+      <div class="stage__fallback"></div>
+      <div class="stage__scan"></div>
+    </div>
 
-    <header class="header">
-      <a class="brand" href="#origin" aria-label="CHRONICLE 回到顶部" data-magnetic="0.25">
-        <svg class="brand__star" viewBox="0 0 64 64" aria-hidden="true"><use href="#compass" /></svg>
-        <span class="brand__name">CHRONICLE</span>
-      </a>
-      <nav class="nav" aria-label="主导航">
-        <a class="roll" href="#work"><span data-text="Work">Work</span><sup>02</sup></a>
-        <a class="roll" href="#chronicle"><span data-text="Chronicle">Chronicle</span><sup>03</sup></a>
-        <a class="roll" href="#fields"><span data-text="Fields">Fields</span><sup>04</sup></a>
-        <a class="roll" href="#signal"><span data-text="Signal">Signal</span><sup>05</sup></a>
-      </nav>
-      <a class="header__cta" href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener noreferrer" data-magnetic="0.3" data-cursor="GitHub">
-        <span class="roll"><span data-text="GitHub ↗">GitHub ↗</span></span>
-      </a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu">
-        <span class="visually-hidden">打开菜单</span><i></i><i></i>
-      </button>
+    <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+    <header class="bar">
+      <div class="bar__row bar__row--top">
+        <span class="bar__status"><i class="led"></i>SYS.ONLINE</span>
+        <span class="bar__user hide-sm">| USER: CHRONICLE-IRAS</span>
+        <span class="bar__mem hide-md" data-mem>MEM 0x00FF</span>
+        <span class="bar__clock">T: <time data-clock>00:00:00.0</time></span>
+      </div>
+      <div class="bar__row bar__row--nav">
+        <nav class="nav" aria-label="主导航">
+          <a href="#top" data-scramble data-nav="top">&gt; SYS.HOME</a>
+          <a href="#profile" data-scramble data-nav="profile">DIR.PROFILE</a>
+          <a href="#projects" data-scramble data-nav="projects">DIR.PROJECTS</a>
+          <a href="#log" data-scramble data-nav="log">DIR.LOGS</a>
+          <a href="#tty" data-scramble data-nav="tty">EXE.TERMINAL</a>
+          <span class="nav__noise" aria-hidden="true" data-noise>#Q7X/2KA</span>
+        </nav>
+        <a class="bar__ext" href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener" data-scramble>NET.GITHUB<svg aria-hidden="true"><use href="#arrow" /></svg></a>
+      </div>
     </header>
 
-    <div class="menu" id="menu" aria-hidden="true">
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><span class="sr">打开菜单</span><i></i><i></i></button>
+    <div class="menu" id="menu" inert>
+      <p class="menu__label">&gt; DIR_LIST</p>
       <nav aria-label="移动端导航">
-        <a href="#origin"><small>00</small>Origin<em>序章</em></a>
-        <a href="#work"><small>02</small>Work<em>作品</em></a>
-        <a href="#chronicle"><small>03</small>Chronicle<em>编年</em></a>
-        <a href="#fields"><small>04</small>Fields<em>领域</em></a>
-        <a href="#signal"><small>05</small>Signal<em>联系</em></a>
+        <a href="#top"><small>00</small>Home.</a>
+        <a href="#profile"><small>01</small>Profile.</a>
+        <a href="#projects"><small>02</small>Projects.</a>
+        <a href="#log"><small>03</small>Logs.</a>
+        <a href="#tty"><small>04</small>Terminal.</a>
+        <a href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener"><small>↗</small>GitHub.</a>
       </nav>
-      <p class="menu__foot"><a href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener noreferrer">github.com/Chronicle-IRAS ↗</a></p>
     </div>
 
-    <aside class="chapter" aria-hidden="true">
-      <span class="chapter__num"><span class="chapter__roll"><b>00</b></span></span>
-      <span class="chapter__sep"></span>
-      <span class="chapter__name"><span class="chapter__roll"><b>Origin</b></span></span>
-    </aside>
+    <div class="rail" aria-hidden="true">
+      <ol class="rail__dots"></ol>
+      <span class="rail__num">00</span>
+    </div>
+    <div class="track" aria-hidden="true"><i></i><span>000</span></div>
 
-    <main id="main" tabindex="-1">
-      <!-- 00 · Origin -->
-      <section class="hero" id="origin" data-chapter="00" data-chapter-name="Origin" aria-labelledby="hero-title">
-        <div class="hero__sticky">
-        <div class="hero__media">
-          <img class="hero__img" src="/src/assets/portrait-1536.webp" srcset="/src/assets/portrait-640.webp 640w, /src/assets/portrait-960.webp 960w, /src/assets/portrait-1536.webp 1536w" sizes="100vw" width="1536" height="1024" alt="红与黑交织的碎片化人物剪影，背后是一轮暗月与星轨" fetchpriority="high" />
-          <canvas class="hero__gl" aria-hidden="true"></canvas>
-          <div class="hero__shade"></div>
-        </div>
-
-        <div class="hero__content shell">
-          <p class="eyebrow hero__eyebrow" data-reveal><span class="dot"></span>CHRONICLE — A Personal Chronicle<span class="hide-sm">&nbsp;· 个人编年史</span></p>
-          <h1 class="hero__title" id="hero-title" aria-label="Ideas take shape.">
-            <span class="line" data-split="chars">Ideas</span>
-            <span class="line" data-split="chars">take<span class="hero__spark" aria-hidden="true">✳</span></span>
-            <span class="line line--serif" data-split="chars">shape.</span>
+    <main id="main">
+      <!-- 00 · HOME -->
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero__center">
+          <h1 class="mark" id="hero-title" data-glitch>
+            <span class="sr">Chronicle-IRAS — </span><span class="mark__word">IRAS<em>.</em></span>
           </h1>
-          <p class="hero__lede cn" data-reveal>在代码与想象之间，<br />让每一个念头，有形可见。</p>
+          <p class="hero__kicker">[ CHRONICLE-IRAS // EVERYTHING IS AI ]</p>
         </div>
 
-        <p class="hero__fragment" aria-hidden="true">
-          <span class="hero__fragment-kicker">Everything begins with</span>
-          <span class="hero__fragment-line" data-split="chars">a <em>fragment.</em></span>
-          <span class="hero__fragment-cn cn">一切，都从一块碎片开始。</span>
-        </p>
-
-        <div class="hero__meta shell" data-reveal>
-          <span>Developer · Builder · Explorer</span>
-          <a class="hero__scroll" href="#prologue" data-cursor="Scroll"><span>Scroll to begin</span><i aria-hidden="true"></i></a>
-          <span class="hero__est">Est. 2025.11 — Now</span>
-        </div>
-        </div>
-      </section>
-
-      <!-- 01 · Prologue -->
-      <section class="prologue shell" id="prologue" data-chapter="01" data-chapter-name="Prologue" aria-labelledby="prologue-title">
-        <header class="section-head">
-          <span class="section-head__num">01</span>
-          <h2 class="section-head__title" id="prologue-title">Prologue <em>序</em></h2>
-          <span class="section-head__rule"></span>
-        </header>
-        <p class="prologue__text" data-scrub-words>
-          Rather than a fixed label, I'd rather introduce myself through what I'm building — at the intersection of
-          <em>developer tools</em>, <em>AI agents</em> and <em>expressive hardware</em>. Nothing starts whole. Everything starts somewhere.
-        </p>
-        <div class="prologue__grid">
-          <p class="prologue__cn cn" data-reveal>与其给自己贴一个固定的标签，我更愿意用正在做的东西介绍自己——在开发者工具、AI 智能体与有表现力的硬件界面的交汇处，把好奇心变成可以触碰的东西。</p>
-          <dl class="stats" data-reveal>
-            <div><dt>Original projects</dt><dd><span data-count="5">05</span></dd></div>
-            <div><dt>On GitHub since</dt><dd>2025<small>.11</small></dd></div>
-            <div><dt>Bio</dt><dd class="stats__quote">“Everything is AI.”</dd></div>
+        <div class="hero__left">
+          <p class="hero__tag">
+            Wiring <u>AI</u> into <u>dev tools</u>,<br />
+            <u>cameras</u> &amp; the <u>web</u>.
+          </p>
+          <dl class="readout">
+            <div><dt>&gt; AGENT</dt><dd class="hi">ONLINE</dd></div>
+            <div><dt>REPOS</dt><dd>9 · ORIGINAL 5</dd></div>
+            <div><dt>UPTIME_SINCE_INIT</dt><dd class="hi" data-uptime>— </dd></div>
           </dl>
+          <p class="hero__warn">[NOTE: TERMINAL BELOW ACCEPTS INPUT]<br />AWAITING_INSTRUCTIONS…</p>
         </div>
-        <div class="focus" data-reveal>
-          <span class="focus__pulse" aria-hidden="true"></span>
-          <p><small>Current focus · 正在进行</small>Qt Blueprint Generator 与交互式着色器 —— 探索可视化编译流水线与智能体工程工作流。</p>
-        </div>
+
+        <figure class="hero__quote">
+          <figcaption>// DECODED_FRAGMENT · qt-blueprint-generator</figcaption>
+          <blockquote><p>“让 AI 写模块内部，人来把关。”</p></blockquote>
+        </figure>
+
+        <a class="hero__cue" href="#profile"><span data-scramble>DESCEND</span><i aria-hidden="true"></i></a>
       </section>
 
-      <!-- 02 · Work -->
-      <section class="work" id="work" data-chapter="02" data-chapter-name="Work" aria-labelledby="work-title">
-        <div class="work__pin">
-          <div class="work__track">
-            <div class="work__intro">
-              <header class="section-head">
-                <span class="section-head__num">02</span>
-                <h2 class="section-head__title" id="work-title">Selected <em>work</em></h2>
-                <span class="section-head__rule"></span>
-              </header>
-              <p class="work__lede">From spark to tangible craft. 四个开源项目，从工具链到硅片，从边缘函数到文字。</p>
-              <p class="work__hint" aria-hidden="true"><span>Keep scrolling</span><i></i></p>
+      <!-- 01 · PROFILE -->
+      <section class="profile" id="profile" aria-labelledby="profile-title">
+        <div class="profile__card card" data-reveal>
+          <p class="card__top"><span>STATUS: IRAS.OS</span><span class="ok"><i class="led"></i>ACTIVE</span></p>
+          <div class="card__id">
+            <svg class="sigil" aria-hidden="true"><use href="#sigil" /></svg>
+            <div>
+              <p class="card__name">CHRONICLE-IRAS</p>
+              <p class="card__class">BUILD 2026.11 · TOOLMAKER / FULL-STACK</p>
             </div>
-
-            <div class="work__rail" tabindex="-1">
-            <article class="project" data-project="blueprint">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/qt-blueprint-generator" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
-                <div class="project__cover">
-                  <svg class="art art--blueprint" viewBox="0 0 800 560" aria-hidden="true">
-                    <defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" /></pattern></defs>
-                    <rect class="art__grid" width="800" height="560" fill="url(#dots)" />
-                    <g class="art__wires">
-                      <path d="M196 150 C 290 150, 290 280, 372 280" />
-                      <path d="M196 410 C 290 410, 290 300, 372 300" />
-                      <path class="art__hot" d="M520 290 C 590 290, 590 170, 640 170" />
-                      <path d="M520 290 C 590 290, 590 410, 640 410" />
-                    </g>
-                    <g class="art__nodes">
-                      <g transform="translate(60 110)"><rect width="136" height="80" rx="10" /><text x="18" y="32">BLUEPRINT</text><text class="t2" x="18" y="58">Module · Port</text></g>
-                      <g transform="translate(60 370)"><rect width="136" height="80" rx="10" /><text x="18" y="32">VALIDATE</text><text class="t2" x="18" y="58">Contract</text></g>
-                      <g class="hot" transform="translate(372 240)"><rect width="148" height="100" rx="10" /><text x="18" y="34">CANDIDATE</text><text class="t2" x="18" y="62">AI · Review</text><circle class="pulse" cx="128" cy="24" r="5" /></g>
-                      <g transform="translate(640 130)"><rect width="110" height="80" rx="10" /><text x="18" y="32">BUILD</text><text class="t2" x="18" y="58">CMake</text></g>
-                      <g transform="translate(640 370)"><rect width="110" height="80" rx="10" /><text x="18" y="32">EXPORT</text><text class="t2" x="18" y="58">Qt 6</text></g>
-                    </g>
-                  </svg>
-                  <span class="project__index" aria-hidden="true">01</span>
-                </div>
-                <div class="project__body">
-                  <p class="project__meta"><span>Tools</span><span>C++17 · Qt 6 · AI</span><span>2026.09</span></p>
-                  <h3 class="project__title"><span>Qt Blueprint</span> <em>Generator</em></h3>
-                  <p class="project__desc cn">蓝图驱动的 Qt 6 可视化开发平台：用节点描述模块、接口与连接，生成可审查、可构建、可导出的工程。AI 只写模块内部，人来把关。</p>
-                </div>
-              </a>
-            </article>
-
-            <article class="project" data-project="monitor">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/monitor" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
-                <div class="project__cover">
-                  <svg class="art art--monitor" viewBox="0 0 800 560" aria-hidden="true">
-                    <g class="art__cams">
-                      <g transform="translate(60 60)"><rect width="200" height="128" rx="6" /><text x="14" y="26">CAM-01</text><circle class="rec" cx="182" cy="20" r="5" /></g>
-                      <g transform="translate(300 60)"><rect width="200" height="128" rx="6" /><text x="14" y="26">CAM-02</text><circle class="rec" cx="182" cy="20" r="5" /></g>
-                      <g transform="translate(540 60)"><rect width="200" height="128" rx="6" /><text x="14" y="26">CAM-03</text><circle class="rec" cx="182" cy="20" r="5" /></g>
-                      <g transform="translate(60 216)"><rect width="200" height="128" rx="6" /><text x="14" y="26">CAM-04</text><circle class="rec" cx="182" cy="20" r="5" /></g>
-                      <g class="hot" transform="translate(300 216)"><rect width="200" height="128" rx="6" /><text x="14" y="26">CAM-05 · LIVE</text><circle class="rec" cx="182" cy="20" r="5" /></g>
-                      <g transform="translate(540 216)"><rect width="200" height="128" rx="6" /><text x="14" y="26">CAM-06</text><circle class="rec" cx="182" cy="20" r="5" /></g>
-                    </g>
-                    <path class="art__baseline" d="M60 460 H740" />
-                    <polyline class="art__wave" points="60,460 110,460 130,420 150,490 170,440 200,460 260,460 280,400 300,500 320,430 340,460 420,460 440,410 460,480 480,452 520,460 580,460 600,395 620,505 640,440 660,460 740,460" />
-                    <text class="art__caption" x="60" y="530">ESP32-S3 · MJPEG / JPEG-UDP · 实时预览</text>
-                  </svg>
-                  <span class="project__index" aria-hidden="true">02</span>
-                </div>
-                <div class="project__body">
-                  <p class="project__meta"><span>Hardware</span><span>Vue 3 · TypeScript · ESP32-S3</span><span>2026.06</span></p>
-                  <h3 class="project__title"><span>ESP32</span> <em>Monitor</em></h3>
-                  <p class="project__desc cn">ESP32-S3 摄像头集群的实时监控中台：多路视频预览、历史录像回放、节点启停与访客 / 管理员双角色权限。</p>
-                </div>
-              </a>
-            </article>
-
-            <article class="project" data-project="blog">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/deskbox-blog" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
-                <div class="project__cover">
-                  <svg class="art art--blog" viewBox="0 0 800 560" aria-hidden="true">
-                    <g class="art__page" transform="translate(150 50)"><rect width="300" height="430" rx="4" /></g>
-                    <g class="art__page art__page--front" transform="translate(330 80)">
-                      <rect width="320" height="430" rx="4" />
-                      <text class="art__glyph" x="28" y="150">Aa</text>
-                      <path class="art__lines" d="M30 200 H290 M30 228 H270 M30 256 H290 M30 284 H220 M30 336 H290 M30 364 H250 M30 392 H180" />
-                      <text class="art__caption" x="28" y="52">DESKBOX · No. 001</text>
-                    </g>
-                    <circle class="art__stamp" cx="196" cy="430" r="46" />
-                    <text class="art__caption" x="166" y="436">ASTRO</text>
-                  </svg>
-                  <span class="project__index" aria-hidden="true">03</span>
-                </div>
-                <div class="project__body">
-                  <p class="project__meta"><span>Writing</span><span>Astro · Design system</span><span>2026.10</span></p>
-                  <h3 class="project__title"><span>DeskBox</span> <em>Blog</em></h3>
-                  <p class="project__desc cn">DeskBox 个人博客：基于 Astro 搭建，自带设计系统与部署脚本，用来记录做东西的过程。</p>
-                </div>
-              </a>
-            </article>
-
-            <article class="project" data-project="proxy">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/palm-netlify-proxy" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
-                <div class="project__cover">
-                  <svg class="art art--proxy" viewBox="0 0 800 560" aria-hidden="true">
-                    <g class="art__rings" transform="translate(400 280)">
-                      <circle r="210" /><circle r="160" /><circle r="110" /><circle class="core" r="46" />
-                      <g class="art__orbit"><circle class="sat" cx="160" cy="0" r="8" /></g>
-                      <g class="art__orbit art__orbit--slow"><circle class="sat sat--b" cx="0" cy="-210" r="5" /></g>
-                    </g>
-                    <path class="art__beam" d="M40 280 H190 M610 280 H760" />
-                    <text class="art__caption" x="40" y="262">CLIENT</text>
-                    <text class="art__caption" x="694" y="262">MODEL</text>
-                    <text class="art__caption art__caption--c" x="400" y="285">EDGE</text>
-                  </svg>
-                  <span class="project__index" aria-hidden="true">04</span>
-                </div>
-                <div class="project__body">
-                  <p class="project__meta"><span>AI</span><span>TypeScript · Netlify Edge</span><span>2026.03</span></p>
-                  <h3 class="project__title"><span>PaLM Netlify</span> <em>Proxy</em></h3>
-                  <p class="project__desc cn">运行在 Netlify Edge Functions 上的 Google PaLM API 轻量代理 —— 一条通往智能的开放连接。</p>
-                </div>
-              </a>
-            </article>
-
-            <div class="work__outro">
-              <a class="work__more" href="https://github.com/Chronicle-IRAS?tab=repositories" target="_blank" rel="noopener noreferrer" data-cursor="GitHub ↗" data-magnetic="0.2">
-                <span class="work__more-label">All repositories</span>
-                <span class="work__more-title">More on <em>GitHub</em></span>
-                <span class="work__more-arrow" aria-hidden="true">↗</span>
-              </a>
-            </div>
-            </div>
-            <div class="work__pager" aria-hidden="true"><span class="work__pager-num">01</span><span class="work__pager-bar"><i></i></span><span>04</span></div>
+          </div>
+          <dl class="stats">
+            <div><dt>DESIGNATION</dt><dd>BUILDER</dd></div>
+            <div><dt>PRIMARY</dt><dd>C++ / TYPESCRIPT</dd></div>
+            <div><dt>SECONDARY</dt><dd>VUE / ASTRO / QT</dd></div>
+            <div><dt>FIELD</dt><dd>TOOLS × HARDWARE × AI</dd></div>
+            <div><dt>GITHUB_NET</dt><dd>REPO:9 / COMMIT:210+</dd></div>
+          </dl>
+          <div class="card__actions">
+            <a class="btn" href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener" data-scramble>EXEC_GITHUB</a>
+            <a class="btn" href="https://github.com/Chronicle-IRAS?tab=repositories" target="_blank" rel="noopener" data-scramble>LIST_REPOS</a>
+            <a class="btn" href="#tty" data-scramble>INIT_TERMINAL</a>
           </div>
         </div>
-      </section>
 
-      <!-- 03 · Chronicle -->
-      <section class="timeline" id="chronicle" data-chapter="03" data-chapter-name="Chronicle" data-theme="light" aria-labelledby="chronicle-title">
-        <div class="shell timeline__inner">
-          <div class="timeline__aside">
-            <header class="section-head">
-              <span class="section-head__num">03</span>
-              <h2 class="section-head__title" id="chronicle-title">The <em>chronicle</em></h2>
-              <span class="section-head__rule"></span>
-            </header>
-            <p class="timeline__lede cn">编年 —— 每一个仓库都是一页。</p>
-            <p class="timeline__year" aria-hidden="true"><span class="timeline__year-roll"><b>2025</b></span></p>
-          </div>
-          <ol class="timeline__list">
-            <li class="entry" data-year="2025">
-              <time datetime="2025-11">2025.11</time>
-              <div><h3>落笔 <em>First page</em></h3><p class="cn">在 GitHub 开始这部编年史，简介只写了一句：“Everything is AI.”</p></div>
-            </li>
-            <li class="entry" data-year="2026">
-              <time datetime="2026-03">2026.03</time>
-              <div><h3>PaLM Netlify Proxy</h3><p class="cn">第一个公开的原创仓库：在 Netlify Edge 上为 Google PaLM API 搭一座轻量的桥。</p></div>
-            </li>
-            <li class="entry" data-year="2026">
-              <time datetime="2026-06">2026.06</time>
-              <div><h3>monitor</h3><p class="cn">开始搭建 ESP32-S3 摄像头集群的监控中台，让硅片和浏览器对话。</p></div>
-            </li>
-            <li class="entry" data-year="2026">
-              <time datetime="2026-09">2026.09</time>
-              <div><h3>Qt Blueprint Generator</h3><p class="cn">蓝图驱动的 Qt 6 代码生成器立项：结构，先于代码。</p></div>
-            </li>
-            <li class="entry" data-year="2026">
-              <time datetime="2026-10">2026.10</time>
-              <div><h3>DeskBox Blog · CHRONICLE</h3><p class="cn">个人博客与第一版 CHRONICLE 个人网站相继上线。</p></div>
-            </li>
-            <li class="entry" data-year="2026">
-              <time datetime="2026-11">2026.11</time>
-              <div><h3>monitor, in production</h3><p class="cn">ESP32 后端服务、JPEG UDP 接入与生产部署合并进主干，监控系统真正跑了起来。</p></div>
-            </li>
-            <li class="entry entry--now" data-year="Now">
-              <time>Now</time>
-              <div><h3>下一章 <em>To be continued</em></h3><p class="cn">未完待续。</p></div>
-            </li>
-          </ol>
-        </div>
-      </section>
-
-      <!-- 04 · Fields -->
-      <section class="fields" id="fields" data-chapter="04" data-chapter-name="Fields" aria-labelledby="fields-title">
-        <div class="marquee" aria-hidden="true">
-          <div class="marquee__track">
-            <span>Build things</span><i>✦</i><span>Break patterns</span><i>✦</i><span>Stay curious</span><i>✦</i><span>Explore worlds</span><i>✦</i>
-            <span>Build things</span><i>✦</i><span>Break patterns</span><i>✦</i><span>Stay curious</span><i>✦</i><span>Explore worlds</span><i>✦</i>
-          </div>
-        </div>
-        <div class="shell">
-          <header class="section-head">
-            <span class="section-head__num">04</span>
-            <h2 class="section-head__title" id="fields-title">More than <em>one thing</em></h2>
-            <span class="section-head__rule"></span>
+        <div class="profile__main">
+          <header class="head" data-reveal>
+            <p class="head__path">&gt; SYS.ABOUT</p>
+            <h2 class="head__title" id="profile-title" data-decode>Profile.</h2>
+            <span class="head__ghost" aria-hidden="true">WHOAMI</span>
           </header>
-          <ul class="fields__list">
-            <li class="field" data-reveal>
-              <h3>
-                <button class="field__toggle" type="button" aria-expanded="false" aria-controls="field-1" data-cursor="Open">
-                  <span class="field__num">01</span>
-                  <span class="field__title">Developer tools</span>
-                  <span class="field__cn cn">可视化架构与编译</span>
-                  <span class="field__icon" aria-hidden="true"></span>
-                </button>
-              </h3>
-              <div class="field__panel" id="field-1" role="region" aria-label="Developer tools">
-                <div class="field__panel-inner">
-                  <p class="field__sub">Turning intricate systems into tactile instruments.</p>
-                  <p class="cn">从 Qt 6 与 C++ 出发，探索可视化节点蓝图、AST 检查与低摩擦的工程工作流。好工具会隐入手艺之中，让人专注于正在创造的东西。</p>
-                  <p class="field__tags">Qt 6 · C++ · Node Graph · AST</p>
-                </div>
+          <p class="about" data-reveal>
+            我做三类东西：<strong>给开发者用的工具</strong>、<strong>连着硬件的系统</strong>，以及<strong>承载文字的网站</strong>。
+            最近的主线是 Qt Blueprint Generator —— 用蓝图描述模块与连接，让 AI 生成候选代码，经人工审核后再构建、导出。
+            简介只有一句：Everything is AI。
+          </p>
+
+          <div class="lang" data-reveal>
+            <p class="lang__head"><span>&gt; LANG.DISTRIBUTION</span><span>5 REPOS · BYTES</span></p>
+            <div class="lang__bar" data-lang-bar></div>
+            <ul class="lang__list" data-lang-list>
+              <li>C++</li><li>TypeScript</li><li>CSS</li><li>JavaScript</li><li>Astro</li><li>Vue</li><li>CMake</li>
+            </ul>
+          </div>
+
+          <div class="widgets">
+            <div class="widget" data-reveal>
+              <p class="widget__head"><span>SYS.CLOCK_MODULE</span><span>LOCAL_TIME</span></p>
+              <p class="widget__clock">&gt; <time data-clock-big>00:00:00.000</time></p>
+              <div class="meter"><i data-day></i></div>
+              <p class="widget__foot"><span>DAY_PROGRESS</span><span data-day-num>0%</span></p>
+            </div>
+            <div class="widget" data-reveal>
+              <p class="widget__head"><span>SYS.DATE</span><span data-cal-title>—</span></p>
+              <table class="cal" aria-label="本月日历" data-cal>
+                <thead><tr><th>MO</th><th>TU</th><th>WE</th><th>TH</th><th>FR</th><th>SA</th><th>SU</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <p class="widget__foot"><span>YEAR_PROGRESS</span><span data-year>—</span></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 · PROJECTS -->
+      <section class="projects" id="projects" aria-labelledby="projects-title">
+        <header class="head head--wide" data-reveal>
+          <p class="head__path">&gt; SYS.EXPLORE</p>
+          <h2 class="head__title" id="projects-title" data-decode>Projects.</h2>
+          <p class="head__meta">DIR_LIST · 05 ENTRIES</p>
+          <span class="head__ghost" aria-hidden="true">ARCHIVE_NODE</span>
+        </header>
+
+        <ol class="index">
+          <li class="entry" data-reveal>
+            <a class="entry__link" href="https://github.com/Chronicle-IRAS/qt-blueprint-generator" target="_blank" rel="noopener">
+              <span class="entry__no">01 / TOOLS</span>
+              <span class="entry__title">&gt; Qt Blueprint <em>Generator.</em></span>
+              <span class="entry__sub">BLUEPRINT → CANDIDATE → REVIEW → BUILD → EXPORT</span>
+              <span class="entry__meta">C++17 · QT 6 · CMAKE · TS<br />2026.09 · 42 COMMITS</span>
+              <span class="entry__addr" aria-hidden="true">0x7E01</span>
+            </a>
+            <div class="entry__more">
+              <div>
+                <p>蓝图驱动的 Qt 6 可视化开发平台：节点、端口与连线描述模块；确定性生成器维护公共契约和工程骨架，AI 只实现模块内部，候选代码经人工审核、接受或拒绝后才进入正式工程，再用真实 CMake 构建和导出。</p>
+                <svg class="schema" viewBox="0 0 320 90" aria-hidden="true">
+                  <g class="schema__nodes"><rect x="4" y="30" width="56" height="28" /><rect x="88" y="30" width="56" height="28" /><rect x="172" y="30" width="56" height="28" /><rect x="256" y="30" width="56" height="28" /></g>
+                  <path class="schema__wire" d="M60 44h28M144 44h28M228 44h28" />
+                  <g class="schema__txt"><text x="32" y="48">BLUEPRINT</text><text x="116" y="48">CANDIDATE</text><text x="200" y="48">REVIEW</text><text x="284" y="48">BUILD</text></g>
+                </svg>
               </div>
-            </li>
-            <li class="field" data-reveal>
-              <h3>
-                <button class="field__toggle" type="button" aria-expanded="false" aria-controls="field-2" data-cursor="Open">
-                  <span class="field__num">02</span>
-                  <span class="field__title">AI &amp; agents</span>
-                  <span class="field__cn cn">上下文编排与推理</span>
-                  <span class="field__icon" aria-hidden="true"></span>
-                </button>
-              </h3>
-              <div class="field__panel" id="field-2" role="region" aria-label="AI & agents">
-                <div class="field__panel-inner">
-                  <p class="field__sub">Connecting context, toolchains, and autonomous decisions.</p>
-                  <p class="cn">研究 AI 智能体如何感知工作区上下文、调用确定性工具，并把抽象的想法拆解成可验证的工程步骤 —— 一场仍在进行的实验。</p>
-                  <p class="field__tags">AI Agents · TypeScript · Edge API</p>
-                </div>
+            </div>
+          </li>
+          <li class="entry" data-reveal>
+            <a class="entry__link" href="https://github.com/Chronicle-IRAS/monitor" target="_blank" rel="noopener">
+              <span class="entry__no">02 / HARDWARE</span>
+              <span class="entry__title">&gt; Monitor<em>.</em></span>
+              <span class="entry__sub">ESP32-S3 CAMERA CLUSTER · LIVE / RECORD / NODES</span>
+              <span class="entry__meta">VUE 3 · TS · NODE · FFMPEG<br />2026.06 · LIVE</span>
+              <span class="entry__addr" aria-hidden="true">0x7E02</span>
+            </a>
+            <div class="entry__more">
+              <div>
+                <p>实验室 ESP32-S3 摄像头集群的监控中台：多路 MJPEG / WebSocket 实时预览、历史录像回放、端口与节点启停管理，访客 / 管理员双角色；配套后端用 Node.js + ffmpeg 零依赖实现，带 3 GB 录像池和节点看门狗。</p>
+                <svg class="schema" viewBox="0 0 320 90" aria-hidden="true">
+                  <g class="schema__nodes"><rect x="4" y="8" width="44" height="30" /><rect x="56" y="8" width="44" height="30" /><rect x="108" y="8" width="44" height="30" /><rect x="4" y="50" width="44" height="30" /><rect x="56" y="50" width="44" height="30" class="is-live" /><rect x="108" y="50" width="44" height="30" /></g>
+                  <path class="schema__wire" d="M170 45h20l8-26 10 52 10-40 8 14h20l6-10 8 20 6-10h44" />
+                </svg>
               </div>
-            </li>
-            <li class="field" data-reveal>
-              <h3>
-                <button class="field__toggle" type="button" aria-expanded="false" aria-controls="field-3" data-cursor="Open">
-                  <span class="field__num">03</span>
-                  <span class="field__title">Web &amp; hardware</span>
-                  <span class="field__cn cn">创意着色器与物理计算</span>
-                  <span class="field__icon" aria-hidden="true"></span>
-                </button>
-              </h3>
-              <div class="field__panel" id="field-3" role="region" aria-label="Web & hardware">
-                <div class="field__panel-inner">
-                  <p class="field__sub">Ideas on screen that reach out and touch the physical world.</p>
-                  <p class="cn">用 WebGL 着色器、GSAP 动效、Vue 与 ESP32 遥测连接数字界面与物理设备，寻找光、物理与硅之间新的化学反应。</p>
-                  <p class="field__tags">WebGL · GSAP · Vue · ESP32</p>
-                </div>
+            </div>
+          </li>
+          <li class="entry" data-reveal>
+            <a class="entry__link" href="https://github.com/Chronicle-IRAS/deskbox-blog" target="_blank" rel="noopener">
+              <span class="entry__no">03 / WRITING</span>
+              <span class="entry__title">&gt; DeskBox <em>Blog.</em></span>
+              <span class="entry__sub">ASTRO · DESIGN SYSTEM · SEARCH · CSP</span>
+              <span class="entry__meta">ASTRO · MDX · PAGEFIND<br />2026.10 · 106 COMMITS</span>
+              <span class="entry__addr" aria-hidden="true">0x7E03</span>
+            </a>
+            <div class="entry__more">
+              <div>
+                <p>基于 Astro 的个人博客：自带设计系统与架构文档，Pagefind 站内搜索、RSS 与站点地图，构建时生成 CSP 哈希与响应头，并用 Vitest 和 Playwright 做单元与端到端测试。</p>
+                <svg class="schema" viewBox="0 0 320 90" aria-hidden="true">
+                  <g class="schema__nodes"><rect x="4" y="10" width="92" height="70" /><rect x="112" y="10" width="92" height="70" /><rect x="220" y="10" width="92" height="70" /></g>
+                  <path class="schema__wire" d="M16 30h60M16 42h68M16 54h48M124 30h60M124 42h44M124 54h68M232 30h52M232 42h68M232 54h36" />
+                </svg>
               </div>
-            </li>
+            </div>
+          </li>
+          <li class="entry" data-reveal>
+            <a class="entry__link" href="https://github.com/Chronicle-IRAS/chronicle" target="_blank" rel="noopener">
+              <span class="entry__no">04 / INTERACTIVE</span>
+              <span class="entry__title">&gt; Chronicle<em>.</em></span>
+              <span class="entry__sub">SCROLL-DRIVEN WEB EXPERIMENT</span>
+              <span class="entry__meta">TYPESCRIPT · CSS<br />2026.10 · 44 COMMITS</span>
+              <span class="entry__addr" aria-hidden="true">0x7E04</span>
+            </a>
+            <div class="entry__more">
+              <div>
+                <p>一次滚动驱动的交互式网页实验：用 TypeScript 手写的叙事动效与状态切换。</p>
+                <svg class="schema" viewBox="0 0 320 90" aria-hidden="true">
+                  <path class="schema__wire" d="M4 70C60 70 70 20 120 20S190 70 240 50 300 20 316 20" />
+                  <g class="schema__nodes"><circle cx="120" cy="20" r="5" /><circle cx="240" cy="50" r="5" /></g>
+                </svg>
+              </div>
+            </div>
+          </li>
+          <li class="entry" data-reveal>
+            <a class="entry__link" href="https://github.com/Chronicle-IRAS/palm-netlify-proxy" target="_blank" rel="noopener">
+              <span class="entry__no">05 / EDGE</span>
+              <span class="entry__title">&gt; PaLM Netlify <em>Proxy.</em></span>
+              <span class="entry__sub">GOOGLE PALM API · NETLIFY EDGE</span>
+              <span class="entry__meta">TYPESCRIPT<br />2026.03</span>
+              <span class="entry__addr" aria-hidden="true">0x7E05</span>
+            </a>
+            <div class="entry__more">
+              <div>
+                <p>部署在 Netlify Edge 上的 Google PaLM API 反向代理，一键部署。</p>
+                <svg class="schema" viewBox="0 0 320 90" aria-hidden="true">
+                  <g class="schema__nodes"><rect x="4" y="30" width="70" height="28" /><rect x="124" y="30" width="70" height="28" /><rect x="244" y="30" width="70" height="28" /></g>
+                  <path class="schema__wire" d="M74 44h50M194 44h50" />
+                  <g class="schema__txt"><text x="39" y="48">CLIENT</text><text x="159" y="48">EDGE</text><text x="279" y="48">PALM</text></g>
+                </svg>
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <div class="tracked" data-reveal>
+          <p class="tracked__head">&gt; COMM_CHANNELS · FORKED &amp; TRACKED</p>
+          <ul>
+            <li><a href="https://github.com/Chronicle-IRAS/pocketjs" target="_blank" rel="noopener"><b>pocketjs</b><span>可移植的组件运行时，把组件代码渲染成原生像素</span></a></li>
+            <li><a href="https://github.com/Chronicle-IRAS/wandao" target="_blank" rel="noopener"><b>wandao</b><span>多平台知识库 Markdown 一键导入导出</span></a></li>
+            <li><a href="https://github.com/Chronicle-IRAS/FlowerSea-Blog" target="_blank" rel="noopener"><b>FlowerSea-Blog</b><span>博客</span></a></li>
+            <li><a href="https://github.com/Chronicle-IRAS/web-interview" target="_blank" rel="noopener"><b>web-interview</b><span>前端面试题库</span></a></li>
           </ul>
         </div>
       </section>
 
-      <!-- 05 · Signal -->
-      <section class="signal" id="signal" data-chapter="05" data-chapter-name="Signal" aria-labelledby="signal-title">
-        <div class="shell signal__inner">
-          <p class="eyebrow" data-reveal><span class="dot"></span>05 — Until the next idea · 下一个念头见</p>
-          <div class="signal__grid">
-            <h2 class="signal__title" id="signal-title" aria-label="Let’s make something matter.">
-              <span class="line" data-split="chars">Let’s make</span>
-              <span class="line" data-split="chars">something</span>
-              <span class="line line--serif" data-split="chars">matter.</span>
-            </h2>
-            <a class="orb" href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener noreferrer" data-magnetic="0.45" data-cursor-hide>
-              <span class="orb__fill" aria-hidden="true"></span>
-              <span class="orb__label">GitHub<br /><small>@Chronicle-IRAS</small></span>
-            </a>
-            <p class="cn signal__lede" data-reveal>去 GitHub 看看这些开源仓库，<br />或者一起做点接下来的东西。</p>
+      <!-- 03 · LOG -->
+      <section class="log" id="log" aria-labelledby="log-title">
+        <header class="head head--wide" data-reveal>
+          <p class="head__path">&gt; SYS.TAIL -F</p>
+          <h2 class="head__title" id="log-title" data-decode>Recent_log.</h2>
+          <p class="head__meta">UTC+8 · 2025 → NOW</p>
+          <span class="head__ghost" aria-hidden="true">GIT_LOG</span>
+        </header>
+        <ol class="loglist">
+          <li data-reveal><time datetime="2026-11-12">2026.11.12</time><span class="tag">PUSH</span><span class="msg"><b>monitor</b> 最近一次提交，项目仍在迭代</span></li>
+          <li data-reveal><time datetime="2026-10-20">2026.10.20</time><span class="tag">INIT</span><span class="msg"><b>deskbox-blog</b> 与 <b>chronicle</b> 同日创建</span></li>
+          <li data-reveal><time datetime="2026-09-02">2026.09.02</time><span class="tag">INIT</span><span class="msg"><b>qt-blueprint-generator</b> 立项：结构先于代码</span></li>
+          <li data-reveal><time datetime="2026-08-23">2026.08</time><span class="tag dim">FORK</span><span class="msg"><b>pocketjs</b> · <b>wandao</b> 加入关注</span></li>
+          <li data-reveal><time datetime="2026-06-04">2026.06.04</time><span class="tag">INIT</span><span class="msg"><b>monitor</b> 开始：让硅片和浏览器对话</span></li>
+          <li data-reveal><time datetime="2026-03-25">2026.03.25</time><span class="tag">DEPLOY</span><span class="msg"><b>palm-netlify-proxy</b> 上线 Netlify Edge</span></li>
+          <li data-reveal><time datetime="2025-11-16">2025.11.16</time><span class="tag">BOOT</span><span class="msg">GitHub 账号初始化 · bio: “Everything is AI”</span></li>
+        </ol>
+      </section>
+
+      <!-- 04 · TERMINAL -->
+      <section class="tty" id="tty" aria-labelledby="tty-title">
+        <header class="head head--wide" data-reveal>
+          <p class="head__path">&gt; EXE.TERMINAL</p>
+          <h2 class="head__title" id="tty-title" data-decode>Terminal.</h2>
+          <p class="head__meta">TRY: help · ls · open monitor</p>
+        </header>
+        <div class="term card" data-reveal>
+          <p class="term__bar"><span>iras@os: ~</span><span>tty1</span></p>
+          <div class="term__out" data-term-out role="log" aria-live="polite" aria-label="终端输出">
+            <p class="muted">IRAS.OS 3.0 · 输入 help 查看命令。</p>
+          </div>
+          <form class="term__form" data-term-form autocomplete="off">
+            <label for="term-input">iras@os:~$</label>
+            <input id="term-input" name="cmd" type="text" spellcheck="false" autocapitalize="off" enterkeyhint="send" placeholder="help" />
+          </form>
+          <div class="term__chips" aria-label="快捷命令">
+            <button type="button" data-cmd="whoami">whoami</button>
+            <button type="button" data-cmd="ls">ls</button>
+            <button type="button" data-cmd="stack">stack</button>
+            <button type="button" data-cmd="forks">forks</button>
+            <button type="button" data-cmd="open qt">open qt</button>
           </div>
         </div>
-        <footer class="footer">
-          <div class="shell footer__row">
-            <p>© 2026 CHRONICLE</p>
-            <p class="footer__links">
-              <a class="roll" href="https://github.com/Chronicle-IRAS" target="_blank" rel="noopener noreferrer"><span data-text="GitHub">GitHub</span></a>
-              <a class="roll" href="https://github.com/XLYXH/chronicle-site" target="_blank" rel="noopener noreferrer"><span data-text="Source">Source</span></a>
-              <a class="roll back-top" href="#origin"><span data-text="Back to top ↑">Back to top ↑</span></a>
-            </p>
-          </div>
-          <p class="footer__word" aria-hidden="true">CHRONICLE</p>
-        </footer>
       </section>
     </main>
 
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
-      <symbol id="compass" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="2.2" />
-        <path d="M32 4v8M32 52v8M4 32h8M52 32h8" stroke="currentColor" stroke-width="2.2" />
-        <path class="compass-core" d="M32 13 35.6 25.4 45.4 18.6 38.6 28.4 51 32 38.6 35.6 45.4 45.4 35.6 38.6 32 51 28.4 38.6 18.6 45.4 25.4 35.6 13 32 25.4 28.4 18.6 18.6 28.4 25.4Z" fill="#f0233c" />
-      </symbol>
-    </svg>
+    <footer class="end">
+      <svg class="sigil sigil--end" aria-hidden="true"><use href="#sigil" /></svg>
+      <p class="end__title" data-decode>SESSION_END</p>
+      <p class="end__sub">Awaiting the next commit<span class="caret" aria-hidden="true">_</span></p>
+      <div class="end__row">
+        <span>© 2026 CHRONICLE-IRAS // BUILT FROM ZERO</span>
+        <a href="#top" data-scramble>RETURN_TO_TOP ↑</a>
+        <span>SYS.STATUS: RUNNING // EOF_REACHED</span>
+      </div>
+    </footer>
+
+    <div class="reticle" aria-hidden="true"><i class="reticle__box"></i><i class="reticle__dot"></i><span class="reticle__label"></span></div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

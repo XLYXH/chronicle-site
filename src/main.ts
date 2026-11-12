@@ -1,71 +1,111 @@
+import './styles/main.css'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import './styles/main.css'
 import { env, onMotionPreferenceChange, qs } from './lib/env'
-import { initCursor, initMagnetic } from './modules/cursor'
-import { HeroGL } from './modules/heroGL'
-import { runLoader } from './modules/loader'
-import { initChapters, initChrome, initMenu } from './modules/navigation'
-import { heroIntro, heroScroll, initFields, initMarquee, initReveals, initSignal, initTimeline, initWork } from './modules/sections'
 import { initSmoothScroll, scrollToElement } from './modules/smoothScroll'
+import { runBoot } from './modules/boot'
+import { StageGL } from './modules/stageGL'
+import { initGlitch } from './modules/glitch'
+import { initScramble } from './modules/scramble'
+import { initMenu, initRail, initReadouts } from './modules/hud'
+import { initWidgets } from './modules/widgets'
+import { initTerminal } from './modules/terminal'
+import { initReticle } from './modules/cursor'
+import { heroIntro, initReveals, initScrollFx } from './modules/fx'
 
 gsap.registerPlugin(ScrollTrigger)
-gsap.defaults({ ease: 'expo.out' })
-
-const reducedMotion = env.reducedMotion
-document.documentElement.classList.toggle('reduced-motion', reducedMotion)
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
-window.scrollTo(0, 0)
 
-const img = qs<HTMLImageElement>('.hero__img')
-const canvas = qs<HTMLCanvasElement>('.hero__gl')
-const imageReady = img ? (img.complete ? img.decode().catch(() => undefined) : new Promise(r => img.addEventListener('load', r, { once: true }))) : Promise.resolve()
-const fontsReady = Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2500))])
-const ready = Promise.all([imageReady, fontsReady])
+const animate = !env.reducedMotion
+const root = document.documentElement
 
-let gl: HeroGL | null = null
+initSmoothScroll(animate)
+initScramble(animate)
+initMenu()
+initReadouts(animate)
+initTerminal(animate)
+initWidgets(animate)
+const glitch = initGlitch(animate)
+if (animate && env.finePointer) initReticle()
 
-initSmoothScroll(!reducedMotion)
-initChrome()
-initMenu(reducedMotion)
-if (env.finePointer && !reducedMotion) {
-  initCursor()
-  initMagnetic()
+// 背景光圈
+const canvas = qs<HTMLCanvasElement>('.stage__gl')
+const stage = canvas
+  ? StageGL.create(canvas, {
+      animate,
+      onFail: () => root.classList.remove('has-gl'),
+    })
+  : null
+if (stage) root.classList.add('has-gl')
+else canvas?.remove()
+
+if (stage) {
+  window.addEventListener(
+    'pointermove',
+    e => {
+      stage.ptr.tx = (e.clientX / innerWidth) * 2 - 1
+      stage.ptr.ty = -((e.clientY / innerHeight) * 2 - 1)
+    },
+    { passive: true },
+  )
+  const vel = { v: 0 }
+  ScrollTrigger.create({
+    start: 0,
+    end: 'max',
+    onUpdate: self => {
+      stage.scroll = self.progress
+      vel.v = Math.min(1, Math.abs(self.getVelocity()) / 4000)
+      stage.redraw()
+    },
+  })
+  // 滚动速度衰减
+  gsap.ticker.add(() => {
+    stage.vel += (vel.v - stage.vel) * 0.08
+    vel.v *= 0.92
+  })
 }
 
-ready.then(() => {
-  if (!reducedMotion && img && canvas) {
-    gl = HeroGL.create(canvas, img, () => {
-      // 运行中降级：上下文丢失或帧率过低时无缝切回静态肖像
-      gl = null
-      document.documentElement.classList.remove('has-gl')
-    })
-    if (gl) document.documentElement.classList.add('has-gl')
-  }
-  // 顺序很重要：先创建会 pin 的触发器，后面的触发器才能算对位置
-  heroScroll(gl, reducedMotion)
-  initWork()
-  initReveals(reducedMotion)
-  initTimeline(reducedMotion)
-  initFields(reducedMotion)
-  initMarquee(reducedMotion)
-  initSignal(reducedMotion)
-  initChapters(reducedMotion)
+initRail()
+initReveals(animate)
+if (animate) initScrollFx()
+
+// 滚动越快，字标越容易“抽搐”
+if (animate) {
+  let last = 0
+  ScrollTrigger.create({
+    start: 0,
+    end: 'max',
+    onUpdate: self => {
+      const v = Math.abs(self.getVelocity())
+      const now = performance.now()
+      if (v > 2600 && now - last > 600 && self.scroll() < innerHeight) {
+        last = now
+        glitch.burst(0.9)
+      }
+    },
+  })
+}
+
+const ready = Promise.all([document.fonts.ready, new Promise(r => requestAnimationFrame(() => r(null)))])
+
+runBoot(ready, animate).then(() => {
   ScrollTrigger.refresh()
+  if (animate) {
+    const tl = gsap.timeline()
+    heroIntro(tl, glitch.intro)
+    if (stage) gsap.to(stage, { intro: 1, duration: 2.4, ease: 'expo.out' })
+  } else if (stage) {
+    stage.intro = 1
+    stage.redraw()
+  }
+  const id = location.hash.slice(1)
+  const target = id ? document.getElementById(id) : null
+  if (target) setTimeout(() => scrollToElement(target), 200)
 })
 
-const initialHash = location.hash.slice(1)
+if (!animate && stage) {
+  stage.intro = 1
+  stage.redraw()
+}
 
-runLoader({
-  reducedMotion,
-  ready,
-  onReveal: tl => ready.then(() => {
-    heroIntro(tl, gl, reducedMotion)
-    // 带锚点访问（如 /#work）：幕布落下后平滑滚到目标章节
-    const target = initialHash ? document.getElementById(initialHash) : null
-    if (target) tl.add(() => scrollToElement(target), '-=0.6')
-  }),
-})
-
-onMotionPreferenceChange(() => window.location.reload())
-window.addEventListener('load', () => ScrollTrigger.refresh())
+onMotionPreferenceChange(() => location.reload())

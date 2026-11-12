@@ -1,72 +1,75 @@
 import { gsap } from 'gsap'
 import { qs } from '../lib/env'
 
-/** 双层光标：点即时跟随，环带阻尼；悬停在 [data-cursor] 上时展开为标签 */
-export function initCursor() {
-  const root = qs('.cursor')
-  const dot = qs('.cursor__dot')
-  const ring = qs('.cursor__ring')
-  const label = qs('.cursor__label')
-  if (!root || !dot || !ring || !label) return
+/**
+ * 准星光标：方框跟随指针；悬停在链接或按钮上时，方框吸附并包住目标元素，
+ * 显示动作标签（外链为 OPEN ↗）。只在精确指针且未减少动态时启用。
+ */
+export function initReticle() {
+  const root = qs('.reticle')
+  const box = root ? qs('.reticle__box', root) : null
+  const dot = root ? qs('.reticle__dot', root) : null
+  const label = root ? qs('.reticle__label', root) : null
+  if (!root || !box || !dot || !label) return
+  document.documentElement.classList.add('has-reticle')
 
-  document.documentElement.classList.add('has-cursor')
-  const dotX = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power3' })
-  const dotY = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power3' })
-  const ringX = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3' })
-  const ringY = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3' })
-  let shown = false
+  const pos = { x: innerWidth / 2, y: innerHeight / 2 }
+  const cur = { x: pos.x, y: pos.y, w: 18, h: 18 }
+  let target: HTMLElement | null = null
 
   window.addEventListener(
     'pointermove',
-    event => {
-      if (event.pointerType !== 'mouse') return
-      if (!shown) {
-        gsap.set([dot, ring], { x: event.clientX, y: event.clientY })
-        root.classList.add('is-visible')
-        shown = true
-      }
-      dotX(event.clientX)
-      dotY(event.clientY)
-      ringX(event.clientX)
-      ringY(event.clientY)
+    e => {
+      if (e.pointerType !== 'mouse') return
+      pos.x = e.clientX
+      pos.y = e.clientY
+      gsap.set(dot, { x: pos.x, y: pos.y })
     },
     { passive: true },
   )
+  window.addEventListener('pointerdown', () => root.classList.add('is-down'))
+  window.addEventListener('pointerup', () => root.classList.remove('is-down'))
+  document.addEventListener('mouseleave', () => gsap.to(root, { opacity: 0, duration: 0.2 }))
+  document.addEventListener('mouseenter', () => gsap.to(root, { opacity: 1, duration: 0.2 }))
 
-  document.addEventListener('pointerover', event => {
-    const target = event.target as Element | null
-    const labelled = target?.closest<HTMLElement>('[data-cursor]')
-    const interactive = target?.closest('a, button, input, [role="button"]')
-    const hidden = target?.closest('[data-cursor-hide]')
-    root.classList.toggle('is-label', Boolean(labelled))
-    root.classList.toggle('is-hover', Boolean(interactive) && !labelled)
-    root.classList.toggle('is-hidden', Boolean(hidden))
-    if (labelled) label.textContent = labelled.dataset.cursor ?? ''
+  document.addEventListener('pointerover', e => {
+    const el = (e.target as Element).closest<HTMLElement>('a, button, [data-glitch]')
+    if (el === target) return
+    target = el
+    root.classList.toggle('is-snap', !!el)
+    let text = ''
+    if (el?.matches('a[target="_blank"]')) text = 'OPEN ↗'
+    else if (el?.matches('a[href^="#"]')) text = 'GOTO'
+    else if (el?.matches('button')) text = 'EXEC'
+    label.textContent = text
   })
 
-  document.addEventListener('pointerdown', () => root.classList.add('is-down'))
-  document.addEventListener('pointerup', () => root.classList.remove('is-down'))
-  document.documentElement.addEventListener('pointerleave', () => root.classList.remove('is-visible'))
-  document.documentElement.addEventListener('pointerenter', () => shown && root.classList.add('is-visible'))
-}
-
-/** 磁吸：元素向指针偏移 strength 比例，离开时弹性回位 */
-export function initMagnetic() {
-  document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach(el => {
-    const strength = Number(el.dataset.magnetic) || 0.3
-    el.addEventListener('pointermove', event => {
-      if (event.pointerType !== 'mouse') return
-      const rect = el.getBoundingClientRect()
-      gsap.to(el, {
-        x: (event.clientX - rect.left - rect.width / 2) * strength,
-        y: (event.clientY - rect.top - rect.height / 2) * strength,
-        duration: 0.6,
-        ease: 'power3.out',
-        overwrite: 'auto',
-      })
-    })
-    el.addEventListener('pointerleave', () => {
-      gsap.to(el, { x: 0, y: 0, duration: 1.1, ease: 'elastic.out(1, 0.35)', overwrite: true })
-    })
+  gsap.ticker.add((_t, dt) => {
+    const k = 1 - Math.exp(-(dt / 1000) * 18)
+    let tx = pos.x
+    let ty = pos.y
+    let tw = 18
+    let th = 18
+    if (target && target.isConnected) {
+      const r = target.getBoundingClientRect()
+      // 大块元素（例如整行项目）只吸附一部分，避免方框过大
+      if (r.width < 420 && r.height < 160) {
+        tx = r.left + r.width / 2 + (pos.x - (r.left + r.width / 2)) * 0.08
+        ty = r.top + r.height / 2 + (pos.y - (r.top + r.height / 2)) * 0.08
+        tw = r.width + 14
+        th = r.height + 10
+      } else {
+        tw = 34
+        th = 34
+      }
+    }
+    cur.x += (tx - cur.x) * k
+    cur.y += (ty - cur.y) * k
+    cur.w += (tw - cur.w) * k
+    cur.h += (th - cur.h) * k
+    box.style.transform = `translate(${cur.x - cur.w / 2}px, ${cur.y - cur.h / 2}px)`
+    box.style.width = `${cur.w}px`
+    box.style.height = `${cur.h}px`
+    label.style.transform = `translate(${cur.x + cur.w / 2 + 8}px, ${cur.y - cur.h / 2 - 4}px)`
   })
 }

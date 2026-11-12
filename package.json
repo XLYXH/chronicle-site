@@ -2,7 +2,7 @@
   "name": "chronicle-site",
   "private": true,
   "version": "1.0.0",
-  "description": "CHRONICLE — 一部以滚动叙事的个人编年史网站",
+  "description": "IRAS.OS — Chronicle-IRAS 的个人网站",
   "type": "module",
   "scripts": {
     "dev": "vite",
