@@ -2,81 +2,70 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#070605" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="robots" content="noindex" />
-    <title>404 · 这一页还没写进编年史 — CHRONICLE</title>
+    <meta name="theme-color" content="#050506" />
+    <title>404 · NODE_NOT_FOUND — IRAS.OS</title>
     <script>
-      // 项目站点部署在子路径下（/<repo>/），404 可能出现在任意层级，统一按站点根解析资源
+      // GitHub Pages 对任意深度的路径都返回这个文件：算出站点根，保证相对资源可用
       ;(function () {
-        var seg = location.pathname.split('/').filter(Boolean)[0]
-        var root = location.hostname.endsWith('github.io') && seg ? '/' + seg + '/' : '/'
-        document.write('<base href="' + root + '" />')
+        var seg = location.pathname.split('/').filter(Boolean)
+        var root = location.hostname.endsWith('github.io') && seg.length ? '/' + seg[0] + '/' : '/'
+        document.write('<base href="' + root + '">')
       })()
     </script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <style>
-      @font-face { font-family: 'Inter Tight'; src: url('fonts/inter-tight.woff2') format('woff2'); font-weight: 300 600; font-display: swap; }
-      @font-face { font-family: 'Instrument Serif'; src: url('fonts/instrument-serif-italic.woff2') format('woff2'); font-style: italic; font-display: swap; }
-      @font-face { font-family: 'JetBrains Mono'; src: url('fonts/jetbrains-mono.woff2') format('woff2'); font-weight: 400 500; font-display: swap; }
-      @font-face { font-family: 'Noto Serif SC'; src: url('fonts/noto-serif-sc-subset.woff2') format('woff2'); font-display: swap; }
-      :root { --ink: #070605; --bone: #ece6dc; --red: #f0233c; --muted: #8d857a; }
+      @font-face { font-family: 'Fraunces'; src: url('fonts/fraunces-italic.woff2') format('woff2'); font-style: italic; font-weight: 300 500; font-display: swap; }
+      @font-face { font-family: 'IBM Plex Mono'; src: url('fonts/plex-mono-400.woff2') format('woff2'); font-display: swap; }
+      @font-face { font-family: 'Noto Sans SC'; src: url('fonts/noto-sans-sc-subset.woff2') format('woff2'); font-display: swap; }
+      :root { --bg: #050506; --fg: #f2f2f0; --dim: #a1a1a8; --line: rgba(255,255,255,.12); --ok: #8dffb8; }
       * { box-sizing: border-box; }
-      html, body { height: 100%; }
+      html, body { height: 100%; margin: 0; }
       body {
-        margin: 0; background: var(--ink); color: var(--bone);
-        font-family: 'Inter Tight', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-        display: grid; grid-template-rows: auto 1fr auto; padding: 28px clamp(20px, 4vw, 64px);
-        -webkit-font-smoothing: antialiased; overflow: hidden;
+        background: var(--bg); color: var(--fg); overflow: hidden;
+        font: 400 12px/1.8 'IBM Plex Mono', ui-monospace, 'Noto Sans SC', monospace; letter-spacing: .12em;
+        display: grid; grid-template-rows: auto 1fr auto; padding: 28px clamp(20px, 4vw, 56px);
+        -webkit-font-smoothing: antialiased;
       }
+      body::before { content: ''; position: fixed; inset: 0; pointer-events: none;
+        background: radial-gradient(circle at 50% 50%, #000 0 min(30vw, 34vh), transparent calc(min(30vw, 34vh) + 2px)),
+          radial-gradient(circle at 50% 50%, transparent 0 min(29vw, 33vh), rgba(255,255,255,.1) min(33vw, 37vh), transparent min(56vw, 62vh)); }
+      body::after { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px); }
       a { color: inherit; text-decoration: none; }
-      :focus-visible { outline: 1.5px solid var(--red); outline-offset: 4px; }
-      .mono { font: 400 11px/1.4 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
-      header { display: flex; justify-content: space-between; align-items: center; }
-      .brand { display: inline-flex; gap: 12px; align-items: center; font: 500 13px/1 'JetBrains Mono', monospace; letter-spacing: 0.32em; }
-      main { display: grid; align-content: center; gap: 28px; position: relative; }
-      h1 { position: relative; z-index: 1; margin: 0; font-weight: 300; font-size: clamp(120px, 22vw, 380px); line-height: 0.8; letter-spacing: -0.07em; }
-      h1 em { font: italic 400 0.42em/1 'Instrument Serif', serif; color: var(--red); letter-spacing: -0.02em; display: block; margin: 0.12em 0 0 0.04em; }
-      p { margin: 0; max-width: 30em; line-height: 1.9; color: rgba(236, 230, 220, 0.8); font-family: 'Noto Serif SC', 'Songti SC', serif; }
-      .home { justify-self: start; display: inline-flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 999px; background: var(--red); color: var(--ink); font-size: 15px; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s; }
-      .home:hover { transform: translateY(-3px); background: var(--bone); }
-      .needle { position: absolute; right: 4vw; top: 50%; width: clamp(160px, 24vw, 380px); height: auto; transform: translateY(-50%); color: rgba(236, 230, 220, 0.5); }
-      .needle .star { transform-origin: 32px 32px; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
-      footer { display: flex; justify-content: space-between; }
-      @media (max-width: 700px) { .needle { position: static; transform: none; width: 120px; order: -1; } }
-      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+      :focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+      header, footer { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 16px; color: var(--dim); font-size: 10px; letter-spacing: .18em; }
+      header b { color: var(--fg); font-weight: 400; }
+      header i { display: inline-block; width: 6px; height: 6px; background: #ffb0b0; margin-right: 8px; }
+      main { position: relative; z-index: 1; display: grid; place-content: center; justify-items: center; gap: 22px; text-align: center; }
+      h1 { margin: 0; font: italic 400 clamp(110px, 22vw, 300px)/.9 'Fraunces', serif; letter-spacing: -.04em; text-shadow: 0 0 26px rgba(255,255,255,.35); position: relative; }
+      h1 em { color: var(--dim); }
+      h1.g { animation: g .3s steps(3) 1; }
+      @keyframes g { 0% { transform: translateX(-6px) skewX(-6deg); clip-path: inset(20% 0 40% 0); } 50% { transform: translateX(8px); clip-path: inset(60% 0 5% 0); } 100% { transform: none; clip-path: none; } }
+      .lines { color: var(--dim); }
+      .lines b { color: var(--fg); font-weight: 400; }
+      .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border: 1px solid rgba(255,255,255,.3); letter-spacing: .22em; transition: background-color .3s, color .3s; }
+      .btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); }
+      .caret { animation: c 1s steps(1) infinite; }
+      @keyframes c { 50% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) { h1.g, .caret { animation: none; } }
     </style>
   </head>
   <body>
-    <header>
-      <a class="brand" href="./" aria-label="CHRONICLE 首页">CHRONICLE</a>
-      <span class="mono">Error 404</span>
-    </header>
+    <header><span><i></i><b>SYS.ERROR</b> | IRAS.OS</span><span>ERR_404</span></header>
     <main>
-      <svg class="needle" viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="1.2" />
-        <path d="M32 3v9M32 52v9M3 32h9M52 32h9" stroke="currentColor" stroke-width="1.2" />
-        <path class="star" d="M32 13 35.6 25.4 45.4 18.6 38.6 28.4 51 32 38.6 35.6 45.4 45.4 35.6 38.6 32 51 28.4 38.6 18.6 45.4 25.4 35.6 13 32 25.4 28.4 18.6 18.6 28.4 25.4Z" fill="#f0233c" />
-      </svg>
-      <p class="mono">Page not found · 迷路了</p>
-      <h1>404<em>lost page.</em></h1>
-      <p>这一页还没写进编年史。罗盘会一直指向你——不过回家的路在下面。</p>
-      <a class="home" href="./">回到 CHRONICLE <span aria-hidden="true">↗</span></a>
+      <p>// NODE_NOT_FOUND</p>
+      <h1 id="t">404<em>.</em></h1>
+      <p class="lines">&gt; 请求的路径不在索引里<br /><b data-path>/</b> · 已记录，正在返回<span class="caret">_</span></p>
+      <a class="btn" href="./">RETURN_HOME ↵</a>
     </main>
-    <footer class="mono"><span>© 2026 CHRONICLE</span><a href="https://github.com/Chronicle-IRAS">GitHub ↗</a></footer>
+    <footer><span>© 2026 CHRONICLE-IRAS</span><a href="https://github.com/Chronicle-IRAS" rel="noopener">NET.GITHUB ↗</a></footer>
     <script>
-      // 罗盘星指向指针
-      ;(function () {
-        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-        var svg = document.querySelector('.needle'), star = document.querySelector('.needle .star'), turn = 0
-        addEventListener('pointermove', function (e) {
-          var r = svg.getBoundingClientRect()
-          var a = (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI + 90
-          var d = ((a - turn + 540) % 360) - 180
-          turn += d
-          star.style.transform = 'rotate(' + turn + 'deg)'
-        })
-      })()
+      document.querySelector('[data-path]').textContent = location.pathname
+      var t = document.getElementById('t')
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setInterval(function () { t.classList.remove('g'); void t.offsetWidth; t.classList.add('g') }, 3200)
+      }
     </script>
   </body>
 </html>
