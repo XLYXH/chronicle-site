@@ -1,109 +1,115 @@
-# CHRONICLE — 个人网站 v2
+# IRAS.OS — Chronicle-IRAS 的个人网站 v3
 
-> Ideas take shape. 在代码与想象之间，让每一个念头，有形可见。
+> Wiring AI into dev tools, cameras & the web. · Everything is AI.
 
-[Chronicle-IRAS](https://github.com/Chronicle-IRAS) 的个人网站，从零重做。内容（文案、项目、链接、肖像与徽章）沿用原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)，设计、结构和代码全部重写。
+线上地址：<https://xlyxh.github.io/chronicle-site/>
 
-## 设计方向：「编年史」
+v3 **从零重做**：旧站（Chronicle-IRAS/chronicle）的肖像、罗盘徽章、墨黑 / 骨白 / 朱红配色、「编年史五章」概念与 og 图全部弃用。旧仓库和 GitHub 资料只用来收集**信息**：账号简介、5 个原创仓库的 README、语言字节数、创建与提交时间、关注（fork）的仓库。所有视觉资产（WebGL 光圈、SVG 印记、项目示意图、图标、og 图）都是这次新做的。
 
-把个人网站当成一本**按章节翻阅的编年史**来做。滚动就是翻页，每一章都有自己的节奏：
+## 设计方向：一台「个人操作系统」
 
-| 章 | 内容 | 关键交互 |
-| --- | --- | --- |
-| 00 Origin | 肖像 + 超大标题 + 「碎片」间奏 | WebGL 肖像：噪声显影入场、指针透镜（触屏为手指位置）、滚动时碎裂成三角碎片，碎片中浮现 “a *fragment.*” 间奏后整体上卷进入序章 |
-| 01 Prologue | 自我介绍 | 逐词随滚动「点亮」，数字计数 |
-| 02 Work | 4 个开源项目 | 桌面端：固定 + 横向滚动画廊，滚动速度驱动封面倾斜、视差、裁切展开、3D 倾斜与光斑；移动端：原生 scroll-snap 滑动画廊 + 页码进度条，不做固定 |
-| 03 Chronicle | 由真实仓库时间整理的时间线 | 页面从墨黑过渡到骨白，红色脊线随滚动绘制，粘性年份滚动切换 |
-| 04 Fields | 三个兴趣方向 | 速度感应跑马灯（随滚动加速、倾斜），手风琴展开 |
-| 05 Signal | 联系 | 整屏朱红，大字逐字升起，磁吸圆形按钮，底部巨型字标随滚动推出 |
+把网站做成一台正在运行的终端系统 **IRAS.OS**（取自用户名 Chronicle-**IRAS**）：开机自检 → 系统桌面 → 目录 → 日志 → 可以输入命令的终端。
 
-- **克制的配色**：墨黑 `#070605`、骨白 `#ECE6DC`、朱红 `#F0233C`（取自原有罗盘徽章）。去掉旧版的 HUD、遥测面板和满屏特效，把注意力还给内容。
-- **字体**：Inter Tight（大字号无衬线，负字距）+ Instrument Serif 斜体（强调词）+ JetBrains Mono（元信息）+ 思源宋体 Noto Serif SC（中文）。**全部自托管、按实际用字子集化**（拉丁字体只保留 ASCII + 用到的符号；思源宋体只含页面里出现的 ~340 个汉字，约 58 KB），不依赖 Google Fonts，国内访问不受影响。
-- **动效语言**：`src/lib/motion.ts` 统一缓动（expo.out / expo.inOut / power3）、时长（0.45 / 0.8 / 1.2 / 1.6s）与错峰节奏，所有章节共用；章节之间用同一种「幕布」裁切转场衔接（Work、Signal）。Lenis 平滑滚动 + GSAP ScrollTrigger 驱动所有滚动时间线；开场：加载计数（跟随真实加载进度）→ 罗盘星从加载器飞入页眉 Logo → 幕布上卷 → 标题逐字升起；滚动速度会让作品封面与跑马灯产生倾斜；双层自定义光标（悬停展开标签）、磁吸按钮、文字翻滚链接、章节指示器数字滚动、移动端菜单卷帘转场。
-- **WebGL 点到为止、优雅降级**：全站只有英雄区一块画布，原生 WebGL、无 three.js。
-  - 按需渲染：只在显影、滚动、指针移动时出帧，静止后自动休眠；离屏或切到后台即停止。
-  - DPR 上限：触屏 1、桌面 1.5，且总像素 ≤ 240 万；帧时过长时自动降分辨率，仍不够快就整体退回静态图片。
-  - 检测到软件渲染（SwiftShader / llvmpipe 等）、`failIfMajorPerformanceCaveat` 或上下文丢失时，直接使用静态 WebP 肖像。
-  - 调试/截图可加 `?gl=force` 强制开启。
+- **单色 + 一点磷光绿**：近黑 `#050506`、亮白 `#F2F2F0`、灰阶层次，只有状态灯用磷光绿 `#8DFFB8`。
+- **字体**：Fraunces 斜体（字标与章节标题，固定光学尺寸 96）+ IBM Plex Mono（系统界面）+ Geist（正文）+ Noto Sans SC（中文）。全部**自托管并按实际用字子集化**，不请求 Google Fonts，国内可正常访问。
+- **自制视觉**：
+  - 背景是一只 WebGL「光圈」：纯黑圆盘、沿径向流动的噪声光晕、稀疏下落的信号线与颗粒；会随滚动放大并在画面中游移，离开首屏后自动减弱以保证可读。
+  - 头像换成由用户名哈希生成的 5×5 像素印记（同时用作 favicon）。
+  - 每个项目配一张手绘的 SVG 流程示意图（蓝图流水线、摄像头矩阵 + 心电波形、文章版式、请求链路）。
 
-### 参考
+### 主要参考：[lanrhyme.top](https://lanrhyme.top)
 
-- [Cyd Stumpel — Portfolio 2025](https://www.awwwards.com/sites/cyd-stumpel-portfolio-2025)（Awwwards SOTD）：克制配色 + 滚动驱动动画 + 页面转场，且可访问性评分高。
-- [Jesper Landberg](https://www.awwwards.com/sites/jesper-landberg-2)（Awwwards SOTD）：横向滚动的作品画廊与 WebGL 细节。
-- [©Design by Dylan](https://www.awwwards.com/sites/c-design-by-dylan)（Awwwards SOTD）：加载开场、大字排版、页脚视差。
-- [Thomas Monavon — Portfolio 24'](https://www.awwwards.com/sites/thomas-monavon-portfolio-24)（Awwwards SOTD）：黑白极简 + 指针驱动的 WebGL 字体效果。
-- [Lenis](https://lenis.darkroom.engineering/)：平滑滚动方案本身也是参考。
+用户点名喜欢这个站的交互、布局和风格，v3 以它为主要参考，**代码、图片、文案、品牌均为原创**，没有复制其源码或素材。采用的模式：
+
+| lanrhyme.top 的模式 | 在本站的实现 |
+| --- | --- |
+| 框线式系统顶栏（状态灯、用户、实时时钟、`SYS.` / `DIR.` 前缀导航、一项不停跳动的乱码） | `.bar`：SYS.ONLINE、USER、内存读数、10Hz 时钟；导航悬停字符解码；乱码项 |
+| 视口四角取景框、扫描线 / 暗角 | `.frame` + `.stage__scan` |
+| 居中的巨型衬线斜体字标 + 故障错位 | `IRAS.` 字标：两层切片 + 反相扫描带的随机故障，悬停 / 快速滚动时爆发 |
+| 首屏左下标语（下划线关键词）+ 系统读数；右下引文碎片；中间 DESCEND 提示 | 标语、AGENT / REPOS / 在线时长读数、`// DECODED_FRAGMENT` 引文 |
+| 大圆形暗盘与光晕背景 | 原创 WebGL 光圈着色器（原站为另一套实现） |
+| 左侧点阵进度 + 数字，右侧细滚动轨；移动端点阵移到底部、左下方块菜单键 | `.rail` / `.track` / `.menu-btn` |
+| RPG 式角色卡（等级、属性行、EXEC_ 按钮） | 资料卡：DESIGNATION / PRIMARY / FIELD / GITHUB_NET，EXEC_GITHUB 等按钮 |
+| 时钟模块、日历、年度进度小部件 | 毫秒时钟 + 当日进度、月历、年度进度、语言占比条 |
+| `> Works.` 式衬线目录 + 编号 + 背景描边大字 | `> Projects.` 项目索引，`ARCHIVE_NODE` 等描边大字随滚动漂移 |
+| RECENT_LOG 与 CYCLE_END 结尾 | `Recent_log.` 提交日志、`SESSION_END · Awaiting the next commit_` |
+| 开场警告 / 预加载画面 | 开机自检（进度跟随真实加载），CRT 式收束揭幕 |
+| 方形准星光标 | 准星吸附到链接 / 按钮并显示 OPEN ↗ / GOTO / EXEC |
+
+在此之上新增：**可输入的终端**（`help`、`whoami`、`ls`、`open <项目>`、`stack`、`forks`、`goto`、`clear`，支持历史与 Tab 补全）。
+
+其他参考：Awwwards SOTD 的 Guillaume Colombel（单一物体贯穿全站、四角极简信息）、Jesper Landberg（克制的 chrome 让作品成为主角），以及 ittybitty 的 topography 着色器的性能做法（30fps、离屏暂停、DPR 上限）。
+
+## 交互一览
+
+- 开机自检 → 「ACCESS GRANTED」→ 白线收束揭幕 → 顶栏从中间展开、四角取景框归位、字标闪烁接通、读数依次出现。
+- Lenis 平滑滚动；字标随滚动后退；章节标题字符解码，分隔线从左向右扫出；描边大字横向视差。
+- 项目行悬停：行高展开显示说明与示意图（示意图连线持续流动），副标题重新解码，准星吸附。
+- 背景光圈跟随指针偏移并局部提亮；滚动速度越快，信号线越密越长。
+- 终端：命令输出逐行出现，`open` 直接打开仓库，`goto` 平滑滚动到章节。
 
 ## 可访问性与性能
 
-- 尊重 `prefers-reduced-motion`：关闭平滑滚动、WebGL、横向固定、光标与所有入场动画，内容直接可读；偏好切换时自动重建。
-- 无 JS 时内容完整可见；语义化标题层级、跳到正文链接、可见的键盘焦点、手风琴使用 `aria-expanded` / `aria-controls`，移动端菜单 `inert` + Esc 关闭并归还焦点。
-- 每帧数值不进 DOM 属性以外的任何状态；光标、透镜、跑马灯都在 GSAP ticker 中统一调度，与 Lenis 共用一个时钟。
-- 肖像压缩为 WebP（640 / 960 / 1536 三档 `srcset`），首屏图片 `fetchpriority="high"`；关键字体 `preload`，`font-display: swap`。
-- 序章「逐词点亮」用颜色而非透明度压暗，暗态仍保持 ≥ 3:1 对比度。
-- 触屏设备关闭颗粒动画与自定义光标；移动端不做任何滚动固定。
-- 完整的 favicon（ico / svg 随深浅色变化 / 180 / 192 / 512）、`site.webmanifest`、Open Graph / Twitter 卡片、JSON-LD、`robots.txt`、`sitemap.xml`，以及独立的 404 页面（罗盘指针跟随鼠标）。
+- `prefers-reduced-motion`：不显示开机画面，关闭平滑滚动、故障、解码、准星与所有循环动画，WebGL 只绘制一帧静态画面。
+- 无 JS 时内容完整可读；语义化标题、跳到正文链接、可见焦点；解码动画只作用于 `aria-hidden` 的视觉层，读屏始终读到原文；终端输出 `role="log"` + `aria-live`；移动端菜单 `inert`、Esc 关闭并归还焦点。
+- WebGL 降级：检测到软件渲染（SwiftShader / llvmpipe 等）或 `failIfMajorPerformanceCaveat` 时直接用 CSS 渐变回退；30fps 封顶、标签页隐藏时停止；DPR 上限触屏 1、桌面 1.25，总像素 ≤ 200 万；帧时过长自动降分辨率，仍不够就退回 CSS。调试 / 截图可加 `?gl=force`。
+- 开机期间页面本体 `visibility: hidden`，字体替换不会产生布局偏移。
+- favicon（ico / svg / 180 / 192 / 512）、manifest、Open Graph / Twitter 卡片、JSON-LD、robots、sitemap、独立 404 页（GitHub Pages 任意深度路径都可用）。
 
-Lighthouse（线上地址，2026-11-12）：
+Lighthouse（线上，2026-11-13，UTC+8）：见下方「检测结果」。
 
-| | 性能 | 无障碍 | 最佳实践 | SEO |
-| --- | --- | --- | --- | --- |
-| 桌面（改版前 → 现在） | 51 → **100** | 96 → **100** | 100 → **100** | 100 → **100** |
-| 移动（改版前 → 现在） | 61 → **96** | 96 → **100** | 100 → **100** | 100 → **100** |
+## 内容来源
 
-剩余提示主要是 GitHub Pages 固定的缓存时长（无法在仓库内配置）。
+`src/data.ts` 汇总了全部信息（截至 2026-11-13）：账号创建于 2025-11-16，公开仓库 9 个（原创 5 个），原创仓库共 210+ 次提交；语言字节数来自 GitHub languages 接口。项目介绍改写自各仓库 README。
 
 ## 本地开发
 
 需要 Node.js 22（见 `.nvmrc`）。
 
 ```bash
-npm ci          # 安装依赖
-npm run dev     # 开发服务器 http://127.0.0.1:5173
-npm run typecheck
-npm test        # Vitest 单元测试（数学工具、分词）
-npm run build   # 类型检查 + 生产构建，输出到 dist/
-npm run preview # 本地预览生产构建
+npm ci
+npm run dev       # http://127.0.0.1:5173
+npm test          # Vitest：解码帧、时间 / 日历、终端命令
+npm run build     # 类型检查 + 生产构建
+npm run preview
 ```
 
-字体子集需要 Python 3 + `fonttools` + `brotli`。改了页面中文文案后重新生成：
+改了页面文字后重新生成字体子集（需要 Python 3 + `fonttools` + `brotli`）：
 
 ```bash
 pip install fonttools brotli
-python3 scripts/fetch-fonts.py   # 下载并子集化到 src/assets/fonts/ 与 public/fonts/
+python3 scripts/fetch-fonts.py
 ```
 
 ## 部署
 
-线上地址：<https://xlyxh.github.io/chronicle-site/>
-
-当前使用 **gh-pages 分支**发布（Settings → Pages → Deploy from a branch → `gh-pages` / root）：
+GitHub Pages，`gh-pages` 分支：
 
 ```bash
-npm run deploy  # 构建并把 dist/ 推送到 gh-pages 分支
+npm run deploy    # 构建并把 dist/ 推送到 gh-pages
 ```
 
-如果想改用 GitHub Actions 自动部署：把 `docs/deploy-pages.workflow.yml` 移到 `.github/workflows/deploy.yml`，并把 Pages 来源改为 **GitHub Actions**。推送工作流文件需要带 `workflow` 权限的令牌。
-
-`vite.config.ts` 使用相对 `base: './'`，部署在任何子路径下都能正常加载资源。
+可选的 Actions 工作流模板在 `docs/deploy-pages.workflow.yml`（推送工作流需要带 `workflow` 权限的令牌）。`vite.config.ts` 使用相对 `base: './'`。
 
 ## 目录
 
 ```
-index.html              语义化页面结构与全部内容
-src/main.ts             启动与模块编排
+index.html               全部内容与结构
+src/data.ts              个人信息、项目、语言统计
+src/main.ts              启动与编排
 src/modules/
-  heroGL.ts             英雄区 WebGL（显影 / 透镜 / 碎裂）
-  loader.ts             开场计数与幕布
-  smoothScroll.ts       Lenis + ScrollTrigger 同步、锚点滚动
-  navigation.ts         页眉、阅读进度、章节指示器、移动端菜单
-  sections.ts           各章节的滚动时间线与交互
-  cursor.ts             自定义光标与磁吸
-  splitText.ts          文本拆分（保留内联元素）
-src/lib/                纯函数工具、动效令牌 motion.ts 与单元测试
-src/styles/             fonts / base / chrome / sections 样式
-public/                 favicon、manifest、404.html、404 用字体
-scripts/fetch-fonts.py  字体下载与子集化
-scripts/deploy.mjs      发布到 gh-pages
-docs/                   可选的 Actions 部署工作流模板
+  boot.ts                开机自检与揭幕
+  stageGL.ts             背景 WebGL 光圈（含降级）
+  glitch.ts              字标故障
+  scramble.ts            字符解码（读屏安全）
+  hud.ts                 顶栏读数、进度点阵、导航、菜单
+  widgets.ts             时钟、日历、年度进度、语言占比
+  terminal.ts            可输入终端
+  cursor.ts              准星光标
+  fx.ts                  显现、开场与滚动效果
+  smoothScroll.ts        Lenis + ScrollTrigger
+src/lib/                 纯函数与单元测试
+src/styles/              fonts / base / hud / sections
+public/                  图标、og 图、manifest、404、404 用字体
+scripts/                 字体子集化、部署
 ```
