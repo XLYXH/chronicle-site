@@ -59,11 +59,13 @@ export function initReveals(reducedMotion: boolean) {
     gsap.set('.section-head__rule', { scaleX: 1 })
     return
   }
-  gsap.set(items, { autoAlpha: 0, y: 40 })
-  ScrollTrigger.batch(items, {
-    start: 'top 88%',
-    once: true,
-    onEnter: batch => gsap.to(batch, { autoAlpha: 1, y: 0, duration: 1.2, ease: EASE, stagger: 0.1, overwrite: true }),
+  // 只动 opacity，不动 visibility：未揭示的按钮依然能被键盘聚焦
+  gsap.set(items, { opacity: 0, y: 40 })
+  const reveal = (targets: Element[]) => gsap.to(targets, { opacity: 1, y: 0, duration: 1.2, ease: EASE, stagger: 0.1, overwrite: true })
+  ScrollTrigger.batch(items, { start: 'top 88%', once: true, onEnter: reveal })
+  document.addEventListener('focusin', event => {
+    const host = (event.target as Element | null)?.closest('[data-reveal]')
+    if (host && Number(gsap.getProperty(host, 'opacity')) < 1) reveal([host])
   })
 
   qsa('.section-head').forEach(head => {

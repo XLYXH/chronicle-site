@@ -394,3 +394,6 @@
   background: var(--ink);
   border-color: var(--ink);
 }
+.menu-open .brand__star .compass-core {
+  fill: var(--ink);
+}
