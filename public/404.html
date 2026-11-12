@@ -35,12 +35,12 @@
       header { display: flex; justify-content: space-between; align-items: center; }
       .brand { display: inline-flex; gap: 12px; align-items: center; font: 500 13px/1 'JetBrains Mono', monospace; letter-spacing: 0.32em; }
       main { display: grid; align-content: center; gap: 28px; position: relative; }
-      h1 { margin: 0; font-weight: 300; font-size: clamp(120px, 26vw, 420px); line-height: 0.8; letter-spacing: -0.07em; }
-      h1 em { font: italic 400 0.42em/1 'Instrument Serif', serif; color: var(--red); letter-spacing: -0.02em; margin-left: 0.1em; }
+      h1 { position: relative; z-index: 1; margin: 0; font-weight: 300; font-size: clamp(120px, 22vw, 380px); line-height: 0.8; letter-spacing: -0.07em; }
+      h1 em { font: italic 400 0.42em/1 'Instrument Serif', serif; color: var(--red); letter-spacing: -0.02em; display: block; margin: 0.12em 0 0 0.04em; }
       p { margin: 0; max-width: 30em; line-height: 1.9; color: rgba(236, 230, 220, 0.8); font-family: 'Noto Serif SC', 'Songti SC', serif; }
       .home { justify-self: start; display: inline-flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 999px; background: var(--red); color: var(--ink); font-size: 15px; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s; }
       .home:hover { transform: translateY(-3px); background: var(--bone); }
-      .needle { position: absolute; right: 2vw; top: 50%; width: clamp(160px, 28vw, 420px); height: auto; transform: translateY(-50%); color: rgba(236, 230, 220, 0.5); }
+      .needle { position: absolute; right: 4vw; top: 50%; width: clamp(160px, 24vw, 380px); height: auto; transform: translateY(-50%); color: rgba(236, 230, 220, 0.5); }
       .needle .star { transform-origin: 32px 32px; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
       footer { display: flex; justify-content: space-between; }
       @media (max-width: 700px) { .needle { position: static; transform: none; width: 120px; order: -1; } }

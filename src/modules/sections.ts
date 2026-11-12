@@ -99,8 +99,14 @@ export function initReveals(reducedMotion: boolean) {
   const scrub = qs('[data-scrub-words]')
   if (scrub) {
     const words = splitElement(scrub, 'words')
+    // 压暗用颜色而非透明度：暗色 #69645d 对墨色背景仍有 3.4:1，满足大字号对比度
+    const targets = words.map(w => getComputedStyle(w).color)
     const tl = gsap.timeline({ paused: true })
-    tl.fromTo(words, { opacity: 0.16 }, { opacity: 1, ease: 'none', stagger: 0.1, duration: 0.6 })
+    tl.fromTo(
+      words,
+      { color: '#69645d' },
+      { color: (i: number) => targets[i] ?? '#ece6dc', ease: 'none', stagger: 0.1, duration: 0.6 },
+    )
     ScrollTrigger.create({
       trigger: scrub,
       start: 'top bottom',
@@ -109,7 +115,7 @@ export function initReveals(reducedMotion: boolean) {
         // 前 25% 的距离只是“压暗”，之后才开始逐词点亮
         tl.progress(gsap.utils.clamp(0, 1, (self.progress - 0.25) / 0.75))
       },
-      onLeaveBack: () => gsap.set(words, { clearProps: 'opacity' }),
+      onLeaveBack: () => gsap.set(words, { clearProps: 'color' }),
     })
   }
 
