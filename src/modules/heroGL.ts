@@ -111,9 +111,19 @@ function compile(gl: WebGLRenderingContext, type: number, source: string): WebGL
   return shader
 }
 
+const SOFTWARE_RENDERER = /swiftshader|llvmpipe|softpipe|software|basic render|mesa offscreen/i
+
+function isSoftwareRenderer(gl: WebGLRenderingContext): boolean {
+  const ext = gl.getExtension('WEBGL_debug_renderer_info')
+  const renderer = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? '')
+  return SOFTWARE_RENDERER.test(renderer)
+}
+
 /**
  * 英雄区唯一的 WebGL 画布：肖像显影、指针透镜、滚动碎裂。
- * 离屏 / 标签页隐藏时停止渲染；失败时静默回退到 <img>。
+ * - 按需渲染：只在显影、滚动、指针活动期间跑帧，静止后自动休眠
+ * - 自适应画质：帧时过长时逐级降低渲染分辨率，仍然吃力就回退到静态图
+ * - 软件渲染 / 上下文丢失 / 编译失败：回退到 <img>
  */
 export class HeroGL {
   readonly state = { reveal: 0, scroll: 0 }
@@ -123,15 +133,29 @@ export class HeroGL {
   private image: { w: number; h: number }
   private visible = true
   private running = false
+  private dead = false
   private time = 0
+  private awakeUntil = 0
+  private quality = 1
+  private samples: number[] = []
   private resizeObserver: ResizeObserver
   private io: IntersectionObserver
+  private coarse = window.matchMedia('(pointer: coarse)').matches
 
-  static create(canvas: HTMLCanvasElement, img: HTMLImageElement): HeroGL | null {
+  /** ?gl=force 跳过软件渲染检测（仅用于无 GPU 环境下截图调试） */
+  static create(canvas: HTMLCanvasElement, img: HTMLImageElement, onFail: () => void): HeroGL | null {
+    const force = new URLSearchParams(location.search).get('gl') === 'force'
     try {
-      const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' })
-      if (!gl) return null
-      return new HeroGL(canvas, gl, img)
+      const gl = canvas.getContext('webgl', {
+        antialias: false,
+        alpha: false,
+        depth: false,
+        stencil: false,
+        powerPreference: 'high-performance',
+        failIfMajorPerformanceCaveat: !force,
+      })
+      if (!gl || (!force && isSoftwareRenderer(gl))) return null
+      return new HeroGL(canvas, gl, img, onFail)
     } catch (error) {
       console.warn('[hero] WebGL unavailable, using static image', error)
       return null
@@ -142,6 +166,7 @@ export class HeroGL {
     private canvas: HTMLCanvasElement,
     gl: WebGLRenderingContext,
     img: HTMLImageElement,
+    private onFail: () => void,
   ) {
     this.gl = gl
     this.image = { w: img.naturalWidth || 1536, h: img.naturalHeight || 1024 }
@@ -183,36 +208,58 @@ export class HeroGL {
       this.toggle()
     })
     this.io.observe(canvas)
+    canvas.addEventListener('webglcontextlost', this.onContextLost)
     document.addEventListener('visibilitychange', this.toggle)
     window.addEventListener('pointermove', this.onPointer, { passive: true })
+    window.addEventListener('pointerdown', this.onPointer, { passive: true })
+    this.wake(1)
+  }
+
+  private onContextLost = (event: Event) => {
+    event.preventDefault()
+    this.fail('context lost')
   }
 
   private onPointer = (event: PointerEvent) => {
     const rect = this.canvas.getBoundingClientRect()
+    if (event.clientY > rect.bottom || event.clientY < rect.top) return
     this.mouse.tx = (event.clientX - rect.left) / rect.width
     this.mouse.ty = 1 - (event.clientY - rect.top) / rect.height
+    // 触屏点按：透镜直接出现在手指处，像水面被点了一下
+    if (event.type === 'pointerdown' && event.pointerType !== 'mouse') {
+      this.mouse.x = this.mouse.tx
+      this.mouse.y = this.mouse.ty
+      this.mouse.vel = 1.2
+    }
     this.mouse.lastMove = this.time
+    this.wake(3.5)
   }
 
   private resize() {
     const { gl, canvas } = this
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
-    const w = Math.max(1, Math.round(canvas.clientWidth * dpr))
-    const h = Math.max(1, Math.round(canvas.clientHeight * dpr))
+    const cw = Math.max(1, canvas.clientWidth)
+    const ch = Math.max(1, canvas.clientHeight)
+    // 触屏设备 DPR 上限 1，桌面 1.5；再限制总像素约 240 万，最后乘自适应画质系数
+    const base = Math.min(window.devicePixelRatio || 1, this.coarse ? 1 : 1.5, Math.sqrt(2.4e6 / (cw * ch)))
+    const dpr = base * this.quality
+    const w = Math.max(1, Math.round(cw * dpr))
+    const h = Math.max(1, Math.round(ch * dpr))
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w
       canvas.height = h
       gl.viewport(0, 0, w, h)
     }
-    const [sx, sy] = coverScale(canvas.clientWidth, canvas.clientHeight, this.image.w, this.image.h)
+    const [sx, sy] = coverScale(cw, ch, this.image.w, this.image.h)
     gl.uniform2f(this.uniforms.uScale, sx, sy)
     // 竖屏时焦点偏向人物（原图右侧）
-    gl.uniform2f(this.uniforms.uFocus, canvas.clientWidth < canvas.clientHeight ? 0.66 : 0.5, 0.5)
-    gl.uniform2f(this.uniforms.uAspect, canvas.clientWidth / canvas.clientHeight, 1)
+    gl.uniform2f(this.uniforms.uFocus, cw < ch ? 0.66 : 0.5, 0.5)
+    gl.uniform2f(this.uniforms.uAspect, cw / ch, 1)
     this.draw()
   }
 
   private tick = (_time: number, deltaMs: number) => {
+    this.measure(deltaMs)
+    if (this.dead) return
     const dt = Math.min(deltaMs / 1000, 0.05)
     this.time += dt
     const m = this.mouse
@@ -225,9 +272,24 @@ export class HeroGL {
     const active = this.time - m.lastMove < 1.2
     m.lens = damp(m.lens, active ? 1 : 0, active ? 3 : 1.2, dt)
     this.draw()
+    if (performance.now() > this.awakeUntil && m.lens < 0.002) this.sleep()
+  }
+
+  /** 连续帧的平均帧时 > 30ms 就降一档分辨率；降到 45% 仍吃力则放弃 WebGL */
+  private measure(deltaMs: number) {
+    if (deltaMs > 250) return
+    this.samples.push(deltaMs)
+    if (this.samples.length < 45) return
+    const avg = this.samples.slice(10).reduce((a, b) => a + b, 0) / (this.samples.length - 10)
+    this.samples = []
+    if (avg <= 30) return
+    this.quality *= 0.72
+    if (this.quality < 0.45) this.fail(`too slow (${avg.toFixed(1)}ms/frame)`)
+    else this.resize()
   }
 
   private draw() {
+    if (this.dead) return
     const { gl, uniforms: u } = this
     gl.uniform2f(u.uMouse, this.mouse.x, this.mouse.y)
     gl.uniform1f(u.uVel, this.mouse.vel)
@@ -238,25 +300,60 @@ export class HeroGL {
     gl.drawArrays(gl.TRIANGLES, 0, 3)
   }
 
-  private toggle = () => {
-    const shouldRun = this.visible && !document.hidden && this.state.scroll < 0.999
-    if (shouldRun && !this.running) gsap.ticker.add(this.tick)
-    if (!shouldRun && this.running) gsap.ticker.remove(this.tick)
-    this.running = shouldRun
+  private canRun() {
+    return !this.dead && this.visible && !document.hidden && this.state.scroll < 0.999
   }
 
-  /** 由滚动驱动调用 */
+  private toggle = () => {
+    if (this.canRun() && performance.now() < this.awakeUntil) this.start()
+    else this.sleep()
+  }
+
+  private start() {
+    if (this.running || !this.canRun()) return
+    this.samples = []
+    gsap.ticker.add(this.tick)
+    this.running = true
+  }
+
+  private sleep() {
+    if (!this.running) return
+    gsap.ticker.remove(this.tick)
+    this.running = false
+  }
+
+  /** 保持渲染至少 seconds 秒 */
+  wake(seconds: number) {
+    this.awakeUntil = Math.max(this.awakeUntil, performance.now() + seconds * 1000)
+    this.start()
+  }
+
   setScroll(progress: number) {
     this.state.scroll = progress
-    this.toggle()
+    this.wake(0.4)
     if (!this.running) this.draw()
   }
 
+  setReveal(progress: number) {
+    this.state.reveal = progress
+    this.wake(0.4)
+  }
+
+  private fail(reason: string) {
+    if (this.dead) return
+    console.warn(`[hero] falling back to static image: ${reason}`)
+    this.destroy()
+    this.onFail()
+  }
+
   destroy() {
-    gsap.ticker.remove(this.tick)
+    this.dead = true
+    this.sleep()
     this.resizeObserver.disconnect()
     this.io.disconnect()
+    this.canvas.removeEventListener('webglcontextlost', this.onContextLost)
     document.removeEventListener('visibilitychange', this.toggle)
     window.removeEventListener('pointermove', this.onPointer)
+    window.removeEventListener('pointerdown', this.onPointer)
   }
 }
