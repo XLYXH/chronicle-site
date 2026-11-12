@@ -52,7 +52,17 @@ npm run preview # 本地预览生产构建
 
 ## 部署
 
-`.github/workflows/deploy.yml` 会在推送到 `main` 时测试、构建并发布到 GitHub Pages。首次使用需要在仓库 **Settings → Pages → Source** 选择 **GitHub Actions**。`vite.config.ts` 使用相对 `base: './'`，部署在任何子路径下都能正常加载资源。
+线上地址：<https://xlyxh.github.io/chronicle-site/>
+
+当前使用 **gh-pages 分支**发布（Settings → Pages → Deploy from a branch → `gh-pages` / root）：
+
+```bash
+npm run deploy  # 构建并把 dist/ 推送到 gh-pages 分支
+```
+
+如果想改用 GitHub Actions 自动部署：把 `docs/deploy-pages.workflow.yml` 移到 `.github/workflows/deploy.yml`，并把 Pages 来源改为 **GitHub Actions**。推送工作流文件需要带 `workflow` 权限的令牌。
+
+`vite.config.ts` 使用相对 `base: './'`，部署在任何子路径下都能正常加载资源。
 
 ## 目录
 
@@ -69,4 +79,6 @@ src/modules/
   splitText.ts          文本拆分（保留内联元素）
 src/lib/                纯函数工具与单元测试
 src/styles/             base / chrome / sections 三层样式
+scripts/deploy.mjs      发布到 gh-pages
+docs/                   可选的 Actions 部署工作流模板
 ```
