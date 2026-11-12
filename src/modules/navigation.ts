@@ -4,7 +4,7 @@ import { qs, qsa } from '../lib/env'
 import { lockScroll } from './smoothScroll'
 
 /** 滚动条、页眉显隐、当前章节指示（数字滚动切换） */
-export function initChrome(reducedMotion: boolean) {
+export function initChrome() {
   const header = qs('.header')
   const bar = qs('.progress i')
   if (bar) {
@@ -23,6 +23,25 @@ export function initChrome(reducedMotion: boolean) {
       },
     })
     header.addEventListener('focusin', () => header.classList.remove('is-hidden'))
+  }
+}
+
+/** 章节指示器：必须在所有 pin 创建之后调用，位置才准确 */
+export function initChapters(reducedMotion: boolean) {
+  const signal = qs('.signal')
+  if (signal) {
+    ScrollTrigger.create({
+      trigger: signal,
+      start: 'top 40px',
+      end: 'max',
+      toggleClass: { targets: document.documentElement, className: 'on-red' },
+    })
+    ScrollTrigger.create({
+      trigger: signal,
+      start: 'top 80%',
+      end: 'max',
+      toggleClass: { targets: document.documentElement, className: 'on-red-low' },
+    })
   }
 
   const num = qs('.chapter__num .chapter__roll')

@@ -1,6 +1,7 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa } from '../lib/env'
+import { scrollToY } from './smoothScroll'
 import { splitElement } from './splitText'
 import type { HeroGL } from './heroGL'
 
@@ -149,7 +150,22 @@ export function initWork() {
         toggleClass: 'is-inview',
       })
     })
-    return () => qsa('.project').forEach(p => p.classList.remove('is-inview'))
+    // 键盘 Tab 到画面外的项目时，把页面滚到对应的横向位置，而不是让容器自己横向滚动
+    const pin = qs('.work__pin')
+    const onFocus = (event: FocusEvent) => {
+      const item = (event.target as Element | null)?.closest<HTMLElement>('.project, .work__outro')
+      const st = scroller.scrollTrigger
+      if (!item || !st || !pin) return
+      pin.scrollLeft = 0
+      const x = gsap.utils.clamp(0, distance(), item.offsetLeft - (window.innerWidth - item.offsetWidth) / 2)
+      const y = st.start + x
+      scrollToY(y)
+    }
+    track.addEventListener('focusin', onFocus)
+    return () => {
+      track.removeEventListener('focusin', onFocus)
+      qsa('.project').forEach(p => p.classList.remove('is-inview'))
+    }
   })
 
   mm.add('(max-width: 899px), (prefers-reduced-motion: reduce)', () => {

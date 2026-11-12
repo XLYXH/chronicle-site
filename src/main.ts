@@ -5,7 +5,7 @@ import { env, onMotionPreferenceChange, qs } from './lib/env'
 import { initCursor, initMagnetic } from './modules/cursor'
 import { HeroGL } from './modules/heroGL'
 import { runLoader } from './modules/loader'
-import { initChrome, initMenu } from './modules/navigation'
+import { initChapters, initChrome, initMenu } from './modules/navigation'
 import { heroIntro, heroScroll, initFields, initMarquee, initReveals, initSignal, initTimeline, initWork } from './modules/sections'
 import { initSmoothScroll } from './modules/smoothScroll'
 
@@ -26,7 +26,7 @@ const ready = Promise.all([imageReady, fontsReady])
 let gl: HeroGL | null = null
 
 initSmoothScroll(!reducedMotion)
-initChrome(reducedMotion)
+initChrome()
 initMenu(reducedMotion)
 if (env.finePointer && !reducedMotion) {
   initCursor()
@@ -38,13 +38,15 @@ ready.then(() => {
     gl = HeroGL.create(canvas, img)
     if (gl) document.documentElement.classList.add('has-gl')
   }
+  // 顺序很重要：先创建会 pin 的触发器，后面的触发器才能算对位置
   heroScroll(gl, reducedMotion)
-  initReveals(reducedMotion)
   initWork()
+  initReveals(reducedMotion)
   initTimeline(reducedMotion)
   initFields(reducedMotion)
   initMarquee(reducedMotion)
   initSignal(reducedMotion)
+  initChapters(reducedMotion)
   ScrollTrigger.refresh()
 })
 

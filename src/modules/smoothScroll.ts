@@ -42,6 +42,11 @@ export function scrollToElement(target: HTMLElement) {
   }
 }
 
+export function scrollToY(y: number) {
+  if (lenis) lenis.scrollTo(y, { duration: 0.9 })
+  else window.scrollTo(0, y)
+}
+
 export function lockScroll(locked: boolean) {
   if (locked) lenis?.stop()
   else lenis?.start()

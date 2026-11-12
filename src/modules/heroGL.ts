@@ -41,14 +41,16 @@ void main() {
   float t = uTime * 0.06;
   uv += (vec2(fbm(uv * 3.0 + t), fbm(uv * 3.0 - t + 4.0)) - 0.5) * 0.006;
 
-  // 2. 指针透镜：径向推开 + 色散，速度越快越强
+  // 2. 指针透镜：径向推开，速度越快越强
   vec2 d = (uv - uMouse) * uAspect;
   float dist = length(d);
-  float lens = smoothstep(0.3, 0.0, dist) * uLens;
-  uv -= normalize(d + 1e-5) * lens * lens * (0.018 + uVel * 0.05);
+  float lens = smoothstep(0.26, 0.0, dist) * uLens;
+  uv -= normalize(d + 1e-5) * lens * lens * (0.012 + uVel * 0.035);
 
-  // 3. 滚动碎裂：三角网格，每块按随机阈值滑落、旋出、淡出
-  vec2 grid = uv * vec2(uAspect.x, 1.0) * 7.0;
+  // 3. 滚动碎裂：旋转后的三角网格，每块按随机阈值滑落、旋出、淡出
+  const float ANG = 0.42;
+  mat2 rot = mat2(cos(ANG), -sin(ANG), sin(ANG), cos(ANG));
+  vec2 grid = rot * ((uv - 0.5) * vec2(uAspect.x, 1.0)) * 5.5;
   vec2 cell = floor(grid);
   vec2 f = fract(grid);
   float tri = step(f.x, f.y);
@@ -56,24 +58,25 @@ void main() {
   float r = hash(id);
   float k = smoothstep(r * 0.55, r * 0.55 + 0.45, uScroll * 1.15);
   vec2 dir = hash2(id) - 0.5;
-  vec2 suv = uv + dir * k * 0.22 + vec2(0.0, k * k * 0.18);
+  vec2 suv = uv + dir * k * 0.2 + vec2(0.0, k * k * 0.16);
   float scale = 1.0 + uScroll * 0.12;
   suv = (suv - 0.5) / scale + 0.5;
 
+  // 色散只在红色通道偏移，保持红黑调性，不出现彩虹边
   vec2 tuv = cover(suv);
-  float ca = 0.0015 + lens * (0.004 + uVel * 0.02) + k * 0.01;
-  vec3 col;
-  col.r = texture2D(uTex, tuv + vec2(ca, 0.0)).r;
-  col.g = texture2D(uTex, tuv).g;
-  col.b = texture2D(uTex, tuv - vec2(ca, 0.0)).b;
+  float ca = 0.0008 + lens * (0.002 + uVel * 0.008) + k * 0.004;
+  vec3 col = texture2D(uTex, tuv).rgb;
+  col.r = mix(col.r, texture2D(uTex, tuv + vec2(ca, 0.0)).r, 0.85);
 
-  // 碎片边缘高光（只在碎裂时出现）
-  float edge = min(min(f.x, f.y), min(1.0 - f.x, abs(f.x - f.y)));
-  float rim = (1.0 - smoothstep(0.0, 0.035, edge)) * k * (1.0 - k) * 4.0;
-  col += vec3(0.94, 0.14, 0.24) * rim * 0.6;
+  // 碎片边缘高光（只在碎裂过程中出现）
+  float edge = min(min(f.x, f.y), min(1.0 - f.x, abs(f.x - f.y) * 0.7071));
+  float rim = (1.0 - smoothstep(0.0, 0.018, edge)) * smoothstep(0.02, 0.2, k) * (1.0 - smoothstep(0.35, 0.7, k));
+  col += vec3(0.94, 0.14, 0.24) * rim * 0.45;
+  // 正在剥离的碎片略微提亮，像玻璃反光
+  col *= 1.0 + k * (1.0 - k) * 1.2;
 
   // 透镜内轻微提亮并偏红
-  col += vec3(0.25, 0.02, 0.05) * lens * 0.35;
+  col += vec3(0.32, 0.03, 0.06) * lens * 0.22;
 
   // 碎块淡出
   col *= 1.0 - smoothstep(0.55, 1.0, k);
