@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070605" />
+    <meta name="robots" content="noindex" />
+    <title>404 · 这一页还没写进编年史 — CHRONICLE</title>
+    <script>
+      // 项目站点部署在子路径下（/<repo>/），404 可能出现在任意层级，统一按站点根解析资源
+      ;(function () {
+        var seg = location.pathname.split('/').filter(Boolean)[0]
+        var root = location.hostname.endsWith('github.io') && seg ? '/' + seg + '/' : '/'
+        document.write('<base href="' + root + '" />')
+      })()
+    </script>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <style>
+      @font-face { font-family: 'Inter Tight'; src: url('fonts/inter-tight.woff2') format('woff2'); font-weight: 300 600; font-display: swap; }
+      @font-face { font-family: 'Instrument Serif'; src: url('fonts/instrument-serif-italic.woff2') format('woff2'); font-style: italic; font-display: swap; }
+      @font-face { font-family: 'JetBrains Mono'; src: url('fonts/jetbrains-mono.woff2') format('woff2'); font-weight: 400 500; font-display: swap; }
+      @font-face { font-family: 'Noto Serif SC'; src: url('fonts/noto-serif-sc-subset.woff2') format('woff2'); font-display: swap; }
+      :root { --ink: #070605; --bone: #ece6dc; --red: #f0233c; --muted: #8d857a; }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0; background: var(--ink); color: var(--bone);
+        font-family: 'Inter Tight', 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        display: grid; grid-template-rows: auto 1fr auto; padding: 28px clamp(20px, 4vw, 64px);
+        -webkit-font-smoothing: antialiased; overflow: hidden;
+      }
+      a { color: inherit; text-decoration: none; }
+      :focus-visible { outline: 1.5px solid var(--red); outline-offset: 4px; }
+      .mono { font: 400 11px/1.4 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+      header { display: flex; justify-content: space-between; align-items: center; }
+      .brand { display: inline-flex; gap: 12px; align-items: center; font: 500 13px/1 'JetBrains Mono', monospace; letter-spacing: 0.32em; }
+      main { display: grid; align-content: center; gap: 28px; position: relative; }
+      h1 { margin: 0; font-weight: 300; font-size: clamp(120px, 26vw, 420px); line-height: 0.8; letter-spacing: -0.07em; }
+      h1 em { font: italic 400 0.42em/1 'Instrument Serif', serif; color: var(--red); letter-spacing: -0.02em; margin-left: 0.1em; }
+      p { margin: 0; max-width: 30em; line-height: 1.9; color: rgba(236, 230, 220, 0.8); font-family: 'Noto Serif SC', 'Songti SC', serif; }
+      .home { justify-self: start; display: inline-flex; align-items: center; gap: 14px; padding: 16px 26px; border-radius: 999px; background: var(--red); color: var(--ink); font-size: 15px; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s; }
+      .home:hover { transform: translateY(-3px); background: var(--bone); }
+      .needle { position: absolute; right: 2vw; top: 50%; width: clamp(160px, 28vw, 420px); height: auto; transform: translateY(-50%); color: rgba(236, 230, 220, 0.5); }
+      .needle .star { transform-origin: 32px 32px; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+      footer { display: flex; justify-content: space-between; }
+      @media (max-width: 700px) { .needle { position: static; transform: none; width: 120px; order: -1; } }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="./" aria-label="CHRONICLE 首页">CHRONICLE</a>
+      <span class="mono">Error 404</span>
+    </header>
+    <main>
+      <svg class="needle" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="1.2" />
+        <path d="M32 3v9M32 52v9M3 32h9M52 32h9" stroke="currentColor" stroke-width="1.2" />
+        <path class="star" d="M32 13 35.6 25.4 45.4 18.6 38.6 28.4 51 32 38.6 35.6 45.4 45.4 35.6 38.6 32 51 28.4 38.6 18.6 45.4 25.4 35.6 13 32 25.4 28.4 18.6 18.6 28.4 25.4Z" fill="#f0233c" />
+      </svg>
+      <p class="mono">Page not found · 迷路了</p>
+      <h1>404<em>lost page.</em></h1>
+      <p>这一页还没写进编年史。罗盘会一直指向你——不过回家的路在下面。</p>
+      <a class="home" href="./">回到 CHRONICLE <span aria-hidden="true">↗</span></a>
+    </main>
+    <footer class="mono"><span>© 2026 CHRONICLE</span><a href="https://github.com/Chronicle-IRAS">GitHub ↗</a></footer>
+    <script>
+      // 罗盘星指向指针
+      ;(function () {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+        var svg = document.querySelector('.needle'), star = document.querySelector('.needle .star'), turn = 0
+        addEventListener('pointermove', function (e) {
+          var r = svg.getBoundingClientRect()
+          var a = (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI + 90
+          var d = ((a - turn + 540) % 360) - 180
+          turn += d
+          star.style.transform = 'rotate(' + turn + 'deg)'
+        })
+      })()
+    </script>
+  </body>
+</html>
