@@ -219,6 +219,12 @@ section:focus {
   animation: grain 1.2s steps(6) infinite;
   mix-blend-mode: overlay;
 }
+@media (pointer: coarse) {
+  .grain {
+    animation: none;
+    inset: 0;
+  }
+}
 @keyframes grain {
   0% { transform: translate(0, 0); }
   20% { transform: translate(-6%, 4%); }

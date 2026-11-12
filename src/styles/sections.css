@@ -386,6 +386,12 @@
   from { transform: translateX(-100%); }
   to { transform: translateX(100%); }
 }
+.work__rail {
+  display: contents;
+}
+.work__pager {
+  display: none;
+}
 .project {
   width: clamp(560px, 46vw, 820px);
   flex: none;
@@ -1130,30 +1136,104 @@
     grid-column: 1 / -1;
   }
   .work__track {
-    flex-direction: column;
+    display: block;
     width: auto;
     min-height: 0;
-    gap: 72px;
-    padding-block: clamp(80px, 16vw, 140px);
+    padding: clamp(80px, 16vw, 140px) 0;
   }
-  .work__intro,
-  .project,
-  .work__outro {
+  .work__intro {
     width: auto;
+    padding-inline: var(--pad);
+    margin-bottom: 36px;
   }
   .work__hint {
     display: none;
   }
+  /* 原生横向滑动画廊：scroll-snap，不劫持纵向滚动 */
+  .work__rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--pad);
+    padding: 4px var(--pad) 28px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .work__rail::-webkit-scrollbar {
+    display: none;
+  }
+  .project {
+    flex: 0 0 min(84vw, 560px);
+    width: auto;
+    scroll-snap-align: start;
+  }
+  .project__link {
+    gap: 22px;
+  }
   .project__cover {
     flex: none;
     max-height: none;
+    transition:
+      transform 0.5s var(--ease-out),
+      border-color 0.5s;
+  }
+  .project__link:active .project__cover {
+    transform: scale(0.98);
+  }
+  .project__title {
+    font-size: clamp(32px, 9vw, 48px);
   }
   .work__outro {
-    justify-items: start;
+    flex: 0 0 min(64vw, 340px);
+    width: auto;
+    scroll-snap-align: start;
   }
   .work__more {
-    width: min(78vw, 320px);
+    width: 100%;
   }
+  .work__pager {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-inline: var(--pad);
+    font: 400 var(--fs-xs) / 1 var(--f-mono);
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+  .work__pager-num {
+    color: var(--fg);
+  }
+  .work__pager-bar {
+    position: relative;
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .work__pager-bar i {
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform: scaleX(0.25);
+    transform-origin: 0 50%;
+    transition: transform 0.4s var(--ease-out);
+  }
+  .js:not(.reduced-motion) .work__rail > * {
+    opacity: 0;
+    transform: translateX(48px);
+    transition:
+      opacity 0.9s var(--ease-out),
+      transform 1.2s var(--ease-out);
+  }
+  .js:not(.reduced-motion) .work__rail.is-entered > * {
+    opacity: 1;
+    transform: none;
+  }
+  .work__rail > :nth-child(2) { transition-delay: 0.08s; }
+  .work__rail > :nth-child(3) { transition-delay: 0.16s; }
+  .work__rail > :nth-child(n + 4) { transition-delay: 0.24s; }
   .timeline__aside {
     position: relative;
     top: 0;
@@ -1220,15 +1300,6 @@
   }
 }
 
-@media (max-width: 899px) and (min-width: 600px) {
-  .work__track {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-  .work__intro {
-    grid-column: 1 / -1;
-  }
-}
 
 /* 无 JS 或减少动效时：横向画廊退化为双列网格，内容完整可达 */
 @media (min-width: 900px) {

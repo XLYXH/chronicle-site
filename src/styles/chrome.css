@@ -61,6 +61,13 @@
   transform: scaleX(0);
   transform-origin: 0 50%;
 }
+.loader__fly {
+  position: fixed;
+  z-index: 160;
+  color: var(--bone);
+  pointer-events: none;
+  animation: none;
+}
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

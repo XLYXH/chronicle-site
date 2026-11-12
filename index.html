@@ -5,26 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#070605" />
     <meta name="color-scheme" content="dark" />
-    <title>CHRONICLE — Ideas take shape.</title>
-    <meta name="description" content="CHRONICLE — 在代码与想象之间，让每一个念头有形可见。开发者工具、AI 智能体与硬件界面的个人编年史。" />
+    <title>CHRONICLE — Ideas take shape. · Chronicle-IRAS</title>
+    <meta name="description" content="CHRONICLE：Chronicle-IRAS 的个人编年史。在代码与想象之间，让每一个念头有形可见——开发者工具、AI 智能体与硬件界面的开源作品集。" />
+    <meta name="author" content="Chronicle-IRAS" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://xlyxh.github.io/chronicle-site/" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="CHRONICLE — Ideas take shape." />
-    <meta property="og:description" content="在代码与想象之间，让每一个念头有形可见。" />
+    <meta property="og:site_name" content="CHRONICLE" />
+    <meta property="og:locale" content="zh_CN" />
     <meta property="og:url" content="https://xlyxh.github.io/chronicle-site/" />
+    <meta property="og:title" content="CHRONICLE — Ideas take shape." />
+    <meta property="og:description" content="在代码与想象之间，让每一个念头有形可见。Chronicle-IRAS 的个人编年史。" />
     <meta property="og:image" content="https://xlyxh.github.io/chronicle-site/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta name="twitter:image" content="https://xlyxh.github.io/chronicle-site/og.png" />
+    <meta property="og:image:alt" content="CHRONICLE — Projects, experiments and ideas." />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CHRONICLE — Ideas take shape." />
+    <meta name="twitter:description" content="在代码与想象之间，让每一个念头有形可见。" />
+    <meta name="twitter:image" content="https://xlyxh.github.io/chronicle-site/og.png" />
     <link rel="icon" href="./favicon.ico" sizes="32x32" />
-    <link rel="icon" type="image/png" href="./favicon-192.png" sizes="192x192" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600&display=swap"
-    />
+    <link rel="manifest" href="./site.webmanifest" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"Person","name":"Chronicle-IRAS","url":"https://xlyxh.github.io/chronicle-site/","sameAs":["https://github.com/Chronicle-IRAS"],"description":"Everything is AI."}
+    </script>
+    <link rel="preload" href="/src/assets/fonts/inter-tight.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/src/assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       document.documentElement.classList.replace('no-js', 'js')
     </script>
@@ -87,7 +95,7 @@
       <section class="hero" id="origin" data-chapter="00" data-chapter-name="Origin" aria-labelledby="hero-title">
         <div class="hero__sticky">
         <div class="hero__media">
-          <img class="hero__img" src="/src/assets/portrait-1536.webp" srcset="/src/assets/portrait-960.webp 960w, /src/assets/portrait-1536.webp 1536w" sizes="100vw" width="1536" height="1024" alt="红与黑交织的碎片化人物剪影，背后是一轮暗月与星轨" fetchpriority="high" />
+          <img class="hero__img" src="/src/assets/portrait-1536.webp" srcset="/src/assets/portrait-640.webp 640w, /src/assets/portrait-960.webp 960w, /src/assets/portrait-1536.webp 1536w" sizes="100vw" width="1536" height="1024" alt="红与黑交织的碎片化人物剪影，背后是一轮暗月与星轨" fetchpriority="high" />
           <canvas class="hero__gl" aria-hidden="true"></canvas>
           <div class="hero__shade"></div>
         </div>
@@ -155,8 +163,9 @@
               <p class="work__hint" aria-hidden="true"><span>Keep scrolling</span><i></i></p>
             </div>
 
+            <div class="work__rail" tabindex="-1">
             <article class="project" data-project="blueprint">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/qt-blueprint-generator" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗" aria-label="Qt Blueprint Generator（在 GitHub 打开）">
+              <a class="project__link" href="https://github.com/Chronicle-IRAS/qt-blueprint-generator" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
                 <div class="project__cover">
                   <svg class="art art--blueprint" viewBox="0 0 800 560" aria-hidden="true">
                     <defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" /></pattern></defs>
@@ -175,7 +184,7 @@
                       <g transform="translate(640 370)"><rect width="110" height="80" rx="10" /><text x="18" y="32">EXPORT</text><text class="t2" x="18" y="58">Qt 6</text></g>
                     </g>
                   </svg>
-                  <span class="project__index">01</span>
+                  <span class="project__index" aria-hidden="true">01</span>
                 </div>
                 <div class="project__body">
                   <p class="project__meta"><span>Tools</span><span>C++17 · Qt 6 · AI</span><span>2026.09</span></p>
@@ -186,7 +195,7 @@
             </article>
 
             <article class="project" data-project="monitor">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/monitor" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗" aria-label="ESP32 Monitor（在 GitHub 打开）">
+              <a class="project__link" href="https://github.com/Chronicle-IRAS/monitor" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
                 <div class="project__cover">
                   <svg class="art art--monitor" viewBox="0 0 800 560" aria-hidden="true">
                     <g class="art__cams">
@@ -201,7 +210,7 @@
                     <polyline class="art__wave" points="60,460 110,460 130,420 150,490 170,440 200,460 260,460 280,400 300,500 320,430 340,460 420,460 440,410 460,480 480,452 520,460 580,460 600,395 620,505 640,440 660,460 740,460" />
                     <text class="art__caption" x="60" y="530">ESP32-S3 · MJPEG / JPEG-UDP · 实时预览</text>
                   </svg>
-                  <span class="project__index">02</span>
+                  <span class="project__index" aria-hidden="true">02</span>
                 </div>
                 <div class="project__body">
                   <p class="project__meta"><span>Hardware</span><span>Vue 3 · TypeScript · ESP32-S3</span><span>2026.06</span></p>
@@ -212,7 +221,7 @@
             </article>
 
             <article class="project" data-project="blog">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/deskbox-blog" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗" aria-label="DeskBox Blog（在 GitHub 打开）">
+              <a class="project__link" href="https://github.com/Chronicle-IRAS/deskbox-blog" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
                 <div class="project__cover">
                   <svg class="art art--blog" viewBox="0 0 800 560" aria-hidden="true">
                     <g class="art__page" transform="translate(150 50)"><rect width="300" height="430" rx="4" /></g>
@@ -225,7 +234,7 @@
                     <circle class="art__stamp" cx="196" cy="430" r="46" />
                     <text class="art__caption" x="166" y="436">ASTRO</text>
                   </svg>
-                  <span class="project__index">03</span>
+                  <span class="project__index" aria-hidden="true">03</span>
                 </div>
                 <div class="project__body">
                   <p class="project__meta"><span>Writing</span><span>Astro · Design system</span><span>2026.10</span></p>
@@ -236,7 +245,7 @@
             </article>
 
             <article class="project" data-project="proxy">
-              <a class="project__link" href="https://github.com/Chronicle-IRAS/palm-netlify-proxy" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗" aria-label="PaLM Netlify Proxy（在 GitHub 打开）">
+              <a class="project__link" href="https://github.com/Chronicle-IRAS/palm-netlify-proxy" target="_blank" rel="noopener noreferrer" data-cursor="Open ↗">
                 <div class="project__cover">
                   <svg class="art art--proxy" viewBox="0 0 800 560" aria-hidden="true">
                     <g class="art__rings" transform="translate(400 280)">
@@ -249,7 +258,7 @@
                     <text class="art__caption" x="694" y="262">MODEL</text>
                     <text class="art__caption art__caption--c" x="400" y="285">EDGE</text>
                   </svg>
-                  <span class="project__index">04</span>
+                  <span class="project__index" aria-hidden="true">04</span>
                 </div>
                 <div class="project__body">
                   <p class="project__meta"><span>AI</span><span>TypeScript · Netlify Edge</span><span>2026.03</span></p>
@@ -266,6 +275,8 @@
                 <span class="work__more-arrow" aria-hidden="true">↗</span>
               </a>
             </div>
+            </div>
+            <div class="work__pager" aria-hidden="true"><span class="work__pager-num">01</span><span class="work__pager-bar"><i></i></span><span>04</span></div>
           </div>
         </div>
       </section>

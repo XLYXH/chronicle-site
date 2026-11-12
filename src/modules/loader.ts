@@ -54,9 +54,36 @@ export function runLoader({ reducedMotion, ready, onReveal }: Options) {
 
   const exit = () => {
     const tl = gsap.timeline({ onComplete: finish })
-    tl.to('.loader__inner > *', { yPercent: -120, autoAlpha: 0, duration: 0.5, ease: 'power3.in', stagger: 0.04 })
+    flyStarToBrand(tl)
+    tl.to('.loader__title, .loader__count', { yPercent: -120, autoAlpha: 0, duration: 0.5, ease: 'power3.in', stagger: 0.04 }, 0)
       .to('.loader__bar', { scaleY: 0, duration: 0.4, ease: 'power2.in' }, '<')
       .to(root, { clipPath: 'inset(0% 0% 100% 0%)', duration: 1, ease: 'expo.inOut' }, '-=0.2')
     onReveal(tl)
   }
+}
+
+/** 加载器里的罗盘星飞向页眉 Logo 并落位：开场与导航之间的一根“线” */
+function flyStarToBrand(tl: gsap.core.Timeline) {
+  const star = qs<SVGSVGElement & HTMLElement>('.loader__star')
+  const brand = qs<SVGSVGElement & HTMLElement>('.brand__star')
+  if (!star || !brand) return
+  const from = star.getBoundingClientRect()
+  const to = brand.getBoundingClientRect()
+  if (!to.width || !from.width) return
+  const fly = star.cloneNode(true) as SVGSVGElement & HTMLElement
+  fly.classList.add('loader__fly')
+  Object.assign(fly.style, { left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px` })
+  document.body.append(fly)
+  star.style.visibility = 'hidden'
+  gsap.set(brand, { opacity: 0 })
+  tl.to(fly, {
+    x: to.left - from.left + (to.width - from.width) / 2,
+    y: to.top - from.top + (to.height - from.height) / 2,
+    scale: to.width / from.width,
+    rotate: 225,
+    duration: 1.35,
+    ease: 'expo.inOut',
+  }, 0.1)
+    .set(brand, { opacity: 1 })
+    .to(fly, { opacity: 0, duration: 0.2, onComplete: () => fly.remove() })
 }
