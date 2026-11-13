@@ -52,3 +52,19 @@ export function lockScroll(locked: boolean) {
   else lenis?.start()
   document.documentElement.classList.toggle('is-locked', locked)
 }
+
+/** 布局突变（如筛选）后：让 Lenis 重新量尺寸，并把内部目标值对齐到真实滚动位置，避免下一次滚轮“弹回” */
+export function resyncScroll() {
+  if (!lenis) return
+  lenis.resize()
+  lenis.scrollTo(window.scrollY, { immediate: true, force: true })
+}
+
+/** 立即平移滚动位置（无动画），用于保持锚点在视口中的位置 */
+export function jumpBy(dy: number) {
+  const y = window.scrollY + dy
+  if (lenis) {
+    lenis.resize()
+    lenis.scrollTo(y, { immediate: true, force: true })
+  } else window.scrollTo(0, y)
+}

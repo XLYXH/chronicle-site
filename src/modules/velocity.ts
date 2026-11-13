@@ -32,7 +32,7 @@ const SOFTWARE = /swiftshader|llvmpipe|softpipe|software|basic render|mesa offsc
 
 export function initVelocity(animate: boolean, onVel: (v: number) => void) {
   if (!animate) return
-  const stretch = qsa('.sec-title, .connect__title, .hero__title, [data-stage]')
+  const stretch = qsa('.sec-title, .connect__title, .hero__title')
   const canvas = document.createElement('canvas')
   canvas.className = 'leak'
   canvas.setAttribute('aria-hidden', 'true')

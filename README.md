@@ -1,10 +1,36 @@
-# CHRONICLE — Chronicle-IRAS 的个人网站（v6）
+# CHRONICLE — Chronicle-IRAS 的个人网站（v7）
 
 > Ideas take shape. · 在代码与想象之间，让每一个念头，有形可见。
 
 线上地址：<https://xlyxh.github.io/chronicle-site/>
 
 v4 推翻了 v3 的「IRAS.OS」终端 / HUD 风格，重新设计成一套**自己的视觉语言**；内容**只取自原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)**，不额外添加。
+
+## v7：作品区筛选修复 + 手感层
+
+### 修掉的 bug（作品区 · 点击 All / Tools / Hardware / AI 之后）
+
+1. **舞台显示的项目和列表对不上**：原来每个项目各有一个 `ScrollTrigger`（`onToggle`），筛选后只在一帧之后 `refresh()`，而那时 Flip（`absolute: true`）还把列表项绝对定位着，触发器量到的是动画中途的位置；`onToggle` 又只在“跨线”时触发，停在区间里就永远不会补同步。结果切回 All 时舞台常停在 Connected / Beyond，而读线上明明是 Blueprint。
+   → 改为整张列表**一个**触发器，每次更新按视口 58% 读线实时求当前项（`onUpdate / onToggle / onRefresh` 都走同一个 `sync()`），被筛掉的项不参与，结果天然被夹取在可见项里。
+2. **筛选动画和布局互相打架**：`absolute: true` 让项目脱离文档流，新进入的项从错误的位置（视口上方）飞进来、几项叠在一起，同时页面高度跳变。
+   → 改成固定顺序：旧项淡出 → 一次性切换 `hidden`（布局只变这一次）→ 以筛选栏为锚补偿滚动、并让 Lenis 重新量尺寸、对齐内部目标值（避免下一次滚轮“弹回”）→ 立刻按读线选出当前项并同步舞台、计数 → 留下的项用**不脱离文档流**的 Flip 滑到新位置、新项依次升入 → 全部落定后再 `ScrollTrigger.refresh()` 并再同步一次。连点时把上一轮快进到底再开始。
+3. **插图卡在半透明**：快速切换时，上一张插图“退场”补间（`opacity: 0.4 / scale: 0.94`）没有被杀掉，`onComplete` 里的复位被它覆盖，再切回这张时就停在 0.4 透明度。→ 每次切换先清掉所有面板上遗留的补间。
+4. **悬停锁死舞台**：滚动时内容从静止的光标下滑过，浏览器会派发 `pointerenter`，被当成“悬停”，舞台就停在光标下的项目、不再跟随滚动。→ 只认真实的指针移动（`pointermove` 且有位移），并且一旦滚动就由滚动重新接管。
+5. **CSS 过渡叠在 GSAP 上**：`.project` 自身有 `transition: opacity`，GSAP 写进去的透明度会被再“缓”一遍，筛选后项目长时间停在 0.99。→ 悬停压暗改到子元素上。
+6. 其它：吸顶的舞台不再参与滚动速度拉伸（消除吸顶时的轻微抖动）；展台玻璃签被后加载的 `.lg { position: relative }` 挤出画面，已找回；计数改为“当前 / 筛选后总数”；移动端舞台吸顶时用纸色遮住它与页眉之间的缝，列表文字不再从缝里漏出来。
+
+测试：Playwright 在 1440 / 1920 / 768 / 390 宽度下按序点完 13 次筛选组合（含反复回到 All），每次之后用小步 / 大步滚轮上下滚动，逐步比对“读线上的项目 / 列表高亮 / 舞台面板 / 插图透明度”，以及连点、筛选中途改窗口尺寸、切换深浅色、锚点跳出再跳回、减少动态效果模式，全部一致、滚动位置零跳动。
+
+### 手感层（`src/modules/craft.ts` + `src/styles/craft.css`，不新增任何文案）
+
+- **每个项目一点自己的色相**：都从钴蓝出发，Monitor 偏青、Proxy 偏紫，用在舞台液体浪头、高亮线、编号与技术栈上。
+- **展台玻璃签**：左上角显示当前项目的类别（取自项目自己的 meta），切换时上下翻动。
+- **列表悬停**：一张很淡的玻璃卡从左侧铺开，标题右移、编号上浮、衬线小字显出。
+- **筛选：墨色液滴**在按钮间滑动，途中竖向收紧、落定回弹。
+- **章节开场**：分隔线从左向右画出，眉题从遮罩中升起。
+- **信笺逐词写出**：随滚动一词一词“上墨”，落款下方一笔手写下划线画出。
+- **联系 CTA**：钴蓝玻璃球（内高光跟随指针），悬停时墨色从底部涨满，标题下划线展开。
+- 统一的按压反馈；全部在减少动态效果时关闭或瞬时完成。
 
 ## v6：液态玻璃
 
@@ -144,7 +170,8 @@ src/modules/
   glass.ts               液态玻璃：能力探测、SVG 滤镜生成与挂载
   heroLens.ts            首屏玻璃透镜：追随、拉伸、滚动分裂
   fx.ts                  标题拆词揭示、首屏入场、碎片间奏、跑马灯透镜
-  showcase.ts            作品展台：液体前沿切换、水波扭曲、筛选（FLIP）
+  showcase.ts            作品展台：液体前沿切换、水波扭曲、读线同步、稳健的筛选序列
+  craft.ts               v7 手感层：筛选液滴、章节开场、信笺书写、玻璃球 CTA
   work.ts                三张交互概念图
   velocity.ts            滚动速度拖影 + WebGL 漏光
   lab.ts                 A little chemistry 3D 轨道融合实验
@@ -153,7 +180,7 @@ src/modules/
   cursor.ts              圆点光标与磁吸
   scramble.ts            悬停解码（读屏安全）
   smoothScroll.ts        Lenis + ScrollTrigger
-src/styles/              fonts / base / chrome / sections / showcase / glass
+src/styles/              fonts / base / chrome / sections / showcase / glass / craft
 public/                  图标、og 图、manifest、404 与其字体
 scripts/                 字体子集化、部署
 ```
