@@ -1,0 +1,358 @@
+/* ==========================================================
+   v10 · 组件手感层（参考 uiverse.io 的开关 / 按钮 / 复选框 / 卡片 / 图案思路，按本站语言重做）
+   原则：每个控件都有“材质”——墨色是有厚度的、玻璃是被照亮的、刻度是能拨的；
+   避免通用的渐变描边、大圆角卡片和千篇一律的阴影。
+   ========================================================== */
+
+/* ---------- 玻璃：高光随指针移动 ---------- */
+@property --glint {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+.lg::after {
+  --glint: 0;
+  background:
+    radial-gradient(70px 70px at var(--gx, 30%) var(--gy, 0%), rgba(255, 255, 255, calc(0.55 * var(--glint))), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.22), transparent 38%, transparent 70%, rgba(255, 255, 255, 0.08));
+  transition: --glint 0.45s var(--ease);
+}
+[data-theme='dark'] .lg::after {
+  background:
+    radial-gradient(70px 70px at var(--gx, 30%) var(--gy, 0%), rgba(255, 255, 255, calc(0.22 * var(--glint))), transparent 70%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent 40%);
+}
+.lg.is-lit::after {
+  --glint: 1;
+}
+
+/* ---------- 主题开关：太阳 ⇄ 月牙（参考 uiverse 的 sun/moon 开关，做成图标级） ---------- */
+.theme__icon {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+.theme__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.theme__sun {
+  fill: var(--ink);
+  transform-origin: 12px 12px;
+  transition: transform 0.7s cubic-bezier(0.5, 1.6, 0.4, 1);
+}
+.theme__bite {
+  transform: translate(9px, -9px);
+  transition: transform 0.7s var(--ease);
+}
+.theme__rays {
+  stroke: var(--ink);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  transform-origin: 12px 12px;
+  transition:
+    transform 0.7s var(--ease),
+    opacity 0.4s;
+}
+.theme__stars {
+  fill: var(--ink);
+  opacity: 0;
+  transform: scale(0.4);
+  transform-origin: 19px 6px;
+  transition:
+    opacity 0.4s 0.15s,
+    transform 0.6s cubic-bezier(0.5, 1.8, 0.4, 1) 0.15s;
+}
+[data-theme='dark'] .theme__sun {
+  transform: scale(1.75);
+}
+[data-theme='dark'] .theme__bite {
+  transform: translate(3.4px, -3.2px);
+}
+[data-theme='dark'] .theme__rays {
+  transform: rotate(-90deg) scale(0.4);
+  opacity: 0;
+}
+[data-theme='dark'] .theme__stars {
+  opacity: 1;
+  transform: none;
+}
+.theme:hover .theme__icon {
+  transform: none;
+}
+.theme:hover .theme__rays {
+  transform: rotate(45deg);
+}
+[data-theme='dark'] .theme:hover .theme__sun {
+  transform: scale(1.75) rotate(-14deg);
+}
+
+/* ---------- 主按钮：有厚度的墨块（参考 uiverse 的 pushable / 3D 按钮） ---------- */
+.pill {
+  --lift: 0px;
+  /* 用独立的 translate 属性：transform 留给磁吸（GSAP） */
+  translate: 0 calc(var(--lift) * -1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 calc(3px + var(--lift)) 0 0 var(--edge, color-mix(in srgb, var(--ink) 72%, #000)),
+    0 calc(10px + var(--lift) * 2) calc(18px + var(--lift) * 2) -10px rgba(17, 18, 22, 0.45);
+  transition:
+    translate 0.35s cubic-bezier(0.3, 1.6, 0.5, 1),
+    box-shadow 0.35s cubic-bezier(0.3, 1.6, 0.5, 1),
+    color 0.3s;
+}
+.pill:hover,
+.pill:focus-visible {
+  --lift: 3px;
+  /* 钴蓝涨满后，按钮的“侧面”也换成深钴蓝 */
+  --edge: var(--gl-deep);
+}
+.pill:active {
+  --lift: -2px;
+  transition-duration: 0.08s;
+}
+[data-theme='dark'] .pill {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.12),
+    0 calc(3px + var(--lift)) 0 0 color-mix(in srgb, var(--ink) 55%, #000),
+    0 calc(10px + var(--lift) * 2) calc(18px + var(--lift) * 2) -10px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- 次级按钮（Reset 等）：按下时陷进去 ---------- */
+.chip {
+  position: relative;
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 0 var(--line-2),
+    0 6px 12px -10px rgba(17, 18, 22, 0.4);
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    border-color 0.3s,
+    box-shadow 0.25s var(--ease),
+    transform 0.25s var(--ease);
+}
+.chip:active {
+  translate: 0 1px;
+  transform: none;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.28),
+    0 0 0 var(--line-2);
+}
+[data-theme='dark'] .chip {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- 筛选按钮：数量做成一枚小号码牌 ---------- */
+.filters sup {
+  top: 0;
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition:
+    color 0.4s,
+    background-color 0.4s,
+    box-shadow 0.4s;
+}
+.filters button[aria-pressed='true'] sup {
+  background: color-mix(in srgb, var(--paper) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper) 22%, transparent);
+}
+.filters button:active {
+  transform: scale(0.96);
+}
+
+/* ---------- 手风琴 ±：墨从外圈灌进来 ---------- */
+.interest__pm {
+  box-shadow: inset 0 0 0 0 var(--ink);
+  transition:
+    box-shadow 0.55s var(--ease),
+    border-color 0.4s,
+    color 0.3s 0.1s,
+    transform 0.6s var(--ease);
+}
+.interest[data-open='true'] .interest__pm {
+  background: transparent;
+  box-shadow: inset 0 0 0 20px var(--ink);
+}
+.interest button:hover .interest__pm {
+  border-color: var(--ink);
+}
+.interest button:active .interest__pm {
+  transform: scale(0.9);
+}
+.interest[data-open='true'] button:active .interest__pm {
+  transform: rotate(180deg) scale(0.9);
+}
+
+/* ---------- 拨盘：一圈刻度 + 凸起的旋钮 ---------- */
+.dial {
+  border: 0;
+  background: repeating-conic-gradient(from -1deg, var(--line-2) 0 2deg, transparent 2deg 15deg);
+  -webkit-mask: radial-gradient(circle, #000 0 52px, transparent 52.5px);
+  mask: radial-gradient(circle, #000 0 52px, transparent 52.5px);
+}
+.dial::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--paper) 100%, #fff 60%), var(--paper) 55%, var(--paper-2));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.06),
+    0 1px 0 var(--line-2),
+    0 10px 18px -10px rgba(17, 18, 22, 0.45);
+  transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.dial {
+  isolation: isolate;
+}
+.dial:hover {
+  background:
+    repeating-conic-gradient(from -1deg, color-mix(in srgb, var(--accent) 60%, transparent) 0 2deg, transparent 2deg 15deg);
+}
+.dial:active::before {
+  transform: scale(0.97);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.16),
+    0 0 0 var(--line-2);
+}
+[data-theme='dark'] .dial::before {
+  background: radial-gradient(circle at 35% 28%, #2a2c36, var(--paper-2) 60%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 18px -10px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------- 当前专注：一张玻璃卡，透出背后的钴蓝点阵 ---------- */
+.focus.lg {
+  border-radius: 20px;
+  background: transparent;
+  --lg-r: 20px;
+  position: relative;
+  z-index: 0;
+}
+.focus__grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--accent) 38%, transparent) 1px, transparent 1.6px) 0 0 / 14px 14px,
+    var(--paper-2);
+  -webkit-mask: linear-gradient(100deg, #000 10%, rgba(0, 0, 0, 0.35) 60%, #000);
+  mask: linear-gradient(100deg, #000 10%, rgba(0, 0, 0, 0.35) 60%, #000);
+}
+[data-glass='refract'] .focus.lg::before {
+  background: color-mix(in srgb, var(--paper) 30%, transparent);
+}
+.focus.lg > div {
+  position: relative;
+}
+
+/* ---------- 实验区“已发现”：复选框式的小牌子，发现时打一个勾 ---------- */
+.lab__found li {
+  position: relative;
+  border-style: solid;
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--paper) 50%, transparent);
+  padding-left: 32px;
+}
+.lab__found li::before {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  margin: -7px 0 0;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1.3px currentColor;
+  opacity: 0.55;
+  transition:
+    background-color 0.35s var(--ease),
+    box-shadow 0.35s,
+    opacity 0.3s;
+}
+.lab__found li::after {
+  content: '';
+  position: absolute;
+  left: 15.5px;
+  top: 50%;
+  width: 4px;
+  height: 8px;
+  margin-top: -6px;
+  border: solid #fff;
+  border-width: 0 1.8px 1.8px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.45s cubic-bezier(0.4, 1.8, 0.5, 1) 0.12s;
+}
+.lab__found li.is-found::before {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1.3px var(--accent);
+  opacity: 1;
+}
+.lab__found li.is-found::after {
+  transform: rotate(45deg) scale(1);
+}
+[data-theme='dark'] .lab__found li::after {
+  border-color: var(--on-accent);
+}
+
+/* ---------- 焦点环：与玻璃同语言的双层光环（替代通用的直角描边） ---------- */
+:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--paper),
+    0 0 0 4px var(--accent),
+    0 0 0 9px color-mix(in srgb, var(--accent) 18%, transparent);
+  border-radius: 10px;
+}
+.lg:focus-visible,
+.pill:focus-visible,
+.filters button:focus-visible,
+.chip:focus-visible,
+.dial:focus-visible {
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill,
+  .chip,
+  .theme__sun,
+  .theme__bite,
+  .theme__rays,
+  .theme__stars,
+  .interest__pm,
+  .lab__found li::after {
+    transition: none !important;
+  }
+}
+@media (max-width: 520px) {
+  .filters button {
+    padding: 0 10px 0 13px;
+    gap: 5px;
+  }
+  .filters sup {
+    min-width: 18px;
+    height: 17px;
+    padding: 0 3px;
+  }
+}

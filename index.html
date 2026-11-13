@@ -92,7 +92,7 @@
       </nav>
       <div class="header__end">
         <button class="theme lg" data-lg="round" type="button" data-magnetic aria-label="切换深浅色">
-          <span class="theme__icon" aria-hidden="true"><i></i></span>
+          <span class="theme__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><mask id="theme-bite"><rect width="24" height="24" fill="#fff" /><circle class="theme__bite" cx="12" cy="12" r="6.4" fill="#000" /></mask><circle class="theme__sun" cx="12" cy="12" r="4.6" mask="url(#theme-bite)" /><g class="theme__rays"><path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M5.1 18.9l1.7-1.7M17.2 6.8l1.7-1.7" /></g><g class="theme__stars"><path d="M19 4.2l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z" /><circle cx="20.6" cy="10.6" r=".7" /></g></svg></span>
         </button>
         <button class="menu-btn lg" data-lg="round" type="button" aria-expanded="false" aria-controls="menu"><span class="sr">打开菜单</span><i></i><i></i></button>
       </div>
@@ -287,7 +287,8 @@
               </button>
             </div>
             <p class="about__desc">Rather than a fixed label, I prefer to introduce myself through what I am currently building—working at the intersection of low-level developer tools, autonomous AI agents, and expressive hardware interfaces.</p>
-            <div class="focus">
+            <div class="focus lg" data-lg="card">
+              <span class="focus__grid" aria-hidden="true"></span>
               <span class="focus__dot" aria-hidden="true"></span>
               <div>
                 <small>Current focus</small>

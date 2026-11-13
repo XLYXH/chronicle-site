@@ -1,10 +1,24 @@
-# CHRONICLE — Chronicle-IRAS 的个人网站（v9）
+# CHRONICLE — Chronicle-IRAS 的个人网站（v10）
 
 > Ideas take shape. · 在代码与想象之间，让每一个念头，有形可见。
 
 线上地址：<https://xlyxh.github.io/chronicle-site/>
 
 v4 推翻了 v3 的「IRAS.OS」终端 / HUD 风格，重新设计成一套**自己的视觉语言**；内容**只取自原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)**，不额外添加。
+
+## v10：组件手感（参考 uiverse.io，保留液态玻璃）
+
+参考 [uiverse.io](https://uiverse.io/)（开源 UI 组件社区，MIT）里开关、按钮、复选框、卡片、图案几类组件的思路，把站内每个控件都做出“材质”；液态玻璃体系（顶栏玻璃岛、透镜、玻璃签、玻璃光标）全部保留并加强。**没有照搬任何 uiverse 作品的代码**，均按本站的瓷白 / 墨色 / 钴蓝语言手写（`src/styles/components.css` + `src/modules/components.ts`）：
+
+- **玻璃被照亮**：所有玻璃件的高光层多了一个跟随指针的柔光点（`@property --glint` 过渡），像灯从指针处照过来。
+- **主题开关**（思路来自 uiverse 的 sun / moon 开关）：太阳的八道光芒旋转收起、圆面被“咬”成月牙，旁边亮起两颗小星；悬停时光芒转 45°。
+- **主按钮**（思路来自 pushable / 3D 按钮）：一块有厚度的墨块，悬停抬起、钴蓝涨满时侧面变成深钴蓝，按下时压实。
+- **次级按钮**：按下时内陷的阴影；**筛选**的数量做成一枚等宽数字的小号码牌。
+- **手风琴 ±**：展开时墨色从外圈“灌”进圆钮。
+- **拨盘**：一圈可“拨”的刻度（悬停时变成钴蓝）+ 一个凸起的旋钮，按下时下陷。
+- **当前专注**：改成一张卡片级液态玻璃，背后衬一层钴蓝点阵（思路来自 uiverse 的 pattern），折射时能看到点阵在边缘弯曲。
+- **实验区“已发现”**（思路来自复选框）：每项前面是一个小方框，发现时填满钴蓝并弹出一个勾。
+- **焦点环**：与玻璃同语言的双层光环，替代通用的直角描边。
 
 ## v9：JIEJOE 教程手法
 
@@ -200,6 +214,7 @@ src/modules/
   craft.ts               v7 手感层：筛选液滴、章节开场、信笺书写、玻璃球 CTA
   signature.ts           v8 签名交互：变形光标、字重场、墨滴、景深展台
   motifs.ts              v9 JIEJOE 教程手法：斩切开屏、百叶窗跳转、波浪线条、描边按钮
+  components.ts          v10 玻璃高光跟随指针（其余组件手感在 components.css）
   work.ts                三张交互概念图
   velocity.ts            滚动速度拖影 + WebGL 漏光
   lab.ts                 A little chemistry 3D 轨道融合实验
@@ -208,7 +223,7 @@ src/modules/
   cursor.ts              圆点光标与磁吸
   scramble.ts            悬停解码（读屏安全）
   smoothScroll.ts        Lenis + ScrollTrigger
-src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / motifs
+src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / motifs / components
 public/                  图标、og 图、manifest、404 与其字体
 scripts/                 字体子集化、部署
 ```

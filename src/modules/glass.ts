@@ -185,6 +185,8 @@ export function initGlass(): GlassMode {
     if (kind === 'bar') mountGlass(n, { bezel: (_w, h) => h * 0.42, edge: (_w, h) => h * 0.32, radius: pill })
     else if (kind === 'round') mountGlass(n, { bezel: (w, h) => Math.min(w, h) * 0.36, edge: (w, h) => Math.min(w, h) * 0.26, magnify: 0.06, radius: pill })
     else if (kind === 'chip') mountGlass(n, { bezel: (_w, h) => h * 0.4, edge: (_w, h) => h * 0.24, radius: pill })
+    // v10：卡片级玻璃（圆角 20px），边缘倒角更宽、位移更轻，透出背后的点阵
+    else if (kind === 'card') mountGlass(n, { bezel: () => 18, edge: () => 10, radius: () => 20 })
   })
   return mode
 }
