@@ -2,34 +2,64 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa } from '../lib/env'
 import { lockScroll } from './smoothScroll'
+import { mountGlass, type GlassMode } from './glass'
 
-/** 顶栏：滚动后收成毛玻璃；当前章节高亮；一颗“液滴”指示器在导航项之间流动 */
-export function initHeader(animate: boolean) {
+/**
+ * 顶栏：品牌、导航、工具按钮是三座玻璃小岛；当前章节由一颗玻璃液滴指示。
+ * 液滴压在文字上方，折射模式下会把下面的字放大；移动时沿方向拉长、到位后回弹成圆润的胶囊。
+ */
+export function initHeader(animate: boolean, mode: GlassMode) {
   const header = qs('.header')
   const nav = qs('.nav')
   if (!header || !nav) return
   const blob = document.createElement('i')
-  blob.className = 'nav__blob'
+  blob.className = 'nav__blob lg'
   blob.setAttribute('aria-hidden', 'true')
   nav.prepend(blob)
+  if (mode === 'refract')
+    mountGlass(blob, { bezel: (_w, h) => h * 0.45, edge: (_w, h) => h * 0.22, magnify: 0.1, radius: (w, h) => Math.min(w, h) / 2 })
   const links = qsa<HTMLAnchorElement>('a', nav)
   let active: HTMLAnchorElement | null = null
+  let shown = false
+  let lastX = 0
 
-  const moveTo = (a: HTMLAnchorElement | null) => {
+  const moveTo = (a: HTMLAnchorElement | null, instant = false) => {
     links.forEach(l => l.classList.toggle('is-lit', l === a))
     if (!a) {
-      gsap.to(blob, { opacity: 0, scale: 0.6, duration: 0.3 })
+      shown = false
+      gsap.to(blob, { scaleX: 0, scaleY: 0, duration: animate ? 0.35 : 0, ease: 'power3.in', overwrite: true })
       return
     }
-    const r = a.getBoundingClientRect()
-    const nr = nav.getBoundingClientRect()
+    const x = a.offsetLeft
+    const w = a.offsetWidth
+    if (!shown || instant || !animate) {
+      // 从无到有：在目标处“凝结”出来
+      gsap.set(blob, { x, width: w })
+      gsap.fromTo(blob, { scaleX: shown ? 1 : 0.2, scaleY: shown ? 1 : 0.2 }, { scaleX: 1, scaleY: 1, duration: animate && !instant ? 0.6 : 0, ease: 'elastic.out(1, 0.6)', overwrite: true })
+      shown = true
+      lastX = x
+      return
+    }
+    shown = true
+    const from = Number(gsap.getProperty(blob, 'x'))
+    lastX = from
     gsap.to(blob, {
-      x: r.left - nr.left,
-      width: r.width,
-      opacity: 1,
-      scale: 1,
-      duration: animate ? 0.7 : 0,
-      ease: 'elastic.out(1, 0.7)',
+      x,
+      width: w,
+      duration: 0.75,
+      ease: 'elastic.out(1, 0.75)',
+      overwrite: true,
+      onUpdate: () => {
+        // 速度 → 拉伸：横向拉长、纵向变扁，像被甩动的水滴
+        const cur = Number(gsap.getProperty(blob, 'x'))
+        const v = Math.abs(cur - lastX)
+        lastX = cur
+        const s = Math.min(0.28, v / 40)
+        gsap.set(blob, { scaleX: 1 + s, scaleY: 1 - s * 0.55 })
+      },
+      onComplete: () => {
+        gsap.to(blob, { scaleX: 1, scaleY: 1, duration: 0.5, ease: 'elastic.out(1, 0.5)' })
+      },
     })
   }
   links.forEach(a => {
@@ -57,21 +87,43 @@ export function initHeader(animate: boolean) {
       },
     })
   })
-  window.addEventListener('resize', () => moveTo(active))
+  window.addEventListener('resize', () => moveTo(active, true))
+  // 收拢/展开时导航宽度变化，液滴跟着对齐
+  nav.addEventListener('transitionend', e => {
+    if ((e as TransitionEvent).propertyName === 'padding-left' && e.target === links[links.length - 1]) moveTo(active, true)
+  })
 
   ScrollTrigger.create({
     start: 40,
     end: 'max',
     onToggle: self => header.classList.toggle('is-scrolled', self.isActive),
+    onUpdate: self => {
+      // 向下读时收起中文小字，向上翻时展开
+      const tuck = self.direction > 0 && self.scroll() > innerHeight * 0.6
+      if (self.direction < 0 || tuck) header.classList.toggle('is-tucked', tuck)
+    },
   })
 
-  const bar = qs('.progress i')
-  if (bar) {
+  const top = qs<HTMLAnchorElement>('.totop')
+  const pct = top ? qs('.totop__pct', top) : null
+  if (top) {
+    let on = false
     ScrollTrigger.create({
       start: 0,
       end: 'max',
-      onUpdate: self => gsap.set(bar, { scaleX: self.progress }),
+      onUpdate: self => {
+        const p = Math.round(self.progress * 100)
+        top.style.setProperty('--p', String(p))
+        if (pct) pct.textContent = String(p)
+        const want = self.scroll() > innerHeight * 0.8
+        if (want !== on) {
+          on = want
+          top.classList.toggle('is-on', on)
+          top.toggleAttribute('inert', !on)
+        }
+      },
     })
+    top.setAttribute('inert', '')
   }
 }
 

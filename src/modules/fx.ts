@@ -67,7 +67,7 @@ export function initReveals(animate: boolean) {
   })
 }
 
-/** 首屏入场：标题逐行升起、✳ 旋入、液体从无到有 */
+/** 首屏入场：标题逐行升起、✳ 旋入、透镜从一点“凝结”成形 */
 export function heroIntro(animate: boolean, onIntro: (v: number) => void) {
   const root = document.documentElement
   root.classList.add('is-ready')
@@ -77,33 +77,23 @@ export function heroIntro(animate: boolean, onIntro: (v: number) => void) {
   }
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
   const state = { v: 0 }
-  tl.to(state, { v: 1, duration: 2.4, ease: 'power2.out', onUpdate: () => onIntro(state.v) }, 0)
+  tl.to(state, { v: 1, duration: 1.8, ease: 'elastic.out(1, 0.6)', onUpdate: () => onIntro(state.v) }, 0.7)
   tl.from('.hero__title .line__in', { yPercent: 115, duration: 1.4, stagger: 0.09 }, 0.15)
   tl.from('.hero__title .spark', { rotate: -180, scale: 0.2, duration: 1.6, ease: 'elastic.out(1, 0.55)' }, 0.45)
   tl.from('.hero__edition, .hero__story, .hero__cta, .hero__note', { opacity: 0, y: 24, duration: 1.2, stagger: 0.08 }, 0.55)
   tl.from('.header', { opacity: 0, y: -16, duration: 1.2 }, 0.4)
 }
 
-/** 碎片间奏：液体随滚动分裂；文字缓缓放大升起；舞台离开后淡出 */
-export function initFragment(animate: boolean, onSplit: (v: number) => void, onStage: (inView: boolean) => void) {
+/** 碎片间奏：透镜在这里分裂成水珠（见 heroLens）；文字缓缓放大升起；背景舞台离开后淡出 */
+export function initFragment(animate: boolean) {
   const sec = qs('.fragment')
   const stage = qs('.hero__stage')
   if (!sec || !stage) return
   ScrollTrigger.create({
     trigger: sec,
-    start: 'top bottom',
-    end: 'bottom 30%',
-    scrub: animate ? 0.6 : false,
-    onUpdate: self => onSplit(self.progress),
-  })
-  ScrollTrigger.create({
-    trigger: sec,
     start: 'bottom 30%',
     end: 'max',
-    onToggle: self => {
-      stage.classList.toggle('is-gone', self.isActive)
-      onStage(!self.isActive)
-    },
+    onToggle: self => stage.classList.toggle('is-gone', self.isActive),
   })
   if (!animate) return
   gsap.fromTo(

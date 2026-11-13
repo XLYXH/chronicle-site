@@ -72,26 +72,30 @@
       <symbol id="arrow" viewBox="0 0 16 16"><path d="M4 12 12 4M5.5 4H12v6.5" fill="none" stroke="currentColor" stroke-width="1.4" /></symbol>
     </svg>
 
-    <div class="progress" aria-hidden="true"><i></i></div>
-
     <header class="header">
-      <a class="brand" href="#top" data-magnetic aria-label="CHRONICLE 首页">
+      <a class="brand lg" data-lg="bar" href="#top" data-magnetic aria-label="CHRONICLE 首页">
         <svg class="brand__mark" aria-hidden="true"><use href="#mark" /></svg>
         <span class="brand__name" data-scramble>CHRONICLE</span>
       </a>
-      <nav class="nav" aria-label="主导航">
+      <nav class="nav lg" data-lg="bar" aria-label="主导航">
         <a href="#work" data-nav="work"><span data-scramble>Work</span><small>作品</small></a>
         <a href="#play" data-nav="play"><span data-scramble>Play</span><small>实验</small></a>
         <a href="#about" data-nav="about"><span data-scramble>About</span><small>关于</small></a>
         <a href="#connect" data-nav="connect"><span data-scramble>Connect</span><small>联系</small></a>
       </nav>
       <div class="header__end">
-        <button class="theme" type="button" data-magnetic aria-label="切换深浅色">
+        <button class="theme lg" data-lg="round" type="button" data-magnetic aria-label="切换深浅色">
           <span class="theme__icon" aria-hidden="true"><i></i></span>
         </button>
-        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><span class="sr">打开菜单</span><i></i><i></i></button>
+        <button class="menu-btn lg" data-lg="round" type="button" aria-expanded="false" aria-controls="menu"><span class="sr">打开菜单</span><i></i><i></i></button>
       </div>
     </header>
+
+    <a class="totop lg" data-lg="round" href="#top" aria-label="回到顶部">
+      <svg class="totop__ring" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" /><circle class="totop__bar" cx="24" cy="24" r="21" pathLength="100" /></svg>
+      <span class="totop__pct" aria-hidden="true">0</span>
+      <svg class="totop__arrow" aria-hidden="true"><use href="#arrow" /></svg>
+    </a>
 
     <div class="menu" id="menu" inert>
       <nav aria-label="移动端导航">
@@ -107,8 +111,8 @@
       <!-- 00 · Hero -->
       <section class="hero" id="top" aria-labelledby="hero-title">
         <div class="hero__stage" aria-hidden="true">
-          <canvas class="hero__gl"></canvas>
-          <div class="hero__fallback"><i></i><i></i><i></i></div>
+          <div class="hero__grid"></div>
+          <div class="hero__rings"></div>
         </div>
         <div class="hero__inner">
           <p class="eyebrow hero__edition" lang="en"><span class="dot"></span>CHRONICLE — A personal universe</p>
@@ -193,8 +197,8 @@
                 </svg>
                 <span class="project__cover" aria-hidden="true">Beyond<i>.</i></span>
               </div>
-            <span class="showcase__count" aria-hidden="true"><b data-stage-num>01</b> / 03</span>
-            <span class="showcase__hint" aria-hidden="true">Hover · Tap</span>
+            <span class="showcase__count lg" data-lg="chip" aria-hidden="true"><b data-stage-num>01</b> / 03</span>
+            <span class="showcase__hint lg" data-lg="chip" aria-hidden="true">Hover · Tap</span>
           </div>
           <div class="projects">
             <article class="project is-active" data-cat="tools" data-key="blueprint" data-reveal>

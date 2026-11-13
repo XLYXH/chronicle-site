@@ -1,0 +1,362 @@
+/* ==========================================================
+   液态玻璃（Liquid Glass）
+   结构：.lg::before = 玻璃本体（backdrop 取样 + SVG 折射）；.lg::after = 高光与边缘反射
+   三档：[data-glass=refract] Chromium 折射 → [data-glass=frost] 磨砂 → [data-glass=solid] 实色
+   ========================================================== */
+:root {
+  --lg-tint: rgba(250, 249, 246, 0.26);
+  --lg-tint-strong: rgba(246, 245, 241, 0.6);
+  --lg-ring: rgba(255, 255, 255, 0.55);
+  --lg-shine: rgba(255, 255, 255, 0.95);
+  --lg-shade: rgba(17, 18, 22, 0.1);
+  --lg-drop: 0 2px 6px rgba(17, 18, 22, 0.08), 0 14px 34px -14px rgba(17, 18, 22, 0.28);
+}
+:root[data-theme='dark'] {
+  --lg-tint: rgba(28, 30, 40, 0.3);
+  --lg-tint-strong: rgba(20, 21, 28, 0.66);
+  --lg-ring: rgba(255, 255, 255, 0.16);
+  --lg-shine: rgba(255, 255, 255, 0.42);
+  --lg-shade: rgba(0, 0, 0, 0.4);
+  --lg-drop: 0 2px 8px rgba(0, 0, 0, 0.35), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+}
+
+.lg {
+  position: relative;
+  z-index: 0;
+  border-radius: 999px;
+}
+.lg::before,
+.lg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.lg::before {
+  z-index: -1;
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(3px) saturate(1.7) brightness(1.04);
+  backdrop-filter: blur(3px) saturate(1.7) brightness(1.04);
+  will-change: backdrop-filter;
+}
+/* 只有确认支持时才把折射挂上；filter 作用于 ::before 自身输出（含 backdrop 结果） */
+[data-glass='refract'] .lg-on::before {
+  filter: var(--lg-filter);
+  clip-path: inset(0 round var(--lg-r, 999px));
+}
+/* 高光：顶左一道锐利的反光 + 底右一道柔和的内反射 + 一圈细边 */
+.lg::after {
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 1px var(--lg-ring),
+    inset 1.5px 1.5px 0 -0.5px var(--lg-shine),
+    inset -1.5px -1.5px 0 -0.5px color-mix(in srgb, var(--lg-shine) 45%, transparent),
+    inset 0 -10px 18px -14px var(--lg-shade),
+    var(--lg-drop);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), transparent 38%, transparent 70%, rgba(255, 255, 255, 0.08));
+}
+[data-theme='dark'] .lg::after {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent 40%);
+}
+
+/* 磨砂降级：Safari / Firefox 不能把 SVG 滤镜作用到 backdrop 结果上，改为更柔的磨砂与更明确的边缘 */
+[data-glass='frost'] .lg::before {
+  -webkit-backdrop-filter: blur(14px) saturate(1.7);
+  backdrop-filter: blur(14px) saturate(1.7);
+  background: color-mix(in srgb, var(--lg-tint-strong) 75%, transparent);
+}
+/* 没有 backdrop-filter：直接给一层更实的底 */
+[data-glass='solid'] .lg::before,
+.lg.no-bf::before {
+  background: var(--lg-tint-strong);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lg::before {
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+  }
+}
+@media (prefers-contrast: more), (forced-colors: active) {
+  .lg::before {
+    background: var(--paper);
+    backdrop-filter: none;
+    filter: none !important;
+  }
+  .lg::after {
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+}
+
+/* ---------- 导航：玻璃液滴指示器 ---------- */
+.nav__blob {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 60px;
+  z-index: 0;
+  pointer-events: none;
+  transform: scale(0);
+  transform-origin: 50% 50%;
+}
+.nav__blob.lg::before {
+  background: color-mix(in srgb, var(--accent) 7%, rgba(255, 255, 255, 0.12));
+  -webkit-backdrop-filter: saturate(1.5) brightness(1.06);
+  backdrop-filter: saturate(1.5) brightness(1.06);
+}
+[data-theme='dark'] .nav__blob.lg::before {
+  background: color-mix(in srgb, var(--accent) 16%, rgba(255, 255, 255, 0.04));
+}
+.nav__blob.lg::after {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, var(--lg-ring)),
+    inset 2px 2px 1px -1px var(--lg-shine),
+    inset -2px -2px 2px -1px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 4px 10px -4px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+[data-glass='frost'] .nav__blob.lg::before,
+[data-glass='solid'] .nav__blob.lg::before {
+  background: color-mix(in srgb, var(--accent) 12%, var(--lg-tint-strong));
+}
+
+.theme.lg,
+.menu-btn.lg {
+  transition: transform 0.5s var(--ease);
+}
+.theme.lg:active,
+.menu-btn.lg:active,
+.totop.lg:active {
+  transform: scale(0.92);
+}
+
+/* ---------- 回到顶部 + 阅读进度环（借鉴 rainzt.cn 右下角的进度按钮） ---------- */
+.totop {
+  position: fixed;
+  right: clamp(14px, 2.4vw, 32px);
+  bottom: calc(clamp(14px, 2.4vw, 32px) + env(safe-area-inset-bottom));
+  z-index: 40;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.8);
+  transition: opacity 0.5s var(--ease), transform 0.6s var(--ease), visibility 0s 0.6s;
+}
+.totop.is-on {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.5s var(--ease), transform 0.6s var(--ease);
+}
+.totop__ring {
+  position: absolute;
+  inset: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  transform: rotate(-90deg);
+  fill: none;
+  stroke-width: 2;
+  stroke: var(--line);
+}
+.totop__bar {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--p, 0));
+}
+.totop__pct,
+.totop__arrow {
+  grid-area: 1 / 1;
+  transition: opacity 0.3s, transform 0.5s var(--ease);
+}
+.totop__arrow {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transform: translateY(6px) rotate(-45deg);
+}
+.totop:hover .totop__pct,
+.totop:focus-visible .totop__pct {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+.totop:hover .totop__arrow,
+.totop:focus-visible .totop__arrow {
+  opacity: 1;
+  transform: rotate(-45deg);
+}
+.menu-open .totop {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ---------- 移动端菜单：一整片磨砂玻璃 ---------- */
+.menu {
+  background: color-mix(in srgb, var(--paper) 62%, transparent);
+  -webkit-backdrop-filter: blur(26px) saturate(1.8);
+  backdrop-filter: blur(26px) saturate(1.8);
+  box-shadow:
+    inset 0 0 0 1px var(--lg-ring),
+    inset 1.5px 1.5px 0 -0.5px var(--lg-shine),
+    0 30px 60px -30px rgba(17, 18, 22, 0.35);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .menu {
+    background: var(--paper);
+  }
+}
+
+/* ---------- 展台上的小玻璃签 ---------- */
+.showcase__count.lg,
+.showcase__hint.lg {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 13px;
+  color: var(--ink-2);
+}
+[data-theme='dark'] .showcase__count.lg,
+[data-theme='dark'] .showcase__hint.lg {
+  color: var(--ink);
+}
+
+/* ---------- 首屏透镜 ---------- */
+/* 舞台必须是不透明底：backdrop 取样不含根背景，透明处经色散通道合成会发灰 */
+.hero__stage {
+  background: var(--paper);
+}
+/* 舞台成了不透明层（z-index:0），首屏文字需要明确地压在它上面 */
+.hero__inner {
+  position: relative;
+  z-index: 1;
+}
+.hero__note {
+  z-index: 1;
+}
+/* 注意：玻璃件内部不能有 mix-blend-mode 的子元素，否则 Chromium 不再把 backdrop 送进滤镜 */
+.hero__grid,
+.hero__rings {
+  position: absolute;
+  inset: 0;
+}
+.hero__grid {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 26%, transparent) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+  -webkit-mask-image: radial-gradient(120% 90% at var(--lx, 66%) var(--ly, 48%), #000 0, rgba(0, 0, 0, 0.55) 45%, transparent 82%);
+  mask-image: radial-gradient(120% 90% at var(--lx, 66%) var(--ly, 48%), #000 0, rgba(0, 0, 0, 0.55) 45%, transparent 82%);
+  opacity: 0.55;
+}
+.hero__rings {
+  background:
+    radial-gradient(circle at var(--lx, 70%) var(--ly, 46%), color-mix(in srgb, var(--accent) 14%, transparent) 0, transparent 26vmin),
+    repeating-radial-gradient(circle at var(--lx, 70%) var(--ly, 46%), transparent 0 calc(11vmin - 1px), color-mix(in srgb, var(--accent) 16%, transparent) calc(11vmin - 1px) 11vmin);
+  -webkit-mask-image: radial-gradient(circle at var(--lx, 70%) var(--ly, 46%), #000 0, transparent 46vmin);
+  mask-image: radial-gradient(circle at var(--lx, 70%) var(--ly, 46%), #000 0, transparent 46vmin);
+  opacity: 0.8;
+}
+
+.lens-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease), visibility 0s;
+}
+.lens-layer.is-gone {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0s 0.6s;
+}
+.lens-layer.is-static {
+  position: absolute;
+  overflow: hidden;
+}
+.lens,
+.lens__caustic {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--d, 300px);
+  height: var(--d, 300px);
+  border-radius: 50%;
+  transform: translate(-999px, -999px);
+}
+.lens--drop {
+  width: calc(var(--d, 300px) * 0.3);
+  height: calc(var(--d, 300px) * 0.3);
+  opacity: 0;
+}
+.lens.lg::before {
+  /* 色散通道合成时，半透明底色会被预乘成灰色：透镜本体不着色，色调交给 ::after */
+  background: none;
+  -webkit-backdrop-filter: blur(0.4px) saturate(1.45) brightness(1.03);
+  backdrop-filter: blur(0.4px) saturate(1.45) brightness(1.03);
+}
+[data-theme='dark'] .lens.lg::before {
+  background: none;
+  -webkit-backdrop-filter: blur(0.4px) saturate(1.5) brightness(1.18);
+  backdrop-filter: blur(0.4px) saturate(1.5) brightness(1.18);
+}
+[data-glass='frost'] .lens.lg::before {
+  -webkit-backdrop-filter: blur(5px) saturate(1.5);
+  backdrop-filter: blur(5px) saturate(1.5);
+  background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.14), color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, 0.3)));
+}
+.lens.lg::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 3px 4px 2px -2px rgba(255, 255, 255, 0.95),
+    inset -6px -8px 14px -8px color-mix(in srgb, var(--accent) 45%, transparent),
+    inset 0 0 20px -8px rgba(255, 255, 255, 0.6),
+    0 30px 50px -28px rgba(17, 18, 22, 0.3);
+  background:
+    radial-gradient(60% 40% at 50% 104%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+    radial-gradient(closest-side at 50% 50%, transparent 70%, color-mix(in srgb, var(--accent) 6%, rgba(255, 255, 255, 0.2)) 100%);
+}
+[data-theme='dark'] .lens.lg::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 3px 4px 2px -2px rgba(255, 255, 255, 0.55),
+    inset -6px -8px 16px -8px color-mix(in srgb, var(--accent) 60%, transparent),
+    inset 0 0 30px -8px rgba(133, 146, 255, 0.35),
+    0 30px 60px -26px rgba(0, 0, 0, 0.8);
+}
+/* 弧形镜面高光：随运动方向轻轻偏转 */
+.lens__spec {
+  position: absolute;
+  left: 13%;
+  top: 9%;
+  width: 40%;
+  height: 22%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 100%);
+  transform: rotate(calc(-32deg + var(--spec, 0) * 1deg));
+  filter: blur(2px);
+  opacity: 0.7;
+  z-index: 3;
+}
+[data-theme='dark'] .lens__spec {
+  opacity: 0.4;
+}
+/* 焦散：透镜把光聚在它的投影里，落在纸面上 */
+.lens__caustic {
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.7) 0, rgba(255, 255, 255, 0.25) 34%, color-mix(in srgb, var(--accent) 12%, transparent) 58%, rgba(17, 18, 22, 0.05) 70%, transparent 80%);
+  filter: blur(8px);
+  opacity: 0.85;
+}
+[data-theme='dark'] .lens__caustic {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 30%, transparent) 0, color-mix(in srgb, var(--accent) 12%, transparent) 50%, transparent 78%);
+}
+@media print {
+  .lens-layer,
+  .totop {
+    display: none;
+  }
+}
