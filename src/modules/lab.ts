@@ -134,8 +134,7 @@ export function initLab(animate: boolean) {
     }
   }
 
-  const sync = () =>
-    drops.forEach(d => d.btn.setAttribute('aria-pressed', String(d.mode === 'held')))
+  const sync = () => drops.forEach(d => d.btn.setAttribute('aria-pressed', String(d.mode === 'held')))
 
   const doFuse = (a: Drop, b: Drop) => {
     a.mode = b.mode = 'fused'
@@ -264,6 +263,17 @@ export function initLab(animate: boolean) {
     if (!animate) render(true)
   })
 
+  // ---- v12 · 实验场的 HUD 读数：转角（度）与“信号增益”（转速）；约 10 次 / 秒 ----
+  const angleEl = field.querySelector<HTMLElement>('[data-lab-angle]')
+  let hudAt = 0
+  const hud = (now: number) => {
+    if (now - hudAt < 100) return
+    hudAt = now
+    const deg = ((((orbit.angle * 180) / Math.PI) % 360) + 360) % 360
+    if (angleEl) angleEl.textContent = String(Math.round(deg)).padStart(3, '0')
+    field.style.setProperty('--gain', Math.min(1, Math.abs(orbit.vel) / 3).toFixed(2))
+  }
+
   // ---- 帧循环：只在可见时运行 ----
   let on = false
   let raf = 0
@@ -278,6 +288,7 @@ export function initLab(animate: boolean) {
     orbit.pitch += (orbit.tPitch - orbit.pitch) * (1 - Math.exp(-dt * 3))
     orbit.roll += (orbit.tRoll - orbit.roll) * (1 - Math.exp(-dt * 3))
     render(false)
+    hud(now)
     if (on) raf = requestAnimationFrame(tick)
   }
   if (animate) {

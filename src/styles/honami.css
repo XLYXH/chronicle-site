@@ -1,0 +1,623 @@
+/* ==========================================================
+   v12 · 穗波市（《鸣潮》2.8 Honami City）风格的再创作：
+   虹彩天空、樱粉花瓣、玻璃高楼与被淹没的街道、虹光结晶、
+   官网式的香槟金细线与菱形端点、千咲的“裁剪”、开屏式色散。
+   不使用任何官方素材，全部为原创 CSS / SVG / Canvas。
+   ========================================================== */
+:root {
+  --paper: #eef1f6;
+  --paper-2: #e2e7f0;
+  --paper-3: #d4dbe8;
+  --ink: #0e1324;
+  --ink-2: #283048;
+  --muted: #586079;
+  --line: rgba(14, 19, 36, 0.12);
+  --line-2: rgba(14, 19, 36, 0.24);
+  --glass: rgba(238, 241, 246, 0.7);
+  --gold: #a07a35;
+  --sakura: #ff7aa6;
+  --sig: #ff5a6e;
+  --cut: #e2324c;
+  --irid: linear-gradient(100deg, #5fd4ff, #8c8cff 30%, #ff7ec0 58%, #ffc98a 80%, #5fd4ff);
+}
+:root[data-theme='dark'] {
+  --paper: #070a14;
+  --paper-2: #0d1222;
+  --paper-3: #151b30;
+  --ink: #eaedf6;
+  --ink-2: #c4c9db;
+  --muted: #8e95ad;
+  --line: rgba(234, 237, 246, 0.1);
+  --line-2: rgba(234, 237, 246, 0.2);
+  --glass: rgba(7, 10, 20, 0.62);
+  --gold: #d9b878;
+  --sakura: #ff8fb6;
+  --sig: #ff6f80;
+  --cut: #ff4a62;
+}
+
+/* ---------- 球体：索诺拉里的城市 ---------- */
+.bd__disc {
+  overflow: hidden;
+  background: none;
+}
+.bd__city {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bd__city .s0 {
+  stop-color: #cfe9ff;
+}
+.bd__city .s1 {
+  stop-color: #e9e6ff;
+}
+.bd__city .s2 {
+  stop-color: #ffe3ee;
+}
+.bd__city .s3 {
+  stop-color: #c9dcf0;
+}
+.bd__city .s4 {
+  stop-color: #e6edf6;
+}
+.bd__far {
+  fill: #b9c8dc;
+}
+.bd__mid {
+  fill: #9fb1ca;
+}
+.bd__near {
+  fill: #7f93b1;
+}
+.bd__tower path,
+.bd__tower ellipse {
+  fill: #6d82a3;
+}
+.bd__tower ellipse {
+  fill: none;
+  stroke: #6d82a3;
+  stroke-width: 0.35;
+}
+.bd__mast {
+  fill: none !important;
+  stroke: #6d82a3;
+  stroke-width: 0.3;
+}
+.bd__beacon {
+  fill: var(--sig);
+  animation: beacon 2.4s steps(1) infinite;
+}
+@keyframes beacon {
+  60% {
+    opacity: 0.25;
+  }
+}
+.bd__win {
+  stroke: #fff6d8;
+  stroke-width: 0.45;
+  opacity: 0.8;
+}
+.bd__reflect {
+  opacity: 0.38;
+}
+.bd__ripple {
+  stroke: #ffffff;
+  stroke-width: 0.3;
+  opacity: 0.7;
+}
+.bd__pulse circle {
+  fill: none;
+  stroke: var(--sakura);
+  stroke-width: 0.25;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse-ring 4.8s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  opacity: 0;
+}
+.bd__pulse circle:nth-child(2) {
+  animation-delay: 1.6s;
+}
+.bd__pulse circle:nth-child(3) {
+  animation-delay: 3.2s;
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(9);
+    opacity: 0;
+  }
+}
+[data-theme='dark'] .bd__city .s0 {
+  stop-color: #050a1c;
+}
+[data-theme='dark'] .bd__city .s1 {
+  stop-color: #12123a;
+}
+[data-theme='dark'] .bd__city .s2 {
+  stop-color: #3a1a4a;
+}
+[data-theme='dark'] .bd__city .s3 {
+  stop-color: #0a1430;
+}
+[data-theme='dark'] .bd__city .s4 {
+  stop-color: #03060f;
+}
+[data-theme='dark'] .bd__far {
+  fill: #141c3a;
+}
+[data-theme='dark'] .bd__mid {
+  fill: #0e1530;
+}
+[data-theme='dark'] .bd__near,
+[data-theme='dark'] .bd__tower path {
+  fill: #080d20;
+}
+[data-theme='dark'] .bd__tower ellipse,
+[data-theme='dark'] .bd__mast {
+  stroke: #8f7dff;
+}
+[data-theme='dark'] .bd__win {
+  stroke: #9fe6ff;
+}
+[data-theme='dark'] .bd__ripple {
+  stroke: #8fd7ff;
+  opacity: 0.4;
+}
+/* 球体整体压淡一点，免得抢正文 */
+.bd__disc > * {
+  opacity: calc(0.62 - var(--hv, 0) * 0.34);
+}
+[data-theme='dark'] .bd__disc > * {
+  opacity: calc(0.85 - var(--hv, 0) * 0.4);
+}
+.bd__disc .bd__sweep,
+.bd__disc .bd__spec {
+  opacity: 1;
+}
+/* 玻璃球的高光：呼应站内的液态玻璃 */
+.bd__spec {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(60% 40% at 34% 18%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(120% 120% at 50% 50%, transparent 62%, rgba(255, 255, 255, 0.35) 70%, transparent 72%);
+  mix-blend-mode: screen;
+}
+.bd__sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 80%, color-mix(in srgb, var(--sakura) 22%, transparent) 97%, transparent 100%);
+  animation: spin 16s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+/* 虹光：一圈虹彩的边，缓慢转动 */
+.bd__rim {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #5fd4ff, #8c8cff, #ff7ec0, #ffc98a, #5fd4ff);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  opacity: 0.75;
+  filter: blur(0.6px);
+  animation: spin 40s linear infinite;
+}
+.bd__disc {
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 0 120px 20px color-mix(in srgb, #9fd8ff 30%, transparent),
+    0 0 260px 60px color-mix(in srgb, #ffb3d1 16%, transparent);
+}
+[data-theme='dark'] .bd__disc {
+  background: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 120px 16px rgba(140, 140, 255, 0.16),
+    0 0 260px 60px rgba(255, 126, 192, 0.08);
+}
+.bd__shards {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  overflow: visible;
+}
+.bd__shards polygon {
+  fill: url(#bd-irid);
+  opacity: 0.55;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 0.12;
+  animation: glint 5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.55s);
+}
+@keyframes glint {
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* 刻度环、轨道文字、中心点、十字线 */
+.bd__ticks {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  overflow: visible;
+  animation: spin 120s linear infinite reverse;
+}
+.bd__ticks path {
+  stroke: var(--gold);
+  stroke-width: 0.12;
+  opacity: 0.7;
+}
+.bd__orbit text {
+  font-family: var(--f-mono);
+  font-size: 1.15px;
+  letter-spacing: 0.32px;
+  fill: var(--muted);
+}
+.bd__orbit path {
+  stroke: none;
+}
+.bd__center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+.bd__cross {
+  position: absolute;
+  background: var(--line);
+}
+.bd__cross--x {
+  left: 0;
+  right: 0;
+  top: calc(52% + var(--py, 0) * 10px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-2) 20%, var(--line-2) 80%, transparent);
+}
+.bd__cross--y {
+  top: 0;
+  bottom: 0;
+  left: calc(50% + var(--px, 0) * 14px);
+  width: 1px;
+  background: linear-gradient(transparent, var(--line-2) 20%, var(--line-2) 80%, transparent);
+}
+
+/* 声波等高线 */
+.bd__waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 70%;
+  translate: 0 calc(var(--bp, 0) * 8vh);
+}
+.bd__waves path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+/* 技术节点图 */
+.bd__graph {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bd__layer--0 {
+  translate: 0 calc(var(--bp, 0) * -60px);
+}
+.bd__layer--1 {
+  translate: 0 calc(var(--bp, 0) * -140px);
+}
+.bd__cl {
+  opacity: 0.5;
+  transition: opacity 0.8s var(--ease);
+}
+.bd__cl path {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1;
+  stroke-dasharray: 2 5;
+}
+.bd__cl .bd__spoke {
+  stroke-dasharray: 1 9;
+}
+.bd__cl rect {
+  fill: var(--paper);
+  stroke: var(--muted);
+}
+.bd__cl circle {
+  fill: none;
+  stroke: var(--gold);
+}
+.bd__cl text {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  fill: var(--muted);
+}
+.bd[data-active='blueprint'] [data-cl='blueprint'],
+.bd[data-active='monitor'] [data-cl='monitor'],
+.bd[data-active='proxy'] [data-cl='proxy'] {
+  opacity: 1;
+}
+.bd[data-active='blueprint'] [data-cl='blueprint'] rect,
+.bd[data-active='monitor'] [data-cl='monitor'] rect,
+.bd[data-active='proxy'] [data-cl='proxy'] rect {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+.bd[data-active='blueprint'] [data-cl='blueprint'] path,
+.bd[data-active='monitor'] [data-cl='monitor'] path,
+.bd[data-active='proxy'] [data-cl='proxy'] path {
+  stroke: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+@media (max-width: 720px) {
+  .bd__graph text,
+  .bd__orbit text {
+    display: none;
+  }
+}
+
+/* ---------- 花瓣 ---------- */
+.petals {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ---------- 官网式的香槟金细线：章节分隔两端是菱形 ---------- */
+.has-craft .sec-top::after {
+  background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 30%, transparent) 40%, var(--line) 70%);
+  height: 1px;
+}
+.sec-top::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  bottom: -4px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--gold);
+  background: var(--paper);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+.sec-top {
+  position: relative;
+}
+.sec-top .eyebrow b {
+  color: var(--accent);
+}
+
+/* ---------- 虹彩强调字：标题里的斜体词带一层虹光 ---------- */
+.sec-title em,
+.connect__title em,
+.fragment__word em {
+  background: var(--irid) 0 0 / 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-position 2.4s var(--ease);
+}
+/* 拆词以后渐变落在每个词的内层上 */
+.sec-title em .w__in,
+.connect__title em .w__in {
+  background: var(--irid) 0 0 / 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sec-title:hover em,
+.sec-title:hover em .w__in,
+.connect__main:hover .connect__title em .w__in {
+  background-position: 100% 0;
+}
+
+/* ---------- 入场色散（RGB 错位闪两下） ---------- */
+.is-glitch {
+  animation: glitch 0.72s steps(1) both;
+}
+@keyframes glitch {
+  0% {
+    text-shadow:
+      -6px 0 rgba(95, 212, 255, 0.85),
+      6px 0 rgba(255, 90, 140, 0.85);
+    clip-path: inset(0 0 52% 0);
+  }
+  12% {
+    text-shadow:
+      4px 0 rgba(95, 212, 255, 0.8),
+      -4px 0 rgba(255, 90, 140, 0.8);
+    clip-path: inset(38% 0 0 0);
+  }
+  24% {
+    text-shadow:
+      -2px 0 rgba(95, 212, 255, 0.7),
+      2px 0 rgba(255, 90, 140, 0.7);
+    clip-path: none;
+  }
+  40% {
+    text-shadow: none;
+  }
+  52% {
+    text-shadow:
+      3px 0 rgba(95, 212, 255, 0.6),
+      -3px 0 rgba(255, 90, 140, 0.6);
+  }
+  64%,
+  100% {
+    text-shadow: none;
+    clip-path: none;
+  }
+}
+
+/* ---------- “裁剪”入场：斜切开 + 绯红切线 ---------- */
+.has-rv [data-rv='cut'] {
+  opacity: 1;
+  clip-path: polygon(0 0, 0 0, -30% 100%, -30% 100%);
+  transition: clip-path 1.6s cubic-bezier(0.7, 0, 0.15, 1) var(--rv-d, 0s);
+}
+.has-rv [data-rv='cut'].is-in {
+  clip-path: polygon(0 0, 130% 0, 100% 100%, -30% 100%);
+}
+.cutline {
+  position: absolute;
+  z-index: 6;
+  top: -10%;
+  bottom: -10%;
+  left: 0;
+  width: 2px;
+  background: var(--cut);
+  box-shadow: 0 0 18px 2px color-mix(in srgb, var(--cut) 60%, transparent);
+  transform: skewX(-16deg);
+  translate: -40px 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.has-rv [data-rv='cut'].is-in > .cutline {
+  animation: cut 1.6s cubic-bezier(0.7, 0, 0.15, 1) var(--rv-d, 0s) both;
+}
+@keyframes cut {
+  0% {
+    translate: -40px 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    translate: calc(var(--cw, 1200px) + 120px) 0;
+    opacity: 0;
+  }
+}
+.showcase__stage {
+  --cw: 820px;
+}
+
+/* ---------- 竖排店招 ---------- */
+.work,
+.play,
+.about,
+.connect {
+  position: relative;
+}
+.sign {
+  position: absolute;
+  z-index: 0;
+  top: clamp(60px, 9vw, 140px);
+  right: max(10px, calc(var(--pad) / 2 - 16px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--sakura) 60%, transparent);
+  writing-mode: vertical-rl;
+  font-family: var(--f-body);
+  pointer-events: none;
+}
+.sign b {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: var(--sakura);
+  text-shadow:
+    0 0 8px color-mix(in srgb, var(--sakura) 60%, transparent),
+    0 0 22px color-mix(in srgb, var(--sakura) 35%, transparent);
+}
+.sign small {
+  writing-mode: horizontal-tb;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+.sign::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid color-mix(in srgb, var(--sakura) 28%, transparent);
+}
+/* 进入视口时像霓虹灯一样闪几下再亮稳 */
+.has-rv .sign {
+  opacity: 0.15;
+}
+.has-rv .sign.is-lit {
+  animation: neon 1.4s steps(1) both;
+}
+@keyframes neon {
+  0% {
+    opacity: 0.15;
+  }
+  10% {
+    opacity: 1;
+  }
+  18% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+  36% {
+    opacity: 0.5;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}
+@media (max-width: 1100px) {
+  .sign {
+    display: none;
+  }
+}
+
+/* 首屏：标识点换成樱粉菱形 */
+.hero__edition .dot {
+  background: var(--sakura);
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bd__sweep,
+  .bd__rim,
+  .bd__ticks,
+  .bd__shards polygon,
+  .bd__beacon,
+  .bd__pulse circle {
+    animation: none !important;
+  }
+  .has-rv [data-rv='cut'] {
+    clip-path: none !important;
+  }
+  .cutline {
+    display: none;
+  }
+  .sign {
+    opacity: 1 !important;
+  }
+}

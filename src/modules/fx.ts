@@ -52,7 +52,14 @@ export function initReveals(animate: boolean) {
     ScrollTrigger.create({
       trigger: t,
       start: 'top 86%',
-      onEnter: () => gsap.to(words, { yPercent: 0, duration: 1.8, ease: 'expo.out', stagger: 0.07, overwrite: true }),
+      onEnter: () => {
+        gsap.to(words, { yPercent: 0, duration: 1.8, ease: 'expo.out', stagger: 0.07, overwrite: true })
+        // v12 · 入场瞬间的色散闪烁（像官网开屏标志那样的 RGB 错位），0.7s 后收起
+        t.classList.remove('is-glitch')
+        void t.offsetWidth
+        t.classList.add('is-glitch')
+        setTimeout(() => t.classList.remove('is-glitch'), 760)
+      },
       onLeaveBack: () => gsap.to(words, { yPercent: 110, duration: 0.5, ease: 'power2.in', overwrite: true }),
     })
   })

@@ -18,6 +18,8 @@ import { initCraft } from './modules/craft'
 import { initSignature } from './modules/signature'
 import { initScrollReveal } from './modules/scrollReveal'
 import { initBackdrop } from './modules/backdrop'
+import { initHud } from './modules/hud'
+import { initPetals } from './modules/petals'
 
 gsap.registerPlugin(ScrollTrigger)
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
@@ -48,6 +50,8 @@ initCraft(animate)
 initSignature(animate, env.finePointer)
 initScrollReveal(animate)
 initBackdrop(animate)
+initHud(animate)
+initPetals(animate, env.finePointer)
 
 const start = () => heroIntro(animate, v => lens?.intro(v))
 // 等字体就绪再入场，避免换字体时的跳动；最多等 1.2s

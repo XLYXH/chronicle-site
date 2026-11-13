@@ -10,16 +10,17 @@ import { scramble } from './scramble'
  *  - 章节眉题入场时用随机字符“解码”出来
  * 只动 opacity 与独立的 translate / scale 属性，不碰 transform——GSAP（Flip、磁吸、速度拉伸）照常工作。
  */
-type Kind = 'up' | 'left' | 'right' | 'scale'
+type Kind = 'up' | 'left' | 'right' | 'scale' | 'cut'
 
 const PLAN: Array<[string, Kind, number?]> = [
   ['.sec-top', 'left'],
   ['.sec-head', 'up'],
-  ['.showcase__stage', 'scale'],
+  // v12 · “剪切”：大块面沿一道斜线被裁开（灵感：千咲的共鸣能力“裁剪”），一道绯红的切线扫过
+  ['.showcase__stage', 'cut'],
   // 项目本身的 opacity / transform 属于筛选动画，入场改由内部两列来做
   ['.project__no', 'right', 0],
   ['.project__info', 'right', 1],
-  ['.lab', 'up'],
+  ['.lab__field', 'cut'],
   ['.about__left', 'left'],
   ['.interest', 'right'],
   ['.connect__main', 'up'],
@@ -32,12 +33,20 @@ export function initScrollReveal(animate: boolean) {
   if (!animate || !('IntersectionObserver' in window)) return
   const root = document.documentElement
   const items: HTMLElement[] = []
+  // 被 clip-path 完全裁掉的元素在 IntersectionObserver 看来面积为 0，所以“剪切”入场改为观察它的父元素
+  const owner = new Map<Element, HTMLElement>()
   PLAN.forEach(([sel, kind, step]) => {
     qsa(sel).forEach((el, i) => {
       el.dataset.rv = kind
       // 同一选择器下的元素依次错开；项目内的编号 / 正文再各自错开半拍
       const d = step === undefined ? i * 0.12 : i * 0.14 + step * 0.08
       el.style.setProperty('--rv-d', `${d.toFixed(2)}s`)
+      if (kind === 'cut' && !el.querySelector(':scope > .cutline')) {
+        const c = document.createElement('i')
+        c.className = 'cutline'
+        c.setAttribute('aria-hidden', 'true')
+        el.append(c)
+      }
       items.push(el)
     })
   })
@@ -51,7 +60,7 @@ export function initScrollReveal(animate: boolean) {
   const io = new IntersectionObserver(
     entries => {
       entries.forEach(({ target, isIntersecting, boundingClientRect }) => {
-        const el = target as HTMLElement
+        const el = owner.get(target) ?? (target as HTMLElement)
         if (isIntersecting) {
           if (el.classList.contains('is-in')) return
           el.classList.add('is-in')
@@ -64,7 +73,11 @@ export function initScrollReveal(animate: boolean) {
     },
     { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
   )
-  items.forEach(el => io.observe(el))
+  items.forEach(el => {
+    const watch = el.dataset.rv === 'cut' && el.parentElement ? el.parentElement : el
+    owner.set(watch, el)
+    io.observe(watch)
+  })
   // 键盘跳到尚未入场的内容：立刻显示，不等动画
   document.addEventListener('focusin', e => {
     const host = (e.target as Element).closest<HTMLElement>('[data-rv]')

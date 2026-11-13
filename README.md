@@ -1,10 +1,37 @@
-# CHRONICLE — Chronicle-IRAS 的个人网站（v11）
+# CHRONICLE — Chronicle-IRAS 的个人网站（v12）
 
 > Ideas take shape. · 在代码与想象之间，让每一个念头，有形可见。
 
 线上地址：<https://xlyxh.github.io/chronicle-site/>
 
 v4 推翻了 v3 的「IRAS.OS」终端 / HUD 风格，重新设计成一套**自己的视觉语言**；内容**只取自原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)**，不额外添加。
+
+## v12：《鸣潮》穗波市风格
+
+用户想要的是《鸣潮》2.8 里**穗波市**（英文 Honami City，地图名为“时隙废都” Chronorift Metropolis，属于苇原 Ashinohara）的气质。v12 在保留 v11 滚动入场和液态玻璃的基础上，把这套风格重新做了一遍。**没有使用任何官方素材、标志或美术**，全部是原创的 CSS / SVG / Canvas；新增的标签只复用原仓库里已有的文字，比如 `SYS // 01000011 · ARCHIVE EDITION 2026`、`02 / STACK COMPOSER`、`06 / DESTINATIONS // ORBITAL INDEX`、`SIGNAL GAIN`、`NOT YET LINKED`、`03 / CURRENTLY`，以及仓库名、技术栈和 siteContent 里的数据。
+
+调研来源：[PlayStation Blog · Version 2.8 introduces the Chronorift Metropolis](https://blog.playstation.com/2025/11/14/wuthering-waves-version-2-8-introduces-the-chronorift-metropolis/)、[繁中版](https://blog.zh-hant.playstation.com/2025/11/19/20251119-ww/)、[灰机 wiki · 穗波市](https://wuwa.huijiwiki.com/wiki/%E7%A9%97%E6%B3%A2%E5%B8%82)、[萌娘百科 · 苇原](https://zh.moegirl.org.cn/%E8%8B%87%E5%8E%9F)、[萌娘百科 · 译名对照表](https://mzh.moegirl.org.cn/%E9%B8%A3%E6%BD%AE/%E8%AF%91%E5%90%8D%E5%AF%B9%E7%85%A7%E8%A1%A8)、[But Why Tho 的 2.8 评测](https://butwhytho.net/2025/11/wuthering-waves-2-8-review/)、[TV Tropes 第二章第十二幕](https://tvtropes.org/pmwiki/pmwiki.php/Recap/WutheringWavesCh2Act12)，以及官网 [mc.kurogames.com](https://mc.kurogames.com/main) / [wutheringwaves.kurogames.com](https://wutheringwaves.kurogames.com/en/main) 的界面观察。
+
+| 穗波市 / 官网的特征 | 本站的实现 |
+| --- | --- |
+| 城市被封存在索诺拉（Sonoro Sphere）里，反复重置 | v11 的“日蚀”圆改成一颗玻璃球，球里是程序生成的城市：三层远近不同的玻璃高楼剪影和窗灯。球面有高光，和站内的液态玻璃是同一种语言 |
+| 市中心的通讯高塔“虹音塔”（Neon Tower），向全市广播 | 球中央立着一座带天线环的高塔，塔尖信标闪烁，三圈樱粉色的广播波纹一圈接一圈向外扩散 |
+| 海水淹没低地和道路 | 地平线以下是水面：楼群倒映在水里，压淡后加了几道水面反光 |
+| 虹彩的蓝色天空 | 球内的天空从天青过渡到淡紫再到樱粉。浅色主题整体转成偏冷的“天空瓷白”，深色主题是带霓虹窗灯的夜色 |
+| 区域海蚀现象“虹光”（Irideglow），会让人结晶 | 球体外缘有一圈缓慢转动的虹彩边，边上浮着九块会闪光的虹彩晶片；章节标题里的斜体词改成虹彩字 |
+| 粉色花瓣像云一样飘过天空（樱花、紫藤） | 一张低分辨率画布上飘着樱花瓣，会三维翻滚、被滚动“吹”动、被指针拨开。页面空闲后才启动，标签页隐藏时停，减弱动效时不创建 |
+| 当代日本风格的商业街 | 每章右侧挂一块竖排的霓虹店招，字用导航里已有的“作品 / 实验 / 关于 / 联系”，进入视口时像霓虹灯一样闪几下再亮稳 |
+| 千咲的共鸣能力是“裁剪”（Clipping），红色眼睛 | 作品展台和实验场改为“剪切”入场：沿一道斜线被裁开，一道绯红的切线扫过 |
+| 官网开屏标志的 RGB 色散故障 | 章节标题入场时有约 0.7 秒的青 / 粉色散错位闪烁 |
+| 官网的香槟金细线、菱形端点、深色底上的细密波纹 | 章节分隔线换成金色渐隐线，左端加一个菱形，中间是一把带刻度的尺。背景下半部铺了一层声波等高线（Wuthering *Waves*），随滚动微微移动 |
+| 游戏 HUD 的密度 | 底部 HUD 显示版本行、当前章节（解码切换）、本地时钟和整页进度（`0.00 / 1.00`）。球外有刻度环、十字准星和沿轨道排布的系统标签。背景里有技术节点图：三个项目的技术栈各成一簇，展台当前的项目那一簇会被点亮 |
+
+**每个章节新增的元素**：
+
+- 作品：每行加了仓库路径（`REPO // Chronicle-IRAS/…`），悬停时解码；技术栈改成切角标牌；悬停或当前项目时四角金色 HUD 框扣上。展台加了刻度尺、准星和当前仓库路径。
+- 实验：四角 HUD，包括 `02 / STACK COMPOSER`、`HARMONIC RESONANCE · IN-PLACE FUSION`、随转速变化的 `SIGNAL GAIN` 条，以及实时转角读数。
+- 关于：新增 `03 / CURRENTLY` 状态面板（Building / Exploring / Learning，Learning 只有一个闪烁的光标，对应原仓库里“故意留白”的那一条），以及三项指标：公开仓库 04、方向 04、工具 05，入场时滚动计数，内容都取自原仓库的 siteContent。
+- 联系：新增 `06 / DESTINATIONS // ORBITAL INDEX` 目的地索引。没有链接的条目照原仓库标为 NOT YET LINKED。
 
 ## v11：向 lanrhyme.top 学滚动与背景，同时“去 AI 味”
 
@@ -240,7 +267,9 @@ src/modules/
   fx.ts                  标题拆词揭示、首屏入场、碎片间奏、跑马灯透镜
   showcase.ts            作品展台：液体前沿切换、水波扭曲、读线同步、稳健的筛选序列
   scrollReveal.ts        v11 可逆的滚动入场 + 眉题解码
-  backdrop.ts            v11 背景：日蚀圆与轨道、空心章节字、栅格、角标、章节节点、斜向虚线
+  backdrop.ts            v11/v12 背景：索诺拉玻璃球（城市、高塔、倒影、虹光边、晶片）、轨道与刻度环、声波线、技术节点图、空心章节字、栅格、角标、章节节点、斜向虚线
+  hud.ts                 v12 HUD：底部读数与时钟、刻度尺、竖排店招、展台 HUD、作品悬停、指标计数
+  petals.ts              v12 飘落的花瓣（Canvas 2D）
   craft.ts               v7 手感层：筛选液滴、信笺书写
   signature.ts           v8 变形光标
   work.ts                三张交互概念图
@@ -251,7 +280,7 @@ src/modules/
   cursor.ts              圆点光标与磁吸
   scramble.ts            悬停解码（读屏安全）
   smoothScroll.ts        Lenis + ScrollTrigger
-src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / components / reveal / backdrop / restraint
+src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / components / reveal / backdrop / restraint / rich / honami
 public/                  图标、og 图、manifest、404 与其字体
 scripts/                 字体子集化、部署
 ```
