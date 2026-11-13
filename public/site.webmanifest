@@ -1,10 +1,10 @@
 {
-  "name": "IRAS.OS — Chronicle-IRAS",
-  "short_name": "IRAS.OS",
+  "name": "CHRONICLE — Ideas take shape.",
+  "short_name": "CHRONICLE",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#050506",
-  "theme_color": "#050506",
+  "background_color": "#f2f1ed",
+  "theme_color": "#f2f1ed",
   "icons": [
     { "src": "favicon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
