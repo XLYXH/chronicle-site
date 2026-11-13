@@ -1,8 +1,8 @@
 {
   "name": "chronicle-site",
   "private": true,
-  "version": "1.0.0",
-  "description": "IRAS.OS — Chronicle-IRAS 的个人网站",
+  "version": "4.0.0",
+  "description": "CHRONICLE — Chronicle-IRAS 的个人网站（Ideas take shape.）",
   "type": "module",
   "scripts": {
     "dev": "vite",

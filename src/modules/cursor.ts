@@ -1,75 +1,70 @@
 import { gsap } from 'gsap'
-import { qs } from '../lib/env'
+import { qs, qsa } from '../lib/env'
 
 /**
- * 准星光标：方框跟随指针；悬停在链接或按钮上时，方框吸附并包住目标元素，
- * 显示动作标签（外链为 OPEN ↗）。只在精确指针且未减少动态时启用。
+ * 钴蓝小圆点光标：跟随有阻尼，悬停可交互元素时放大成圆环，
+ * 带 data-cursor 的元素显示一个短标签；data-magnetic 元素被指针轻轻吸附。
+ * 只在精确指针 + 允许动效时启用，系统光标保留（只在 CSS 中隐藏于大面积区域外不做处理）。
  */
-export function initReticle() {
-  const root = qs('.reticle')
-  const box = root ? qs('.reticle__box', root) : null
-  const dot = root ? qs('.reticle__dot', root) : null
-  const label = root ? qs('.reticle__label', root) : null
-  if (!root || !box || !dot || !label) return
-  document.documentElement.classList.add('has-reticle')
-
-  const pos = { x: innerWidth / 2, y: innerHeight / 2 }
-  const cur = { x: pos.x, y: pos.y, w: 18, h: 18 }
-  let target: HTMLElement | null = null
+export function initCursor() {
+  const el = qs('.cursor')
+  const label = qs('.cursor__label')
+  if (!el || !label) return
+  document.documentElement.classList.add('has-cursor')
+  const xTo = gsap.quickTo(el, 'x', { duration: 0.45, ease: 'power3.out' })
+  const yTo = gsap.quickTo(el, 'y', { duration: 0.45, ease: 'power3.out' })
+  let shown = false
 
   window.addEventListener(
     'pointermove',
     e => {
       if (e.pointerType !== 'mouse') return
-      pos.x = e.clientX
-      pos.y = e.clientY
-      gsap.set(dot, { x: pos.x, y: pos.y })
+      if (!shown) {
+        shown = true
+        gsap.set(el, { x: e.clientX, y: e.clientY })
+        el.classList.add('is-on')
+      }
+      xTo(e.clientX)
+      yTo(e.clientY)
     },
     { passive: true },
   )
-  window.addEventListener('pointerdown', () => root.classList.add('is-down'))
-  window.addEventListener('pointerup', () => root.classList.remove('is-down'))
-  document.addEventListener('mouseleave', () => gsap.to(root, { opacity: 0, duration: 0.2 }))
-  document.addEventListener('mouseenter', () => gsap.to(root, { opacity: 1, duration: 0.2 }))
+  document.documentElement.addEventListener('pointerleave', () => el.classList.remove('is-on'))
+  document.documentElement.addEventListener('pointerenter', () => shown && el.classList.add('is-on'))
+  window.addEventListener('pointerdown', () => el.classList.add('is-down'))
+  window.addEventListener('pointerup', () => el.classList.remove('is-down'))
 
+  const interactive = 'a, button, [data-cursor], [role="button"], .lab__drop'
   document.addEventListener('pointerover', e => {
-    const el = (e.target as Element).closest<HTMLElement>('a, button, [data-glitch]')
-    if (el === target) return
-    target = el
-    root.classList.toggle('is-snap', !!el)
-    let text = ''
-    if (el?.matches('a[target="_blank"]')) text = 'OPEN ↗'
-    else if (el?.matches('a[href^="#"]')) text = 'GOTO'
-    else if (el?.matches('button')) text = 'EXEC'
+    const t = (e.target as Element).closest<HTMLElement>(interactive)
+    el.classList.toggle('is-hover', !!t)
+    const text = t?.closest<HTMLElement>('[data-cursor]')?.dataset.cursor ?? ''
     label.textContent = text
+    el.classList.toggle('has-label', !!text)
+  })
+  document.addEventListener('pointerout', e => {
+    if (!(e.relatedTarget as Element | null)?.closest(interactive)) {
+      el.classList.remove('is-hover', 'has-label')
+    }
   })
 
-  gsap.ticker.add((_t, dt) => {
-    const k = 1 - Math.exp(-(dt / 1000) * 18)
-    let tx = pos.x
-    let ty = pos.y
-    let tw = 18
-    let th = 18
-    if (target && target.isConnected) {
-      const r = target.getBoundingClientRect()
-      // 大块元素（例如整行项目）只吸附一部分，避免方框过大
-      if (r.width < 420 && r.height < 160) {
-        tx = r.left + r.width / 2 + (pos.x - (r.left + r.width / 2)) * 0.08
-        ty = r.top + r.height / 2 + (pos.y - (r.top + r.height / 2)) * 0.08
-        tw = r.width + 14
-        th = r.height + 10
-      } else {
-        tw = 34
-        th = 34
-      }
-    }
-    cur.x += (tx - cur.x) * k
-    cur.y += (ty - cur.y) * k
-    cur.w += (tw - cur.w) * k
-    cur.h += (th - cur.h) * k
-    box.style.transform = `translate(${cur.x - cur.w / 2}px, ${cur.y - cur.h / 2}px)`
-    box.style.width = `${cur.w}px`
-    box.style.height = `${cur.h}px`
-    label.style.transform = `translate(${cur.x + cur.w / 2 + 8}px, ${cur.y - cur.h / 2 - 4}px)`
+  initMagnetic()
+}
+
+export function initMagnetic() {
+  qsa('[data-magnetic]').forEach(m => {
+    const xTo = gsap.quickTo(m, 'x', { duration: 0.6, ease: 'elastic.out(1, 0.45)' })
+    const yTo = gsap.quickTo(m, 'y', { duration: 0.6, ease: 'elastic.out(1, 0.45)' })
+    const strength = Number(m.dataset.magnetic) || 0.32
+    m.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse') return
+      const r = m.getBoundingClientRect()
+      xTo((e.clientX - (r.left + r.width / 2)) * strength)
+      yTo((e.clientY - (r.top + r.height / 2)) * strength)
+    })
+    m.addEventListener('pointerleave', () => {
+      xTo(0)
+      yTo(0)
+    })
   })
 }
