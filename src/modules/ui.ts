@@ -189,10 +189,24 @@ export function initTheme(animate: boolean, onChange: () => void) {
     const t = doc.startViewTransition(apply)
     t.ready
       .then(() => {
-        document.documentElement.animate(
-          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-          { duration: 750, easing: 'cubic-bezier(.7,0,.2,1)', pseudoElement: '::view-transition-new(root)' },
-        )
+        // 不是正圆：边缘带几道随时间流动、逐渐抚平的波纹，像墨迹在纸上漫开
+        const N = 56
+        const seed = Math.random() * 6
+        const frames: Keyframe[] = []
+        for (let k = 0; k <= 12; k++) {
+          const t = k / 12
+          const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+          const R = e * radius * 1.08
+          const wob = Math.sin(t * Math.PI) * 0.09
+          const pts: string[] = []
+          for (let i = 0; i < N; i++) {
+            const a = (i / N) * Math.PI * 2
+            const r = R * (1 + wob * (Math.sin(a * 5 + seed + t * 5) * 0.6 + Math.sin(a * 9 - seed * 1.7 - t * 7) * 0.4))
+            pts.push(`${(x + Math.cos(a) * r).toFixed(1)}px ${(y + Math.sin(a) * r).toFixed(1)}px`)
+          }
+          frames.push({ clipPath: `polygon(${pts.join(',')})`, offset: t })
+        }
+        document.documentElement.animate(frames, { duration: 900, easing: 'linear', pseudoElement: '::view-transition-new(root)' })
       })
       .catch(() => {})
   })

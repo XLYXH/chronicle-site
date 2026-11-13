@@ -15,6 +15,7 @@ import { initGlass } from './modules/glass'
 import { initHeroLens } from './modules/heroLens'
 import { initVelocity } from './modules/velocity'
 import { initCraft } from './modules/craft'
+import { initSignature } from './modules/signature'
 
 gsap.registerPlugin(ScrollTrigger)
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
@@ -42,6 +43,7 @@ initWhisper(animate, env.finePointer)
 initReveals(animate)
 initFragment(animate)
 initCraft(animate)
+initSignature(animate, env.finePointer)
 
 const start = () => heroIntro(animate, v => lens?.intro(v))
 // 等字体就绪再入场，避免换字体时的跳动；最多等 1.2s

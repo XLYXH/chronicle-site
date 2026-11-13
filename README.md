@@ -1,10 +1,22 @@
-# CHRONICLE — Chronicle-IRAS 的个人网站（v7）
+# CHRONICLE — Chronicle-IRAS 的个人网站（v8）
 
 > Ideas take shape. · 在代码与想象之间，让每一个念头，有形可见。
 
 线上地址：<https://xlyxh.github.io/chronicle-site/>
 
 v4 推翻了 v3 的「IRAS.OS」终端 / HUD 风格，重新设计成一套**自己的视觉语言**；内容**只取自原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)**，不额外添加。
+
+## v8：签名交互
+
+v8 在 v6 / v7 的液态玻璃 + 瓷白 / 墨色 / 钴蓝体系上加了五个“高级”交互，全部不新增文案，集中在 `src/modules/signature.ts` + `src/styles/signature.css`：
+
+1. **变形光标**（精确指针）：靠近按钮、导航、筛选、主题 / 菜单 / 回顶按钮等实体控件时，钴蓝小圆点“长”成一片贴合控件形状与圆角的玻璃框，跟着磁吸的控件走，并向指针轻微偏移；离开时缩回圆点。
+2. **字重场**：章节大标题与联系标题拆成单字，按指针距离实时调节可变字体的 `wght` 轴（Bricolage 500→780，Newsreader 斜体 300→660），平滑回落；触屏上标题入场时有一道从左到右扫过的字重波。只在标题接近视口时才拆字。
+3. **墨滴**：按下任意位置，一圈钴蓝墨环扩散，并甩出几颗受重力影响、沿速度方向拉长的小墨珠（Canvas，首次按下才创建，空闲时不绘制；实验区拖拽不触发）。触屏同样有效。
+4. **景深展台**：指针在作品舞台上时，舞台按透视倾斜，插图、封面大字、玻璃签分三层视差，一道柔光跟随指针。视差走 CSS 独立的 `translate` 属性，不干扰 v7 的筛选 / 切换动画。
+5. **液态主题切换**：View Transitions 的揭示不再是正圆，而是一团边缘起伏、逐渐抚平的墨迹从按钮处漫开；不支持的浏览器直接切换。
+
+减少动态效果时以上全部关闭；无 JS 时内容不受影响。v7 的作品区筛选回归测试（四种宽度 × 13 次组合 × 上下滚动）全部通过。
 
 ## v7：作品区筛选修复 + 手感层
 
@@ -173,6 +185,7 @@ src/modules/
   fx.ts                  标题拆词揭示、首屏入场、碎片间奏、跑马灯透镜
   showcase.ts            作品展台：液体前沿切换、水波扭曲、读线同步、稳健的筛选序列
   craft.ts               v7 手感层：筛选液滴、章节开场、信笺书写、玻璃球 CTA
+  signature.ts           v8 签名交互：变形光标、字重场、墨滴、景深展台
   work.ts                三张交互概念图
   velocity.ts            滚动速度拖影 + WebGL 漏光
   lab.ts                 A little chemistry 3D 轨道融合实验
@@ -181,7 +194,7 @@ src/modules/
   cursor.ts              圆点光标与磁吸
   scramble.ts            悬停解码（读屏安全）
   smoothScroll.ts        Lenis + ScrollTrigger
-src/styles/              fonts / base / chrome / sections / showcase / glass / craft
+src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature
 public/                  图标、og 图、manifest、404 与其字体
 scripts/                 字体子集化、部署
 ```

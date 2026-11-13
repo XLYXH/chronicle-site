@@ -1,0 +1,94 @@
+/* ==========================================================
+   v8 · 签名交互：变形光标、字重场、墨滴、景深展台、液态主题切换
+   ========================================================== */
+
+/* ---------- 变形光标：贴合控件的玻璃框 ---------- */
+.cursor__frame {
+  display: none;
+  position: fixed;
+  z-index: 98;
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent),
+    inset 1.5px 1.5px 0 -0.5px rgba(255, 255, 255, 0.7),
+    0 8px 22px -12px color-mix(in srgb, var(--accent) 60%, transparent);
+  transition: opacity 0.25s;
+}
+.has-cursor .cursor__frame {
+  display: block;
+}
+.cursor__frame.is-on {
+  opacity: 1;
+}
+.cursor.is-framed .cursor__dot {
+  opacity: 0;
+  transform: scale(0.2);
+}
+.cursor__frame.is-on:active,
+.is-down-frame {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+/* ---------- 字重场：每个字母一个可变字重 ---------- */
+.ch {
+  /* 行内而非 inline-block：尽量保留字间距调整 */
+  font-variation-settings: 'wght' var(--wg, 500);
+}
+em .ch {
+  font-variation-settings: 'wght' var(--wg, 300);
+}
+
+/* ---------- 墨滴层 ---------- */
+.ink-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99;
+  pointer-events: none;
+}
+[data-theme='dark'] .ink-layer {
+  mix-blend-mode: screen;
+}
+
+/* ---------- 景深展台 ---------- */
+.showcase__stage .project__art svg {
+  translate: calc(var(--dx, 0) * -12px) calc(var(--dy, 0) * -10px);
+}
+.showcase__stage .project__cover {
+  translate: calc(var(--dx, 0) * 18px) calc(var(--dy, 0) * 12px);
+}
+.showcase__stage .showcase__count,
+.showcase__stage .showcase__hint {
+  translate: calc(var(--dx, 0) * 8px) calc(var(--dy, 0) * 6px);
+}
+.showcase__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(42% 60% at var(--sx, 50%) var(--sy, 50%), rgba(255, 255, 255, 0.42), transparent 70%),
+    linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.12) 48%, transparent 62%);
+  mix-blend-mode: soft-light;
+  transition: opacity 0.6s var(--ease);
+}
+.showcase__stage.is-tilting .showcase__sheen {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor__frame,
+  .ink-layer,
+  .showcase__sheen {
+    display: none;
+  }
+}
