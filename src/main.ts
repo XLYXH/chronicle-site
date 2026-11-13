@@ -6,11 +6,13 @@ import { initSmoothScroll, scrollToElement } from './modules/smoothScroll'
 import { initScramble } from './modules/scramble'
 import { initCursor } from './modules/cursor'
 import { initHeader, initMenu, initTheme } from './modules/ui'
-import { initArt, initFilter } from './modules/work'
+import { initArt } from './modules/work'
+import { initShowcase } from './modules/showcase'
 import { initAbout } from './modules/about'
 import { initLab } from './modules/lab'
 import { heroIntro, initFragment, initReveals, initWhisper } from './modules/fx'
 import { LiquidGL, readPalette } from './modules/liquidGL'
+import { initVelocity } from './modules/velocity'
 
 gsap.registerPlugin(ScrollTrigger)
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
@@ -51,7 +53,10 @@ if (liquid && animate) {
   document.documentElement.addEventListener('pointerleave', () => (liquid.ptr.ton = 0))
 }
 
-initFilter(animate)
+initShowcase(animate)
+initVelocity(animate, v => {
+  if (liquid) liquid.vel = v
+})
 initArt(animate)
 initAbout(animate)
 initLab(animate)

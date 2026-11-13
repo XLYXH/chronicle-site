@@ -56,6 +56,11 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="b" />
           <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
         </filter>
+              <!-- 展台的水波扭曲：位移强度由脚本驱动 -->
+        <filter id="ripple" x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.01 0.03" numOctaves="2" seed="4" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
       </defs>
       <symbol id="mark" viewBox="0 0 32 32">
         <circle cx="13" cy="17" r="8.5" />
@@ -155,64 +160,71 @@
           </div>
         </div>
 
-        <div class="projects">
-          <article class="project" data-cat="tools" data-reveal>
-            <div class="project__art art-blueprint" data-art="blueprint">
-              <svg viewBox="0 0 600 340" aria-hidden="true">
-                <g class="bp-grid"></g>
-                <path class="bp-wire" d="M150 110 C230 110 250 230 300 230 C360 230 380 90 450 90" />
-                <path class="bp-wire bp-wire--b" d="M150 110 C230 110 250 230 300 230 C360 230 380 90 450 90" />
-                <g class="bp-node" transform="translate(70 80)"><rect width="80" height="60" rx="12" /><text x="40" y="35">INPUT</text></g>
-                <g class="bp-node bp-node--mid"><rect x="-54" y="-30" width="108" height="60" rx="12" /><text y="5">TRANSFORM</text></g>
-                <g class="bp-node" transform="translate(450 60)"><rect width="80" height="60" rx="12" /><text x="40" y="35">OUTPUT</text></g>
-              </svg>
-              <span class="project__cover" aria-hidden="true">Blueprint<i>.</i></span>
-            </div>
-            <div class="project__info">
-              <p class="project__meta"><span>Tools · Open source</span><i>Structure becomes possibility.</i></p>
-              <h3 class="project__title"><a href="https://github.com/Chronicle-IRAS/qt-blueprint-generator" target="_blank" rel="noopener" data-cursor="GitHub"><span data-scramble>Qt Blueprint Generator</span><svg aria-hidden="true"><use href="#arrow" /></svg></a></h3>
-              <p class="project__desc">Making complex architecture visible. A visual node-graph editor and C++17 / Qt 6 code synthesis engine.</p>
-              <p class="project__stack">C++17 · Qt 6 · Visual AST</p>
-            </div>
-          </article>
-
-          <article class="project is-flip" data-cat="hardware" data-reveal>
-            <div class="project__art art-monitor" data-art="monitor">
-              <svg viewBox="0 0 600 340" aria-hidden="true">
-                <g class="mo-chip"><rect x="250" y="120" width="100" height="100" rx="18" /><text x="300" y="176">ESP32</text></g>
-                <g class="mo-pins"></g>
-                <path class="mo-wave" d="M40 170 H560" />
-                <circle class="mo-ring" cx="300" cy="170" r="70" />
-                <circle class="mo-ring mo-ring--2" cx="300" cy="170" r="70" />
-              </svg>
-              <span class="project__cover" aria-hidden="true">Connected<i>.</i></span>
-            </div>
-            <div class="project__info">
-              <p class="project__meta"><span>Hardware · Open source</span><i>A bridge to the physical world.</i></p>
-              <h3 class="project__title"><a href="https://github.com/Chronicle-IRAS/monitor" target="_blank" rel="noopener" data-cursor="GitHub"><span data-scramble>ESP32 Monitor</span><svg aria-hidden="true"><use href="#arrow" /></svg></a></h3>
-              <p class="project__desc">Real-time dialogue between silicon and the browser. Live ESP32 sensor telemetry streamed into a reactive Vue interface.</p>
-              <p class="project__stack">Vue · ESP32 · Telemetry</p>
-            </div>
-          </article>
-
-          <article class="project" data-cat="ai" data-reveal>
-            <div class="project__art art-proxy" data-art="proxy">
-              <svg viewBox="0 0 600 340" aria-hidden="true">
-                <path class="px-path" id="px-path" d="M70 250 C170 250 190 90 300 90 S430 250 530 250" />
-                <g class="px-end" transform="translate(70 250)"><circle r="26" /><text y="5">YOU</text></g>
-                <g class="px-end px-end--edge" transform="translate(300 90)"><circle r="34" /><text y="5">EDGE</text></g>
-                <g class="px-end" transform="translate(530 250)"><circle r="26" /><text y="5">AI</text></g>
-                <g class="px-packets"></g>
-              </svg>
-              <span class="project__cover" aria-hidden="true">Beyond<i>.</i></span>
-            </div>
-            <div class="project__info">
-              <p class="project__meta"><span>AI · Open source</span><i>An open connection to intelligence.</i></p>
-              <h3 class="project__title"><a href="https://github.com/Chronicle-IRAS/palm-netlify-proxy" target="_blank" rel="noopener" data-cursor="GitHub"><span data-scramble>PaLM Netlify Proxy</span><svg aria-hidden="true"><use href="#arrow" /></svg></a></h3>
-              <p class="project__desc">A lightweight edge bridge for intelligence. Open-source PaLM API relay running on Netlify Edge Functions.</p>
-              <p class="project__stack">TypeScript · Edge · AI Proxy</p>
-            </div>
-          </article>
+        <div class="showcase">
+          <div class="showcase__stage" data-stage data-cursor="Open" data-reveal>
+              <div data-panel="blueprint" class="is-active project__art art-blueprint" data-art="blueprint">
+                <svg viewBox="0 0 600 340" aria-hidden="true">
+                  <g class="bp-grid"></g>
+                  <path class="bp-wire" d="M150 110 C230 110 250 230 300 230 C360 230 380 90 450 90" />
+                  <path class="bp-wire bp-wire--b" d="M150 110 C230 110 250 230 300 230 C360 230 380 90 450 90" />
+                  <g class="bp-node" transform="translate(70 80)"><rect width="80" height="60" rx="12" /><text x="40" y="35">INPUT</text></g>
+                  <g class="bp-node bp-node--mid"><rect x="-54" y="-30" width="108" height="60" rx="12" /><text y="5">TRANSFORM</text></g>
+                  <g class="bp-node" transform="translate(450 60)"><rect width="80" height="60" rx="12" /><text x="40" y="35">OUTPUT</text></g>
+                </svg>
+                <span class="project__cover" aria-hidden="true">Blueprint<i>.</i></span>
+              </div>
+              <div data-panel="monitor" class="project__art art-monitor" data-art="monitor">
+                <svg viewBox="0 0 600 340" aria-hidden="true">
+                  <g class="mo-chip"><rect x="250" y="120" width="100" height="100" rx="18" /><text x="300" y="176">ESP32</text></g>
+                  <g class="mo-pins"></g>
+                  <path class="mo-wave" d="M40 170 H560" />
+                  <circle class="mo-ring" cx="300" cy="170" r="70" />
+                  <circle class="mo-ring mo-ring--2" cx="300" cy="170" r="70" />
+                </svg>
+                <span class="project__cover" aria-hidden="true">Connected<i>.</i></span>
+              </div>
+              <div data-panel="proxy" class="project__art art-proxy" data-art="proxy">
+                <svg viewBox="0 0 600 340" aria-hidden="true">
+                  <path class="px-path" id="px-path" d="M70 250 C170 250 190 90 300 90 S430 250 530 250" />
+                  <g class="px-end" transform="translate(70 250)"><circle r="26" /><text y="5">YOU</text></g>
+                  <g class="px-end px-end--edge" transform="translate(300 90)"><circle r="34" /><text y="5">EDGE</text></g>
+                  <g class="px-end" transform="translate(530 250)"><circle r="26" /><text y="5">AI</text></g>
+                  <g class="px-packets"></g>
+                </svg>
+                <span class="project__cover" aria-hidden="true">Beyond<i>.</i></span>
+              </div>
+            <span class="showcase__count" aria-hidden="true"><b data-stage-num>01</b> / 03</span>
+            <span class="showcase__hint" aria-hidden="true">Hover · Tap</span>
+          </div>
+          <div class="projects">
+            <article class="project is-active" data-cat="tools" data-key="blueprint" data-reveal>
+              <span class="project__no" aria-hidden="true">01</span>
+              <div class="project__info">
+                <p class="project__meta"><span>Tools · Open source</span><i>Structure becomes possibility.</i></p>
+                <h3 class="project__title"><a href="https://github.com/Chronicle-IRAS/qt-blueprint-generator" target="_blank" rel="noopener" data-cursor="GitHub"><span data-scramble>Qt Blueprint Generator</span><svg aria-hidden="true"><use href="#arrow" /></svg></a></h3>
+                <p class="project__desc">Making complex architecture visible. A visual node-graph editor and C++17 / Qt 6 code synthesis engine.</p>
+                <p class="project__stack">C++17 · Qt 6 · Visual AST</p>
+              </div>
+            </article>
+            <article class="project" data-cat="hardware" data-key="monitor" data-reveal>
+              <span class="project__no" aria-hidden="true">02</span>
+              <div class="project__info">
+                <p class="project__meta"><span>Hardware · Open source</span><i>A bridge to the physical world.</i></p>
+                <h3 class="project__title"><a href="https://github.com/Chronicle-IRAS/monitor" target="_blank" rel="noopener" data-cursor="GitHub"><span data-scramble>ESP32 Monitor</span><svg aria-hidden="true"><use href="#arrow" /></svg></a></h3>
+                <p class="project__desc">Real-time dialogue between silicon and the browser. Live ESP32 sensor telemetry streamed into a reactive Vue interface.</p>
+                <p class="project__stack">Vue · ESP32 · Telemetry</p>
+              </div>
+            </article>
+            <article class="project" data-cat="ai" data-key="proxy" data-reveal>
+              <span class="project__no" aria-hidden="true">03</span>
+              <div class="project__info">
+                <p class="project__meta"><span>AI · Open source</span><i>An open connection to intelligence.</i></p>
+                <h3 class="project__title"><a href="https://github.com/Chronicle-IRAS/palm-netlify-proxy" target="_blank" rel="noopener" data-cursor="GitHub"><span data-scramble>PaLM Netlify Proxy</span><svg aria-hidden="true"><use href="#arrow" /></svg></a></h3>
+                <p class="project__desc">A lightweight edge bridge for intelligence. Open-source PaLM API relay running on Netlify Edge Functions.</p>
+                <p class="project__stack">TypeScript · Edge · AI Proxy</p>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -225,16 +237,18 @@
           </div>
           <div class="sec-head sec-head--play" data-reveal>
             <h2 class="sec-title" id="play-title" data-split>A little <em>chemistry.</em></h2>
-            <p class="play__lede">Drag one technology onto another — or tap two — to <strong>synthesize them in place</strong>. When a composite matches a verified project, it opens into its repository. Otherwise, it’s <em>a new possibility</em>.</p>
+            <p class="play__lede">Spin the orbit, then tap two technologies to <strong>synthesize them at the core</strong>. When a composite matches a verified project, it opens into its repository. Otherwise, it’s <em>a new possibility</em>.</p>
           </div>
         </div>
         <div class="lab" data-reveal>
-          <div class="lab__field" data-lab-field>
+          <div class="lab__field" data-lab-field data-cursor="Drag" role="group" aria-label="Orbit of technologies. Use left and right arrow keys to rotate." tabindex="-1">
+            <svg class="lab__ring" data-lab-ring aria-hidden="true"><ellipse fill="none" /></svg>
+            <span class="lab__core" aria-hidden="true"></span>
             <div class="lab__goo" data-lab-goo></div>
             <div class="lab__labels" data-lab-labels></div>
           </div>
           <div class="lab__bar wrap">
-            <p class="lab__status" role="status" data-lab-status>Drag or tap two drops to fuse them.</p>
+            <p class="lab__status" role="status" data-lab-status>Drag to spin the orbit · tap two drops to fuse them.</p>
             <ul class="lab__found" aria-label="Discovered repositories">
               <li data-found-key="cpp+qt">Blueprint</li>
               <li data-found-key="esp32+vue">Monitor</li>

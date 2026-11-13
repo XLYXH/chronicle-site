@@ -361,19 +361,6 @@ main > .whisper {
   color: color-mix(in srgb, var(--paper) 65%, transparent);
 }
 
-.projects {
-  display: grid;
-  gap: clamp(64px, 9vw, 140px);
-}
-.project {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: clamp(28px, 4vw, 72px);
-  align-items: end;
-}
-.project.is-flip .project__art {
-  order: 2;
-}
 .project__art {
   position: relative;
   aspect-ratio: 600 / 400;
@@ -581,9 +568,6 @@ main > .whisper {
   fill: var(--accent);
 }
 
-.projects.is-single .project {
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-}
 
 /* ---------- 实验 ---------- */
 .play {
@@ -621,6 +605,39 @@ main > .whisper {
   overflow: hidden;
   touch-action: pan-y;
 }
+.lab__field {
+  cursor: grab;
+  perspective: 900px;
+}
+.lab__field.is-dragging {
+  cursor: grabbing;
+}
+.lab__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.lab__ring ellipse {
+  stroke: var(--line-2);
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+}
+.lab__core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 10px var(--accent-soft);
+  animation: pulse 2.6s var(--ease) infinite;
+  pointer-events: none;
+}
 .lab__goo,
 .lab__labels {
   position: absolute;
@@ -656,8 +673,8 @@ main > .whisper {
   font-weight: 500;
   font-size: 14px;
   letter-spacing: -0.01em;
-  touch-action: none;
-  cursor: grab;
+  touch-action: pan-y;
+  cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
   transition: box-shadow 0.35s var(--ease);
@@ -1119,13 +1136,6 @@ html:not(.js) .interest__panel {
 
 /* ---------- 响应式 ---------- */
 @media (max-width: 899px) {
-  .project,
-  .projects.is-single .project {
-    grid-template-columns: 1fr;
-  }
-  .project.is-flip .project__art {
-    order: 0;
-  }
   .about__grid {
     grid-template-columns: 1fr;
   }
@@ -1155,7 +1165,7 @@ html:not(.js) .interest__panel {
     gap: 6px;
   }
   .lab__field {
-    height: 640px;
+    height: 460px;
   }
   .lab__found {
     flex-wrap: wrap;

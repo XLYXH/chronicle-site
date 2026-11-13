@@ -1,44 +1,11 @@
 import { gsap } from 'gsap'
-import { Flip } from 'gsap/Flip'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa } from '../lib/env'
 
-gsap.registerPlugin(Flip)
 const NS = 'http://www.w3.org/2000/svg'
 const svgEl = (tag: string, attrs: Record<string, string | number>) => {
   const e = document.createElementNS(NS, tag)
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v))
   return e
-}
-
-/** 作品筛选：按钮 aria-pressed，卡片用 FLIP 重新排布 */
-export function initFilter(animate: boolean) {
-  const buttons = qsa<HTMLButtonElement>('[data-filter]')
-  const cards = qsa('.project')
-  const wrap = qs('.projects')
-  if (!wrap) return
-  buttons.forEach(b =>
-    b.addEventListener('click', () => {
-      const f = b.dataset.filter
-      buttons.forEach(x => x.setAttribute('aria-pressed', String(x === b)))
-      // 卡片可能还没滚动揭示过：先完成揭示再记录 FLIP 状态
-      gsap.killTweensOf(cards)
-      gsap.set(cards, { opacity: 1, y: 0 })
-      const state = animate ? Flip.getState(cards) : null
-      cards.forEach(c => (c.hidden = f !== 'all' && c.dataset.cat !== f))
-      wrap.classList.toggle('is-single', f !== 'all')
-      // 页面高度变了，刷新滚动触发点
-      requestAnimationFrame(() => ScrollTrigger.refresh())
-      if (state)
-        Flip.from(state, {
-          duration: 0.8,
-          ease: 'expo.inOut',
-          absolute: true,
-          onEnter: els => gsap.fromTo(els, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out', overwrite: true }),
-          onLeave: els => gsap.to(els, { opacity: 0, duration: 0.3 }),
-        })
-    }),
-  )
 }
 
 /** 每个项目的插图都是小小的可交互概念图，呼应原仓库里的交互预览 */
