@@ -46,7 +46,8 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
   let D = 0
   const size = () => {
     const m = Math.min(innerWidth, innerHeight)
-    D = Math.round(clamp(m * (innerWidth < 700 ? 0.46 : 0.4), 150, 400))
+    const portrait = innerWidth < innerHeight
+    D = Math.round(clamp(m * (portrait ? (innerWidth < 700 ? 0.5 : 0.36) : 0.4), 150, 400))
     layer.style.setProperty('--d', `${D}px`)
   }
   size()
@@ -70,11 +71,21 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
     window.addEventListener('resize', size)
   }
 
-  // 静止位置：与标题里的 ✳ 同心，略偏右
-  const restPos = () => {
+  // 静止位置：横屏时与标题里的 ✳ 同心、略偏右；竖屏时悬在标题上方的留白里（滚动时才掠过标题）
+  const edition = qs('.hero__edition') ?? spark
+  const restView = () => {
     const r = spark.getBoundingClientRect()
-    const h = animate ? { left: 0, top: 0 } : hero.getBoundingClientRect()
-    return { x: r.left - h.left + r.width / 2 + D * 0.18, y: r.top - h.top + r.height / 2 }
+    if (innerWidth < innerHeight) {
+      const t = edition.getBoundingClientRect()
+      return { x: innerWidth * 0.64, y: t.top - D * 0.46 }
+    }
+    return { x: r.left + r.width / 2 + D * 0.18, y: r.top + r.height / 2 }
+  }
+  const restPos = () => {
+    const p = restView()
+    if (animate) return p
+    const h = hero.getBoundingClientRect()
+    return { x: p.x - h.left, y: p.y - h.top }
   }
 
   const place = (n: HTMLElement, x: number, y: number, sx: number, sy: number, a: number, s = 1) => {
@@ -86,9 +97,9 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
   let lastStage = ''
   const syncStage = (_p?: unknown) => {
     if (!stage || scrollY > 4) return
-    const r = spark.getBoundingClientRect()
-    const x = Math.round(r.left + r.width / 2 + D * 0.18)
-    const y = Math.round(r.top + r.height / 2)
+    const p = restView()
+    const x = Math.round(p.x)
+    const y = Math.round(p.y)
     const k = `${x},${y}`
     if (k === lastStage) return
     lastStage = k
@@ -170,7 +181,7 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
     if (y0 < 4) syncStage(rest)
     let tx = rest.x + Math.sin(t * 0.55) * D * 0.03
     let ty = rest.y + Math.cos(t * 0.43) * D * 0.04
-    if (fine && ptr.on && y0 < heroH * 0.5) {
+    if (fine && ptr.on && ptr.y > 96 && y0 < heroH * 0.5) {
       tx += (ptr.x - tx) * 0.88
       ty += (ptr.y - ty) * 0.88
     } else if (parked) {
@@ -202,7 +213,7 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
     pos.x += dx
     pos.y += dy
     const speed = Math.hypot(dx, dy) / Math.max(dt, 0.001)
-    stretch += (clamp(speed / 2600, 0, 0.22) - stretch) * (1 - Math.exp(-dt * 10))
+    stretch += (clamp(speed / 4200, 0, 0.13) - stretch) * (1 - Math.exp(-dt * 10))
     if (speed > 30) angle = Math.atan2(dy, dx)
     const intro = introV
     const sx = 1 + stretch
