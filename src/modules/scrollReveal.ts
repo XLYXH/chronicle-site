@@ -5,7 +5,7 @@ import { scramble } from './scramble'
  * v11 · 滚动入场（借鉴 lanrhyme.top 的做法，重新实现）：
  *  - 四种入场：自下（60px）、自左（-60px）、自右（50px）、放大（.92 → 1）
  *  - 时长很长（1.8–2.4s）、尾巴很长的 expo 缓出：元素是“慢慢落定”的，不是弹出来的
- *  - 可逆：元素重新回到视口下方 20% 之后复位，下一次往下滚时再入场一次
+ *  - 可逆：元素完全回到视口下方之后复位（v13.1 加了迟滞，见下），下一次往下滚时再入场一次
  *  - 同组元素依次错开（stagger），列表沿对角线一个接一个滑入
  *  - 章节眉题入场时用随机字符“解码”出来
  * 只动 opacity 与独立的 translate / scale 属性，不碰 transform——GSAP（Flip、磁吸、速度拉伸）照常工作。
@@ -59,24 +59,34 @@ export function initScrollReveal(animate: boolean) {
   const decode = (el: HTMLElement) => qsa('.eyebrow', el).forEach((e, i) => setTimeout(() => scramble(e, 900), 200 + i * 160))
   const io = new IntersectionObserver(
     entries => {
-      entries.forEach(({ target, isIntersecting, boundingClientRect }) => {
+      entries.forEach(({ target, isIntersecting }) => {
         const el = owner.get(target) ?? (target as HTMLElement)
         if (isIntersecting) {
           if (el.classList.contains('is-in')) return
           el.classList.add('is-in')
           if (el.classList.contains('sec-top')) decode(el)
-        } else if (boundingClientRect.top > innerHeight * 0.8) {
-          // 只有回到视口下方时才复位；滚过头顶的保持原样，免得往回看时一片空白
-          el.classList.remove('is-in')
         }
       })
     },
     { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
   )
+  // v13.1 · 迟滞：入场线在视口底部上方 50px，复位线在视口底部下方 60px——中间隔着 110px 的“死区”，
+  // 滚动抖动不会让元素反复复位 / 重播；复位只发生在元素完全看不见的时候，所以也不会有一闪而空。
+  // 滚过头顶的保持原样，免得往回看时一片空白
+  const out = new IntersectionObserver(
+    entries => {
+      entries.forEach(({ target, isIntersecting, boundingClientRect }) => {
+        if (isIntersecting || boundingClientRect.top < 0) return
+        owner.get(target)?.classList.remove('is-in')
+      })
+    },
+    { threshold: 0, rootMargin: '0px 0px 60px 0px' },
+  )
   items.forEach(el => {
     const watch = el.dataset.rv === 'cut' && el.parentElement ? el.parentElement : el
     owner.set(watch, el)
     io.observe(watch)
+    out.observe(watch)
   })
   // 键盘跳到尚未入场的内容：立刻显示，不等动画
   document.addEventListener('focusin', e => {

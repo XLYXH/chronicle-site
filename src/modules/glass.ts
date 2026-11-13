@@ -114,10 +114,7 @@ export function mountGlass(target: HTMLElement, opts: GlassOptions): Glass {
       disp.push(d)
       filter.append(d, el('feColorMatrix', { in: `d${i}`, type: 'matrix', values, result: `c${i}` }))
     })
-    filter.append(
-      el('feBlend', { in: 'c0', in2: 'c1', mode: 'screen', result: 'rg' }),
-      el('feBlend', { in: 'rg', in2: 'c2', mode: 'screen' }),
-    )
+    filter.append(el('feBlend', { in: 'c0', in2: 'c1', mode: 'screen', result: 'rg' }), el('feBlend', { in: 'rg', in2: 'c2', mode: 'screen' }))
   } else {
     const d = el('feDisplacementMap', { in: 'SourceGraphic', in2: 'map', scale: 0, xChannelSelector: 'R', yChannelSelector: 'G' })
     disp.push(d)

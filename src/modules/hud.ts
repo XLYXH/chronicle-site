@@ -37,13 +37,21 @@ function signs() {
   if (!('IntersectionObserver' in window)) return
   const io = new IntersectionObserver(
     es =>
-      es.forEach(({ target, isIntersecting, boundingClientRect }) => {
+      es.forEach(({ target, isIntersecting }) => {
         if (isIntersecting) target.classList.add('is-lit')
-        else if (boundingClientRect.top > innerHeight * 0.8) target.classList.remove('is-lit')
       }),
     { threshold: 0.6 },
   )
-  qsa('.sign').forEach(s => io.observe(s))
+  // v13.1 · bug 修复：原来店招一出视口 80% 线就熄灭、回来再“打火”，抖动时霓虹会连续重闪。
+  // 现在只有完全滚出视口下方 60px 后才熄灭（看不见时复位），打火效果本身不变
+  const off = new IntersectionObserver(
+    es =>
+      es.forEach(({ target, isIntersecting, boundingClientRect }) => {
+        if (!isIntersecting && boundingClientRect.top > 0) target.classList.remove('is-lit')
+      }),
+    { rootMargin: '0px 0px 60px 0px' },
+  )
+  qsa('.sign').forEach(s => (io.observe(s), off.observe(s)))
 }
 
 function rules() {
@@ -84,6 +92,7 @@ function readouts() {
   })
   let current = 0
   let raf = 0
+  let wait = 0
   ids.forEach((id, i) => {
     const el = document.getElementById(id)
     if (!el) return
@@ -91,19 +100,24 @@ function readouts() {
       trigger: el,
       start: 'top 55%',
       end: 'bottom 55%',
+      // v13.1 · bug 修复：与背景转场同一处分界线，抖动时读数会被反复重启解码；同样要稳定 240ms 才换
       onToggle: self => {
-        if (!self.isActive || i === current || !sec || !no) return
-        current = i
-        no.textContent = String(i).padStart(2, '0')
-        const target = names[i] ?? ''
-        cancelAnimationFrame(raf)
-        const t0 = performance.now()
-        const step = (now: number) => {
-          const p = Math.min(1, (now - t0) / 700)
-          sec.textContent = scrambleFrame(target, p)
-          if (p < 1) raf = requestAnimationFrame(step)
-        }
-        raf = requestAnimationFrame(step)
+        if (!self.isActive) return
+        clearTimeout(wait)
+        wait = window.setTimeout(() => {
+          if (i === current || !sec || !no) return
+          current = i
+          no.textContent = String(i).padStart(2, '0')
+          const target = names[i] ?? ''
+          cancelAnimationFrame(raf)
+          const t0 = performance.now()
+          const step = (now: number) => {
+            const p = Math.min(1, (now - t0) / 700)
+            sec.textContent = scrambleFrame(target, p)
+            if (p < 1) raf = requestAnimationFrame(step)
+          }
+          raf = requestAnimationFrame(step)
+        }, 240)
       },
     })
   })
@@ -155,16 +169,30 @@ function counters() {
   nums.forEach(n => {
     const target = Number(n.dataset.count)
     const state = { v: 0 }
+    let done = false
     ScrollTrigger.create({
       trigger: n,
       start: 'top 88%',
-      onEnter: () =>
+      onEnter: () => {
+        if (done) return
+        done = true
         gsap.fromTo(
           state,
           { v: 0 },
           { v: target, duration: 1.6, ease: 'expo.out', onUpdate: () => (n.textContent = String(Math.round(state.v)).padStart(2, '0')) },
-        ),
-      onLeaveBack: () => (n.textContent = '00'),
+        )
+      },
+    })
+    // v13.1 · bug 修复：原来入场线上来回抖动会让数字从 00 重新数一遍。现在有迟滞：
+    // 已数完的不重数，完全滚出视口下方 60px 后才清零
+    ScrollTrigger.create({
+      trigger: n,
+      start: 'top bottom+=60',
+      onLeaveBack: () => {
+        done = false
+        gsap.killTweensOf(state)
+        n.textContent = '00'
+      },
     })
   })
 }

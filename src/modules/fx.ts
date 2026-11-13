@@ -49,10 +49,14 @@ export function initReveals(animate: boolean) {
   titles.forEach(t => {
     const words = qsa('.w__in', t)
     gsap.set(words, { yPercent: 110 })
+    let shown = false
     ScrollTrigger.create({
       trigger: t,
       start: 'top 86%',
       onEnter: () => {
+        // 已经升起的标题再次越过入场线（来回抖动）不重放
+        if (shown) return
+        shown = true
         gsap.to(words, { yPercent: 0, duration: 1.8, ease: 'expo.out', stagger: 0.07, overwrite: true })
         // v12 · 入场瞬间的色散闪烁（像官网开屏标志那样的 RGB 错位），0.7s 后收起
         t.classList.remove('is-glitch')
@@ -60,7 +64,16 @@ export function initReveals(animate: boolean) {
         t.classList.add('is-glitch')
         setTimeout(() => t.classList.remove('is-glitch'), 760)
       },
-      onLeaveBack: () => gsap.to(words, { yPercent: 110, duration: 0.5, ease: 'power2.in', overwrite: true }),
+    })
+    // v13.1 · bug 修复：原来入场线（86%）就是复位线，停在附近轻微滚动会让标题反复沉下 / 升起、色散反复重放。
+    // 现在复位线在视口底部下方 60px（完全看不见时瞬间复位），两线之间有迟滞
+    ScrollTrigger.create({
+      trigger: t,
+      start: 'top bottom+=60',
+      onLeaveBack: () => {
+        shown = false
+        gsap.set(words, { yPercent: 110, overwrite: true })
+      },
     })
   })
   document.addEventListener('focusin', e => {

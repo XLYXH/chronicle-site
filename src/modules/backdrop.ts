@@ -229,12 +229,15 @@ export function initBackdrop(animate: boolean) {
   const fill = qs<HTMLElement>('.rail__line b', rail)!
 
   // 换章节：空心字从随机字符解码成新字样
+  // v13.1 · bug 修复：滚动停在章节分界线（55%）附近时，ScrollTrigger 会在两章之间来回切换，
+  // 每次都从头重启广播波 / 斜切线 / 解码，表现为一阵乱闪。现在章节要稳定 240ms 才算换章（快速划过多章时也只放最后一次），
+  // 效果本身不变；刻度点仍即时更新
   let current = 0
   let raf = 0
-  const setSection = (i: number) => {
+  let pending = 0
+  const apply = (i: number) => {
     if (i === current) return
     current = i
-    dots.forEach((d, j) => d.classList.toggle('is-on', j <= i))
     transition()
     const target = (words[i] ?? '').toUpperCase()
     cancelAnimationFrame(raf)
@@ -245,6 +248,11 @@ export function initBackdrop(animate: boolean) {
       if (p < 1) raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
+  }
+  const setSection = (i: number) => {
+    dots.forEach((d, j) => d.classList.toggle('is-on', j <= i))
+    clearTimeout(pending)
+    pending = window.setTimeout(() => apply(i), 240)
   }
   dots[0]?.classList.add('is-on')
   function transition() {

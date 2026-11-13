@@ -50,20 +50,29 @@ function run(fine: boolean) {
   canvas.className = 'petals'
   canvas.setAttribute('aria-hidden', 'true')
   document.body.append(canvas)
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
+  const c2 = canvas.getContext('2d')
+  if (!c2) return
+  const ctx: CanvasRenderingContext2D = c2
   const tex = BLURS.flatMap(b => COLORS.map(c => sprite(c, b)))
-  let W = 0
-  let H = 0
+  let W = innerWidth
+  let H = innerHeight
   const S = Math.min(1.25, devicePixelRatio || 1)
+  // v13.1 · bug 修复：移动端地址栏伸缩会连续触发 resize，每次给 canvas.width/height 赋值都会清空并重新分配画布，
+  // 花瓣层会闪一下、还掉帧。现在只在宽度变化或高度变高时才重设画布（变矮时沿用原画布，多出来的部分在屏幕外），
+  // 重设后立刻补画一帧，不留空白帧
+  let cw = 0
+  let ch = 0
   const resize = () => {
     W = innerWidth
     H = innerHeight
+    if (W === cw && H <= ch) return
+    ch = W === cw ? Math.max(H, ch) : H
+    cw = W
     canvas.width = Math.round(W * S)
-    canvas.height = Math.round(H * S)
+    canvas.height = Math.round(ch * S)
+    canvas.style.height = `${ch}px`
+    draw(0)
   }
-  resize()
-  window.addEventListener('resize', resize)
 
   const count = W < 720 ? 30 : 64
   const mk = (top = false): Petal => {
@@ -101,8 +110,7 @@ function run(fine: boolean) {
 
   let on = true
   document.addEventListener('visibilitychange', () => (on = !document.hidden))
-  gsap.ticker.add((_t, dtMs) => {
-    if (!on) return
+  function draw(dtMs: number) {
     const dt = Math.min(0.05, dtMs / 1000)
     const dy = scrollY - lastY
     lastY = scrollY
@@ -134,5 +142,10 @@ function run(fine: boolean) {
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.globalAlpha = 1
+  }
+  resize()
+  window.addEventListener('resize', resize)
+  gsap.ticker.add((_t, dtMs) => {
+    if (on) draw(dtMs)
   })
 }

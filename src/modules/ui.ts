@@ -16,8 +16,7 @@ export function initHeader(animate: boolean, mode: GlassMode) {
   blob.className = 'nav__blob lg'
   blob.setAttribute('aria-hidden', 'true')
   nav.prepend(blob)
-  if (mode === 'refract')
-    mountGlass(blob, { bezel: (_w, h) => h * 0.45, edge: (_w, h) => h * 0.22, magnify: 0.1, radius: (w, h) => Math.min(w, h) / 2 })
+  if (mode === 'refract') mountGlass(blob, { bezel: (_w, h) => h * 0.45, edge: (_w, h) => h * 0.22, magnify: 0.1, radius: (w, h) => Math.min(w, h) / 2 })
   const links = qsa<HTMLAnchorElement>('a', nav)
   let active: HTMLAnchorElement | null = null
   let shown = false
@@ -35,7 +34,11 @@ export function initHeader(animate: boolean, mode: GlassMode) {
     if (!shown || instant || !animate) {
       // 从无到有：在目标处“凝结”出来
       gsap.set(blob, { x, width: w })
-      gsap.fromTo(blob, { scaleX: shown ? 1 : 0.2, scaleY: shown ? 1 : 0.2 }, { scaleX: 1, scaleY: 1, duration: animate && !instant ? 0.6 : 0, ease: 'elastic.out(1, 0.6)', overwrite: true })
+      gsap.fromTo(
+        blob,
+        { scaleX: shown ? 1 : 0.2, scaleY: shown ? 1 : 0.2 },
+        { scaleX: 1, scaleY: 1, duration: animate && !instant ? 0.6 : 0, ease: 'elastic.out(1, 0.6)', overwrite: true },
+      )
       shown = true
       lastX = x
       return

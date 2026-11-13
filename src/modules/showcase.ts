@@ -274,8 +274,7 @@ export function initShowcase(animate: boolean) {
       if (!animate) return settle()
       seq = gsap.timeline({ onComplete: settle })
       if (state) seq.add(Flip.from(state, { duration: 0.7, ease: 'expo.inOut' }), 0)
-      if (entering.length)
-        seq.fromTo(entering, { opacity: 0, y: 48 }, { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out', stagger: 0.07 }, state ? 0.18 : 0)
+      if (entering.length) seq.fromTo(entering, { opacity: 0, y: 48 }, { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out', stagger: 0.07 }, state ? 0.18 : 0)
       if (!seq.duration()) seq.to({}, { duration: 0.01 })
     }
     if (animate && leaving.length) {
