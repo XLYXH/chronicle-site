@@ -9,7 +9,7 @@ const VERT = `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`
 
 const FRAG = `precision highp float;
 uniform vec2 uRes;uniform float uTime;uniform vec2 uPtr;uniform float uPtrOn;uniform float uSplit;uniform float uIntro;
-uniform vec3 uBg;uniform vec3 uA;uniform vec3 uDeep;uniform float uDark;uniform float uMobile;
+uniform vec3 uBg;uniform vec3 uA;uniform vec3 uDeep;uniform float uDark;uniform float uMobile;uniform float uVel;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 vec3 ball(int i,float t,float asp){
   float fi=float(i);
@@ -22,11 +22,13 @@ vec3 ball(int i,float t,float asp){
   float sy=sin(ang);
   vec2 far=vec2(asp*.5,.5)+vec2(cos(ang)*asp*mix(.4,.34,uMobile),sign(sy)*(.17+abs(sy)*.22));
   c=mix(home+c*mix(1.,.8,uMobile),far+c*.3,smoothstep(0.,1.,uSplit));
+  // 滚动速度把液滴拖出尾巴：每颗滞后程度不同
+  c.y+=uVel*(.03+.07*fract(fi*.618));
   return vec3(c,r*mix(1.,.62,uMobile)*uIntro);
 }
 // Wyvill 核：有界、光滑，没有中心奇点，液面因此平滑如镜
 void add(vec2 p,vec2 c,float R,inout float f,inout vec2 g){
-  vec2 d=p-c;float R2=R*R+1e-6;float q=dot(d,d)/R2;
+  vec2 d=p-c;d.y/=1.+abs(uVel)*.9;float R2=R*R+1e-6;float q=dot(d,d)/R2;
   if(q<1.){float k=1.-q;f+=k*k*k;g+=-6.*k*k*d/R2;}
 }
 void field(vec2 p,float t,float asp,float grow,out float f,out vec2 g){
@@ -98,6 +100,7 @@ export class LiquidGL {
   private start = performance.now()
   ptr = { x: 0.7, y: 0.5, tx: 0.7, ty: 0.5, on: 0, ton: 0 }
   split = 0
+  vel = 0
   intro = 0
   palette: Palette
 
@@ -150,7 +153,7 @@ export class LiquidGL {
     const loc = gl.getAttribLocation(prog, 'p')
     gl.enableVertexAttribArray(loc)
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
-    for (const k of ['uRes', 'uTime', 'uPtr', 'uPtrOn', 'uSplit', 'uIntro', 'uBg', 'uA', 'uDeep', 'uDark', 'uMobile'])
+    for (const k of ['uRes', 'uTime', 'uPtr', 'uPtrOn', 'uSplit', 'uIntro', 'uBg', 'uA', 'uDeep', 'uDark', 'uMobile', 'uVel'])
       this.u[k] = gl.getUniformLocation(prog, k)
 
     canvas.addEventListener('webglcontextlost', e => {
@@ -249,6 +252,7 @@ export class LiquidGL {
     gl.uniform3f(this.u.uDeep!, ...p.deep)
     gl.uniform1f(this.u.uDark!, p.dark ? 1 : 0)
     gl.uniform1f(this.u.uMobile!, mobile)
+    gl.uniform1f(this.u.uVel!, this.vel)
     gl.drawArrays(gl.TRIANGLES, 0, 3)
   }
 

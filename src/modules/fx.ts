@@ -99,6 +99,7 @@ export function initFragment(animate: boolean, onSplit: (v: number) => void, onS
   ScrollTrigger.create({
     trigger: sec,
     start: 'bottom 30%',
+    end: 'max',
     onToggle: self => {
       stage.classList.toggle('is-gone', self.isActive)
       onStage(!self.isActive)
