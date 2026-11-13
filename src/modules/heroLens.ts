@@ -81,6 +81,22 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
     }
     return { x: r.left + r.width / 2 + D * 0.18, y: r.top + r.height / 2 }
   }
+  // 位置缓存：避免每帧读取布局（强制回流）；按页面坐标存，使用时减去 scrollY
+  const cached = { rx: 0, ry: 0, wx: 0, wy: 0, fTop: 0, fH: 1, at: -1 }
+  const refresh = () => {
+    const y = scrollY
+    const p = restView()
+    cached.rx = p.x
+    cached.ry = p.y + y
+    if (word && frag) {
+      const wr = word.getBoundingClientRect()
+      cached.wx = wr.left + wr.width * 0.62
+      cached.wy = wr.top + wr.height * 0.5 + y
+      const fr = frag.getBoundingClientRect()
+      cached.fTop = fr.top + y
+      cached.fH = fr.height
+    }
+  }
   const restPos = () => {
     const p = restView()
     if (animate) return p
@@ -89,7 +105,8 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
   }
 
   const place = (n: HTMLElement, x: number, y: number, sx: number, sy: number, a: number, s = 1) => {
-    n.style.transform = `translate(${(x - n.offsetWidth / 2).toFixed(1)}px, ${(y - n.offsetHeight / 2).toFixed(1)}px) rotate(${a.toFixed(3)}rad) scale(${(sx * s).toFixed(4)}, ${(sy * s).toFixed(4)}) rotate(${(-a).toFixed(3)}rad)`
+    const half = (n.classList.contains('lens--drop') ? D * 0.3 : D) / 2
+    n.style.transform = `translate(${(x - half).toFixed(1)}px, ${(y - half).toFixed(1)}px) rotate(${a.toFixed(3)}rad) scale(${(sx * s).toFixed(4)}, ${(sy * s).toFixed(4)}) rotate(${(-a).toFixed(3)}rad)`
   }
 
   // 背景的同心圆与点阵以透镜的静止位为圆心，让折射有东西可“弯”
@@ -163,6 +180,14 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
     })
   }
 
+  let heroHeight = hero.offsetHeight
+  const onResize = () => {
+    heroHeight = hero.offsetHeight
+    cached.at = -1
+  }
+  window.addEventListener('resize', onResize)
+  ScrollTrigger.addEventListener('refresh', onResize)
+
   const pos = { x: 0, y: 0 }
   let first = true
   let stretch = 0
@@ -171,14 +196,19 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
   const smooth = (t: number) => t * t * (3 - 2 * t)
 
   gsap.ticker.add((_t, dtMs) => {
-    if (hide) return
+    if (hide || document.hidden) return
     const dt = Math.min(0.05, dtMs / 1000)
     const t = (performance.now() - t0) / 1000
-    const heroH = hero.offsetHeight
     const y0 = scrollY
+    // 入场期间（前 5 秒）标题还在动：每 10 帧重新取一次静止位，之后低频校准；resize / refresh 时立即更新
+    cached.at++
+    if (cached.at % (t < 5 ? 10 : 240) === 0) {
+      refresh()
+      if (y0 < 4) syncStage()
+    }
+    const heroH = heroHeight
     // 首屏内的目标：静止位 + 呼吸漂浮；鼠标在首屏时追随指针
-    const rest = restPos()
-    if (y0 < 4) syncStage(rest)
+    const rest = { x: cached.rx, y: cached.ry - y0 }
     let tx = rest.x + Math.sin(t * 0.55) * D * 0.03
     let ty = rest.y + Math.cos(t * 0.43) * D * 0.04
     if (fine && ptr.on && ptr.y > 96 && y0 < heroH * 0.5) {
@@ -192,14 +222,13 @@ export function initHeroLens(animate: boolean, mode: GlassMode): HeroLens | null
     let split = 0
     let shrink = 1
     if (word && frag) {
-      const wr = word.getBoundingClientRect()
-      const wx = wr.left + wr.width * 0.62
-      const wy = wr.top + wr.height * 0.5
+      const wx = cached.wx
+      const wy = cached.wy - y0
       const a = smooth(clamp(y0 / (heroH * 0.9)))
       tx += (wx - tx) * a
       ty += (wy - ty) * a
-      const fr = frag.getBoundingClientRect()
-      split = smooth(clamp((innerHeight * 0.5 - (fr.top + fr.height * 0.5)) / (fr.height * 0.24)))
+      const frTop = cached.fTop - y0
+      split = smooth(clamp((innerHeight * 0.5 - (frTop + cached.fH * 0.5)) / (cached.fH * 0.24)))
       shrink = 1 - a * 0.18 - split * 0.5
     }
     if (first) {

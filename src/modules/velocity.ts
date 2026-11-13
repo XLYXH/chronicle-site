@@ -136,5 +136,5 @@ export function initVelocity(animate: boolean, onVel: (v: number) => void) {
     gl.uniform3f(u.uC!, ...accent)
     gl.uniform1f(u.uDark!, document.documentElement.dataset.theme === 'dark' ? 1 : 0)
     gl.drawArrays(gl.TRIANGLES, 0, 3)
-  })
+  }, false, true) // 排在最前：先读 scrollY，再让其它模块写样式，避免强制回流
 }

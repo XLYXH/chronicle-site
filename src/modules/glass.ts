@@ -53,19 +53,32 @@ function ensureDefs() {
   return defs
 }
 
+/** 位移场很平滑：按一半分辨率生成，再由 feImage 拉伸回原尺寸（主线程开销约为 1/4） */
+const MAP_SCALE = 0.5
+
 function mapFor(spec: LensSpec) {
   const key = `${spec.w}|${spec.h}|${spec.r}|${spec.bezel}|${spec.edge}|${spec.magnify ?? 0}`
   const hit = cache.get(key)
   if (hit) return hit
-  const m = buildLensMap(spec)
+  const k = MAP_SCALE
+  const w = Math.max(2, Math.round(spec.w * k))
+  const h = Math.max(2, Math.round(spec.h * k))
+  const m = buildLensMap({ ...spec, w, h, r: spec.r * k, bezel: spec.bezel * k, edge: spec.edge * k })
   scratch ??= document.createElement('canvas')
-  scratch.width = spec.w
-  scratch.height = spec.h
+  scratch.width = w
+  scratch.height = h
   const ctx = scratch.getContext('2d')!
-  ctx.putImageData(new ImageData(m.data as Uint8ClampedArray<ArrayBuffer>, spec.w, spec.h), 0, 0)
-  const out = { href: scratch.toDataURL('image/png'), scale: m.scale }
+  ctx.putImageData(new ImageData(m.data as Uint8ClampedArray<ArrayBuffer>, w, h), 0, 0)
+  const out = { href: scratch.toDataURL('image/png'), scale: m.scale / k }
   cache.set(key, out)
   return out
+}
+
+/** 把贴图生成推迟到空闲时段，不和首屏渲染、入场动画抢主线程 */
+const idle = (fn: () => void) => {
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }
+  if (w.requestIdleCallback) w.requestIdleCallback(fn, { timeout: 900 })
+  else setTimeout(fn, 120)
 }
 
 const el = <K extends string>(tag: K, attrs: Record<string, string | number>) => {
@@ -113,7 +126,17 @@ export function mountGlass(target: HTMLElement, opts: GlassOptions): Glass {
   svg.append(filter)
 
   let last = ''
-  const update = () => {
+  let queued = false
+  let ready = false
+  const schedule = () => {
+    if (queued) return
+    queued = true
+    idle(() => {
+      queued = false
+      compute()
+    })
+  }
+  const compute = () => {
     const w = Math.round(target.offsetWidth)
     const h = Math.round(target.offsetHeight)
     if (w < 2 || h < 2) return
@@ -130,14 +153,17 @@ export function mountGlass(target: HTMLElement, opts: GlassOptions): Glass {
     image.setAttribute('height', String(h))
     image.setAttribute('href', m.href)
     disp.forEach((d, i) => d.setAttribute('scale', (m.scale * (1 - disperse * i)).toFixed(2)))
+    if (!ready) {
+      // 第一张贴图就绪后才挂滤镜，避免空贴图造成的整体偏移
+      ready = true
+      target.style.setProperty('--lg-filter', `url(#${id})`)
+      target.classList.add('lg-on')
+    }
   }
-  update()
-  target.style.setProperty('--lg-filter', `url(#${id})`)
-  target.classList.add('lg-on')
-  const ro = new ResizeObserver(update)
+  const ro = new ResizeObserver(schedule)
   ro.observe(target)
   return {
-    update,
+    update: schedule,
     destroy() {
       ro.disconnect()
       filter.remove()
