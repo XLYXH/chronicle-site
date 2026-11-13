@@ -1,0 +1,256 @@
+/* ==========================================================
+   v11 · 背景层（见 backdrop.ts）
+   ========================================================== */
+main > section:not(.hero):not(.fragment),
+main > .whisper {
+  background: transparent;
+}
+.bd {
+  --px: 0;
+  --py: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+/* 暗角：中心通透，四周压暗一点 */
+.bd::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, transparent 38%, color-mix(in srgb, var(--paper-3) 55%, transparent) 100%);
+}
+[data-theme='dark'] .bd::after {
+  background: radial-gradient(circle at 50% 45%, transparent 35%, rgba(4, 6, 9, 0.55) 78%, rgba(2, 3, 5, 0.85) 100%);
+}
+
+/* 版心 12 栏发丝网格 */
+.bd__grid {
+  position: absolute;
+  inset: 0 max(var(--pad), calc((100vw - var(--max)) / 2 + var(--pad)));
+  background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px calc(100% / 12));
+  border-right: 1px solid var(--line);
+  opacity: 0.55;
+}
+
+/* 日蚀：一枚大圆 + 柔和外晕 + 虚线轨道 */
+.bd__orb {
+  --s: min(96vmin, 1040px);
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: var(--s);
+  height: var(--s);
+  translate: calc(-50% + var(--px) * 14px) calc(-50% + var(--py) * 10px + var(--bp, 0) * -6vh);
+  scale: calc(0.9 + var(--bp, 0) * 0.18);
+}
+.bd__disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--paper-2) 70%, var(--paper)) 0 58%, var(--paper-2) 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    0 0 0 18px color-mix(in srgb, var(--paper) 50%, transparent),
+    0 0 120px 30px color-mix(in srgb, #fff 45%, transparent);
+}
+[data-theme='dark'] .bd__disc {
+  background: radial-gradient(circle at 50% 50%, #050608 0 62%, #07090c 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 90px 10px rgba(133, 146, 255, 0.07),
+    0 0 220px 40px rgba(133, 146, 255, 0.04);
+}
+.bd__orbit {
+  position: absolute;
+  inset: -7%;
+  width: 114%;
+  height: 114%;
+  overflow: visible;
+  rotate: calc(var(--bp, 0) * 140deg);
+}
+.bd__orbit circle {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 2 4;
+}
+.bd__node {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px;
+  background: var(--accent);
+  rotate: calc(-90deg + var(--bp, 0) * 320deg);
+  transform: translateX(calc(var(--s) * 0.57));
+  transform-origin: 3.5px 3.5px;
+}
+
+/* 当前章节的字样：超大空心字 */
+.bd__ghost {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  translate: -50% calc(-50% + var(--bp, 0) * -14vh);
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: clamp(90px, 17vw, 300px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--ink) 7%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 颗粒：一张静态噪点，乘上去 */
+.bd__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+[data-theme='dark'] .bd__grain {
+  opacity: 0.1;
+  filter: invert(1);
+}
+
+/* 四角 HUD 角标 */
+.bd__c {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 0 solid var(--ink);
+  opacity: 0.28;
+}
+.bd__c--tl {
+  left: 14px;
+  top: 14px;
+  border-width: 1px 0 0 1px;
+}
+.bd__c--tr {
+  right: 14px;
+  top: 14px;
+  border-width: 1px 1px 0 0;
+}
+.bd__c--bl {
+  left: 14px;
+  bottom: 14px;
+  border-width: 0 0 1px 1px;
+}
+.bd__c--br {
+  right: 14px;
+  bottom: 14px;
+  border-width: 0 1px 1px 0;
+}
+
+/* 左侧章节节点 */
+.rail {
+  position: fixed;
+  z-index: 5;
+  left: max(18px, calc(var(--pad) / 2 - 4px));
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  gap: 26px;
+  pointer-events: none;
+}
+.rail__dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--line-2);
+  background: var(--paper);
+  transition:
+    background 0.6s var(--ease),
+    border-color 0.6s var(--ease);
+}
+.rail__dot.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.rail__line {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  bottom: 3px;
+  width: 1px;
+  background: repeating-linear-gradient(var(--line-2) 0 2px, transparent 2px 5px);
+}
+.rail__line b {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+}
+@media (max-width: 1023px) {
+  .rail {
+    display: none;
+  }
+}
+
+/* 页面级斜向虚线 */
+.links {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.links line {
+  stroke: color-mix(in srgb, var(--ink) 26%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+}
+.links rect {
+  fill: var(--paper);
+  stroke: var(--line-2);
+  transition:
+    fill 0.6s var(--ease),
+    stroke 0.6s var(--ease);
+}
+.links rect.is-on {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+main > :not(.links) {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 720px) {
+  .bd__orb {
+    --s: 118vmin;
+    top: 46%;
+  }
+  .bd__grid {
+    background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px calc(100% / 4));
+  }
+  .bd__c {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bd__orb,
+  .bd__ghost {
+    translate: -50% -50%;
+    scale: none;
+  }
+  .bd__orbit,
+  .bd__node {
+    rotate: none;
+  }
+}
+
+/* 首屏舞台不再自带一层不透明的纸色，让日蚀和网格从第一屏就在 */
+.hero__stage {
+  background: transparent;
+}

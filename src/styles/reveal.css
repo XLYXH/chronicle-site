@@ -1,0 +1,62 @@
+/* ==========================================================
+   v11 · 滚动入场：长时长 + 长尾缓出，可逆（见 scrollReveal.ts）
+   ========================================================== */
+.has-rv [data-rv] {
+  opacity: 0;
+  transition:
+    opacity 2.4s cubic-bezier(0.25, 1, 0.3, 1) var(--rv-d, 0s),
+    translate 2.4s cubic-bezier(0.25, 1, 0.3, 1) var(--rv-d, 0s),
+    scale 2.4s cubic-bezier(0.25, 1, 0.3, 1) var(--rv-d, 0s);
+}
+.has-rv [data-rv='up'] {
+  translate: 0 60px;
+}
+.has-rv [data-rv='left'] {
+  translate: -60px 0;
+}
+.has-rv [data-rv='right'] {
+  translate: 50px 0;
+  transition-duration: 1.8s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.has-rv [data-rv='scale'] {
+  scale: 0.92;
+  transition-duration: 1.8s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.has-rv [data-rv].is-in {
+  opacity: 1;
+  translate: none;
+  scale: none;
+}
+/* 复位时不要慢慢退：直接回到起点，等下一次入场 */
+.has-rv [data-rv]:not(.is-in),
+.has-rv [data-rv].rv-now {
+  transition-duration: 0s;
+  transition-delay: 0s;
+}
+
+/* 章节分隔线：跟着眉题一起从左画到右 */
+.has-craft .sec-top::after {
+  transition: transform 2.2s cubic-bezier(0.25, 1, 0.3, 1) 0.15s;
+}
+.has-craft .sec-top.is-in::after {
+  transform: scaleX(1);
+}
+.has-craft .sec-top:not(.is-in)::after {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-rv [data-rv] {
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+  }
+}
+
+/* 自左 / 自右入场的起点在版心外，裁掉横向溢出（clip 不生成滚动容器，sticky 不受影响） */
+main,
+.footer {
+  overflow-x: clip;
+}

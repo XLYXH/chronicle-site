@@ -1,25 +1,13 @@
 /* ==========================================================
-   v7 · 手感层：项目色、筛选液滴、列表悬停、章节开场、信笺书写、玻璃球 CTA、按压反馈
+   v7 · 手感层：筛选液滴、列表悬停、章节分隔线、信笺书写、按压反馈（v11 精简）
    ========================================================== */
 
-/* ---------- 每个项目一点自己的色相（都从钴蓝出发，只偏一点） ---------- */
+/* ---------- 项目强调色：v11 起三个项目统一用钴蓝 ---------- */
 [data-key='blueprint'],
 [data-panel='blueprint'],
 [data-active='blueprint'] {
   --pc: var(--accent);
   --pc-deep: var(--gl-deep);
-}
-[data-key='monitor'],
-[data-panel='monitor'],
-[data-active='monitor'] {
-  --pc: color-mix(in oklch, var(--accent) 72%, #00b3a4);
-  --pc-deep: color-mix(in oklch, var(--gl-deep) 70%, #00565a);
-}
-[data-key='proxy'],
-[data-panel='proxy'],
-[data-active='proxy'] {
-  --pc: color-mix(in oklch, var(--accent) 74%, #9b3cff);
-  --pc-deep: color-mix(in oklch, var(--gl-deep) 72%, #3a0a78);
 }
 .project::before {
   background: var(--pc, var(--accent));
@@ -29,9 +17,8 @@
   color: var(--pc, var(--accent));
 }
 .showcase__wave {
-  background:
-    radial-gradient(120% 80% at 30% 20%, color-mix(in srgb, var(--pc, var(--gl-a)) 70%, #fff) 0, transparent 55%),
-    linear-gradient(160deg, var(--pc, var(--gl-a)), var(--pc-deep, var(--gl-deep)));
+  /* v11：平涂的钴蓝，不再用渐变 */
+  background: var(--accent);
 }
 .showcase__stage .project__cover i {
   color: var(--pc, var(--accent));
@@ -41,55 +28,15 @@
   gap: 8px;
 }
 
-/* ---------- 列表悬停：一张很淡的玻璃卡从左侧铺开 ---------- */
-.project::after {
-  content: '';
-  position: absolute;
-  inset: 10px -18px;
-  z-index: -1;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--paper-2) 55%, transparent);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--lg-ring) 80%, transparent),
-    inset 1.5px 1.5px 0 -0.5px var(--lg-shine);
-  opacity: 0;
-  clip-path: inset(0 100% 0 0 round 22px);
-  transition:
-    clip-path 0.7s var(--ease),
-    opacity 0.4s;
-  pointer-events: none;
-}
-.projects {
-  isolation: isolate;
-}
-.project__title a > span,
-.project__meta i,
-.project__no {
+/* ---------- 列表悬停：只让标题让一步（v11 去掉了悬停玻璃卡） ---------- */
+.project__title a > span {
   display: inline-block;
-  transition:
-    transform 0.6s var(--ease),
-    color 0.4s,
-    opacity 0.4s;
-}
-.project__meta i {
-  opacity: 0.55;
+  transition: transform 0.6s var(--ease);
 }
 @media (hover: hover) {
-  .project:hover::after {
-    opacity: 1;
-    clip-path: inset(0 0 0 0 round 22px);
-  }
   /* 只平移内层文字：链接自身若带 transform，会成为整卡点击层 ::after 的包含块 */
   .project:hover .project__title a > span {
     transform: translateX(6px);
-  }
-  .project:hover .project__meta i {
-    opacity: 1;
-    transform: translateX(-4px);
-  }
-  .project:hover .project__no {
-    transform: translateY(-3px);
-    color: var(--pc, var(--accent));
   }
 }
 
@@ -107,9 +54,6 @@
   height: 44px;
   border-radius: 999px;
   background: var(--ink);
-  box-shadow:
-    inset 1.5px 1.5px 0 -0.5px rgba(255, 255, 255, 0.28),
-    0 10px 22px -12px rgba(17, 18, 22, 0.55);
   transform-origin: 50% 50%;
   pointer-events: none;
 }
@@ -139,21 +83,6 @@
   background: var(--line);
   transform: scaleX(0);
   transform-origin: 0 50%;
-  transition: transform 1.4s var(--ease) 0.1s;
-}
-.has-craft .sec-top .eyebrow {
-  clip-path: inset(0 0 0 0);
-}
-.has-craft .sec-top .eyebrow > * ,
-.has-craft .sec-top .eyebrow {
-  transition: transform 1s var(--ease), opacity 0.8s;
-}
-.has-craft .sec-top:not(.is-in) .eyebrow {
-  transform: translateY(70%);
-  opacity: 0;
-}
-.has-craft .sec-top .eyebrow:last-child {
-  transition-delay: 0.12s;
 }
 .has-craft .sec-top.is-in::after {
   transform: none;
@@ -200,20 +129,12 @@
   stroke-dashoffset: 0;
 }
 
-/* ---------- 联系：钴蓝玻璃球 ---------- */
+/* ---------- 联系：平涂钴蓝圆，悬停时墨色升起 ---------- */
 .connect__arrow {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  background:
-    radial-gradient(60% 60% at var(--mx, 34%) var(--my, 28%), rgba(255, 255, 255, 0.42), transparent 62%),
-    radial-gradient(120% 120% at 70% 85%, var(--gl-deep), transparent 60%),
-    var(--accent);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
-    inset 2px 2px 0 -1px rgba(255, 255, 255, 0.7),
-    inset -6px -10px 24px -12px rgba(0, 0, 0, 0.45),
-    0 24px 48px -26px color-mix(in srgb, var(--accent) 80%, transparent);
+  background: var(--accent);
 }
 .connect__arrow::after {
   content: '';
@@ -244,7 +165,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project::after,
   .sec-top::after,
   .letter__stroke path,
   .connect__arrow::after,

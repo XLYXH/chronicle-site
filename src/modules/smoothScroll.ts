@@ -3,12 +3,6 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 let lenis: Lenis | null = null
-type JumpHook = (distance: number, jump: () => void) => boolean
-let jumpHook: JumpHook | null = null
-/** v9：远距离锚点跳转可以交给一个转场（百叶窗）来做；返回 false 表示不接管，照常平滑滚动 */
-export function setJumpTransition(fn: JumpHook) {
-  jumpHook = fn
-}
 
 /** Lenis 与 GSAP ticker 共用一个时钟，避免两套 rAF 互相抖动 */
 export function initSmoothScroll(enabled: boolean) {
@@ -45,16 +39,6 @@ export function scrollToElement(target: HTMLElement) {
       focusable.focus({ preventScroll: true })
     }
   }
-  const distance = Math.abs(target.getBoundingClientRect().top)
-  if (
-    lenis &&
-    jumpHook &&
-    jumpHook(distance, () => {
-      lenis?.scrollTo(target, { immediate: true, force: true })
-      focus()
-    })
-  )
-    return
   if (lenis) {
     lenis.scrollTo(target, {
       duration: 1.6,

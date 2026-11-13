@@ -1,10 +1,36 @@
-# CHRONICLE — Chronicle-IRAS 的个人网站（v10）
+# CHRONICLE — Chronicle-IRAS 的个人网站（v11）
 
 > Ideas take shape. · 在代码与想象之间，让每一个念头，有形可见。
 
 线上地址：<https://xlyxh.github.io/chronicle-site/>
 
 v4 推翻了 v3 的「IRAS.OS」终端 / HUD 风格，重新设计成一套**自己的视觉语言**；内容**只取自原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)**，不额外添加。
+
+## v11：向 lanrhyme.top 学滚动与背景，同时“去 AI 味”
+
+用无头浏览器逐 300px 滚动截帧，并读了 [lanrhyme.top](https://lanrhyme.top) 打包后的 JS / CSS，笔记要点如下。手法重新实现，没有拷贝它的代码，配色仍是瓷白 / 墨色 / 钴蓝；新增的背景字样全部取自页面上已有的文字。
+
+| lanrhyme 的做法 | 本站的改法 |
+| --- | --- |
+| `.reveal / -left / -right / -scale` 四种入场，IntersectionObserver（threshold .1、底部 -50px），2.4s `cubic-bezier(.25,1,.3,1)` / 1.8s `cubic-bezier(.16,1,.3,1)`，位移 60 / -60 / 50px、缩放 .92 | `src/modules/scrollReveal.ts` + `reveal.css`：参数相同，同组元素依次错开 0.12s，作品列表的编号和正文各错开半拍。**只动 `opacity` 和独立的 `translate` / `scale` 属性**，GSAP 的 Flip、磁吸和速度拉伸照常工作；项目本身的透明度归筛选动画管，所以入场做在它内部的两列上 |
+| 入场可逆：元素回到视口下方 80% 线以下就复位 | 同样可逆。复位是瞬间完成的，下次往下滚时再慢慢入场；标题逐词升起也改成可逆的 |
+| 系统标签用随机字符解码出现 | 章节眉题在每次入场时解码出现（只作用于 `aria-hidden` 的视觉层） |
+| 首屏标题随滚动以 0.3 倍速下沉、放大、失焦（≤4px）、淡出，副文案以 0.15 倍速跟随 | 用同一组系数，换成 GSAP 的 scrub 时间线，取代原来整体上移淡出的写法 |
+| 背景：一枚巨大的暗色“日蚀”圆、外晕、暗角 | 浅色模式下是一枚比纸色略深的圆，外面一圈柔和的亮晕；深色模式下是近黑的圆，外面一圈很淡的钴蓝晕。外圈加一道虚线轨道，随整页进度缓慢放大和转动，轨道上的钴蓝小方块标出读到哪里；精确指针下圆会轻微偏向指针 |
+| 面板后面压着约 3% 透明度的超大字（ARCHIVE_NODE） | 当前章节的字样用超大空心字压在最底层：首屏 CHRONICLE、作品 OBSESSIONS、实验 CHEMISTRY……全部取自各章已有的眉题。换章节时解码切换，随滚动做视差 |
+| 节点之间的斜向虚线 | 页面级的 SVG：从每一章右侧的眉题拉一条虚线到下一章的编号，随读线一段段画出，两端的小方块走到时被填实 |
+| 左侧一列圆点做滚动进度、四角 HUD 角标、扫描线 / 噪点 | 左侧一列章节节点，节点之间的虚线随进度填色（≥1024px 时显示）。四角各有 14px 的角标，展台和实验场四角也有。扫描线换成一张极淡的静态噪点 |
+| 严格的栅格 | 版心 12 栏的发丝网格（移动端 4 栏） |
+
+**去掉或收敛的（“AI 味”的来源）**
+
+- 移除：v9 斩切开屏、百叶窗跳转、联系区波浪线、按钮描边追光（`motifs.ts` / `motifs.css` 整体删除）。
+- 移除：v8 字重场、墨滴、景深展台的倾斜和反光；变形光标保留。
+- 移除：v10 玻璃高光跟随指针（`components.ts` 删除），主按钮 3D 抬起改回平的墨块，当前专注的玻璃卡改成一块状态面板（钴蓝竖线加一个不再闪烁的方点）。
+- 移除：v5 滚动时屏幕边缘的 WebGL 漏光（发光）。速度拉伸的幅度减半，首屏标题不再参与拉伸。
+- 移除：v7 作品列表悬停时的玻璃卡，三个项目各自的色相，联系按钮玻璃球的渐变、高光和投影，展台切换时的渐变波；都改成平涂的钴蓝。
+- 收敛：大块面的圆角从 18–30px 改成 3px，加发丝描边；首屏同心圆去掉了中心光晕；标识圆点不再有光圈；等宽标签加大了字距。
+- 保留：液态玻璃只用在该用的地方，包括顶栏玻璃岛、首屏透镜、展台玻璃签、变形光标、回到顶部和主题按钮。
 
 ## v10：组件手感（参考 uiverse.io，保留液态玻璃）
 
@@ -150,7 +176,7 @@ v5 在 v4 的风格与内容不变的前提下，加入几处“记得住”的�
 
 - `prefers-reduced-motion`：关闭平滑滚动、解码、光标、循环动画与入场动画；首屏透镜静止，内容直接可见。
 - 无 JS 时内容完整可读（手风琴全部展开）；语义化标题、跳到正文链接、可见焦点；解码只作用于 `aria-hidden` 的视觉层，读屏始终读到原文；拆词标题保留 `aria-label`。
-- 降级：液态玻璃按 refract / frost / solid 三档自动选择（见 v6）；滚动漏光在软件渲染或无 WebGL 时退回 CSS 渐变，调试 / 截图可加 `?gl=force`。
+- 降级：液态玻璃按 refract / frost / solid 三档自动选择（见 v6）。v11 的入场只在 JS 可用且没有开启“减少动态效果”时启用；背景在减少动态效果时只保留静态的圆、网格和角标。
 - 作品概念图与实验区的动画只在可见时运行。
 - favicon（ico / svg / 180 / 192 / 512）、manifest、Open Graph / Twitter 卡片、JSON-LD、robots、sitemap、独立 404 页（GitHub Pages 任意深度路径都可用，跟随深浅色）。
 
@@ -212,19 +238,19 @@ src/modules/
   heroLens.ts            首屏玻璃透镜：追随、拉伸、滚动分裂
   fx.ts                  标题拆词揭示、首屏入场、碎片间奏、跑马灯透镜
   showcase.ts            作品展台：液体前沿切换、水波扭曲、读线同步、稳健的筛选序列
-  craft.ts               v7 手感层：筛选液滴、章节开场、信笺书写、玻璃球 CTA
-  signature.ts           v8 签名交互：变形光标、字重场、墨滴、景深展台
-  motifs.ts              v9 JIEJOE 教程手法：斩切开屏、百叶窗跳转、波浪线条、描边按钮
-  components.ts          v10 玻璃高光跟随指针（其余组件手感在 components.css）
+  scrollReveal.ts        v11 可逆的滚动入场 + 眉题解码
+  backdrop.ts            v11 背景：日蚀圆与轨道、空心章节字、栅格、角标、章节节点、斜向虚线
+  craft.ts               v7 手感层：筛选液滴、信笺书写
+  signature.ts           v8 变形光标
   work.ts                三张交互概念图
-  velocity.ts            滚动速度拖影 + WebGL 漏光
+  velocity.ts            滚动速度拖影（标题轻微拉伸）
   lab.ts                 A little chemistry 3D 轨道融合实验
   about.ts               兴趣手风琴 + ✳ 拨盘
   ui.ts                  玻璃顶栏、液滴导航、进度环、菜单、主题切换
   cursor.ts              圆点光标与磁吸
   scramble.ts            悬停解码（读屏安全）
   smoothScroll.ts        Lenis + ScrollTrigger
-src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / motifs / components
+src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / components / reveal / backdrop / restraint
 public/                  图标、og 图、manifest、404 与其字体
 scripts/                 字体子集化、部署
 ```

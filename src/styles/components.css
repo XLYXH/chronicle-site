@@ -4,28 +4,6 @@
    避免通用的渐变描边、大圆角卡片和千篇一律的阴影。
    ========================================================== */
 
-/* ---------- 玻璃：高光随指针移动 ---------- */
-@property --glint {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 0;
-}
-.lg::after {
-  --glint: 0;
-  background:
-    radial-gradient(70px 70px at var(--gx, 30%) var(--gy, 0%), rgba(255, 255, 255, calc(0.55 * var(--glint))), transparent 70%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.22), transparent 38%, transparent 70%, rgba(255, 255, 255, 0.08));
-  transition: --glint 0.45s var(--ease);
-}
-[data-theme='dark'] .lg::after {
-  background:
-    radial-gradient(70px 70px at var(--gx, 30%) var(--gy, 0%), rgba(255, 255, 255, calc(0.22 * var(--glint))), transparent 70%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent 40%);
-}
-.lg.is-lit::after {
-  --glint: 1;
-}
-
 /* ---------- 主题开关：太阳 ⇄ 月牙（参考 uiverse 的 sun/moon 开关，做成图标级） ---------- */
 .theme__icon {
   width: 22px;
@@ -89,39 +67,6 @@
 }
 [data-theme='dark'] .theme:hover .theme__sun {
   transform: scale(1.75) rotate(-14deg);
-}
-
-/* ---------- 主按钮：有厚度的墨块（参考 uiverse 的 pushable / 3D 按钮） ---------- */
-.pill {
-  --lift: 0px;
-  /* 用独立的 translate 属性：transform 留给磁吸（GSAP） */
-  translate: 0 calc(var(--lift) * -1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
-    0 calc(3px + var(--lift)) 0 0 var(--edge, color-mix(in srgb, var(--ink) 72%, #000)),
-    0 calc(10px + var(--lift) * 2) calc(18px + var(--lift) * 2) -10px rgba(17, 18, 22, 0.45);
-  transition:
-    translate 0.35s cubic-bezier(0.3, 1.6, 0.5, 1),
-    box-shadow 0.35s cubic-bezier(0.3, 1.6, 0.5, 1),
-    color 0.3s;
-}
-.pill:hover,
-.pill:focus-visible {
-  --lift: 3px;
-  /* 钴蓝涨满后，按钮的“侧面”也换成深钴蓝 */
-  --edge: var(--gl-deep);
-}
-.pill:active {
-  --lift: -2px;
-  transition-duration: 0.08s;
-}
-[data-theme='dark'] .pill {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.12),
-    0 calc(3px + var(--lift)) 0 0 color-mix(in srgb, var(--ink) 55%, #000),
-    0 calc(10px + var(--lift) * 2) calc(18px + var(--lift) * 2) -10px rgba(0, 0, 0, 0.7);
 }
 
 /* ---------- 次级按钮（Reset 等）：按下时陷进去 ---------- */
@@ -239,32 +184,6 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 10px 18px -10px rgba(0, 0, 0, 0.8);
-}
-
-/* ---------- 当前专注：一张玻璃卡，透出背后的钴蓝点阵 ---------- */
-.focus.lg {
-  border-radius: 20px;
-  background: transparent;
-  --lg-r: 20px;
-  position: relative;
-  z-index: 0;
-}
-.focus__grid {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle, color-mix(in srgb, var(--accent) 38%, transparent) 1px, transparent 1.6px) 0 0 / 14px 14px,
-    var(--paper-2);
-  -webkit-mask: linear-gradient(100deg, #000 10%, rgba(0, 0, 0, 0.35) 60%, #000);
-  mask: linear-gradient(100deg, #000 10%, rgba(0, 0, 0, 0.35) 60%, #000);
-}
-[data-glass='refract'] .focus.lg::before {
-  background: color-mix(in srgb, var(--paper) 30%, transparent);
-}
-.focus.lg > div {
-  position: relative;
 }
 
 /* ---------- 实验区“已发现”：复选框式的小牌子，发现时打一个勾 ---------- */

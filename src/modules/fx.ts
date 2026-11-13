@@ -38,31 +38,27 @@ export function splitWords(el: HTMLElement) {
   el.replaceChildren(frag)
 }
 
+/**
+ * 标题逐词从遮罩里升起。v11：与 scrollReveal 同一套“可逆”规则——
+ * 标题回到视口下方 20% 之后复位，再次往下滚时重新升起。
+ */
 export function initReveals(animate: boolean) {
   const titles = qsa('[data-split]')
   if (!animate) return
   titles.forEach(splitWords)
   titles.forEach(t => {
-    gsap.set(qsa('.w__in', t), { yPercent: 110 })
+    const words = qsa('.w__in', t)
+    gsap.set(words, { yPercent: 110 })
     ScrollTrigger.create({
       trigger: t,
-      start: 'top 88%',
-      once: true,
-      onEnter: () => gsap.to(qsa('.w__in', t), { yPercent: 0, duration: 1.2, ease: 'expo.out', stagger: 0.06 }),
+      start: 'top 86%',
+      onEnter: () => gsap.to(words, { yPercent: 0, duration: 1.8, ease: 'expo.out', stagger: 0.07, overwrite: true }),
+      onLeaveBack: () => gsap.to(words, { yPercent: 110, duration: 0.5, ease: 'power2.in', overwrite: true }),
     })
   })
-  const items = qsa('[data-reveal]')
-  gsap.set(items, { opacity: 0, y: 36 })
-  ScrollTrigger.batch(items, {
-    start: 'top 92%',
-    once: true,
-    onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08, overwrite: true }),
-  })
-  // 键盘跳到尚未揭示的内容时立即显示
   document.addEventListener('focusin', e => {
-    const host = (e.target as Element).closest<HTMLElement>('[data-reveal]')
-    if (host && Number(getComputedStyle(host).opacity) < 1) gsap.to(host, { opacity: 1, y: 0, duration: 0.3, overwrite: true })
-    const t = (e.target as Element).closest<HTMLElement>('[data-split]') ?? host?.querySelector<HTMLElement>('[data-split]')
+    const t =
+      (e.target as Element).closest<HTMLElement>('[data-split]') ?? (e.target as Element).closest('[data-reveal]')?.querySelector<HTMLElement>('[data-split]')
     if (t) gsap.to(qsa('.w__in', t), { yPercent: 0, duration: 0.3, overwrite: true })
   })
 }
@@ -101,12 +97,23 @@ export function initFragment(animate: boolean) {
     { scale: 0.82, yPercent: 18 },
     { scale: 1, yPercent: 0, ease: 'none', scrollTrigger: { trigger: sec, start: 'top 85%', end: 'center 55%', scrub: 0.6 } },
   )
-  gsap.fromTo('.hero__inner', { yPercent: 0, opacity: 1 }, {
-    yPercent: -12,
-    opacity: 0,
-    ease: 'none',
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom 20%', scrub: 0.4 },
+  // v11 · 首屏随滚动退场（取自 lanrhyme）：标题以 0.3 倍速下沉、微微放大、失焦、淡出；
+  // 副文案以 0.15 倍速跟随，更早淡出——层与层速度不同，形成景深
+  const hero = qs('.hero')
+  if (!hero) return
+  const out = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.3, invalidateOnRefresh: true },
   })
+  const h = () => hero.offsetHeight
+  out.fromTo(
+    '.hero__title',
+    { y: 0, scale: 1, opacity: 1, filter: 'blur(0px)' },
+    { y: () => h() * 0.3, scale: () => 1 + h() * 0.0005, opacity: 0, filter: 'blur(4px)' },
+    0,
+  )
+  out.fromTo('.hero__story, .hero__cta', { yPercent: 0, opacity: 1 }, { yPercent: () => h() * 0.15, opacity: 0, duration: 0.6 }, 0)
+  out.fromTo('.hero__edition, .hero__note', { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.12 }, 0)
 }
 
 /** 低语跑马灯：持续缓行，滚动速度会推它一把；指针处的“透镜”显出实心的另一层 */
