@@ -93,12 +93,13 @@ function waves(): string {
 function shards(): string {
   const r = rng(11)
   let g = ''
-  for (let i = 0; i < 9; i++) {
-    const a = -2.4 + (i / 9) * 2.2 + r() * 0.2
-    const rad = 47 + r() * 6
+  for (let i = 0; i < 16; i++) {
+    // v13：更多、更大，绕满整圈（上半圈更密）
+    const a = i < 11 ? -2.9 + (i / 11) * 2.7 + r() * 0.2 : 0.4 + ((i - 11) / 5) * 2.2 + r() * 0.3
+    const rad = 48 + r() * 9
     const cx = 50 + Math.cos(a) * rad
     const cy = 50 + Math.sin(a) * rad
-    const s = 1.2 + r() * 2.6
+    const s = 2 + r() * 4.4
     const pts = [
       [0, -s * 1.6],
       [s * 0.7, -s * 0.2],
@@ -200,6 +201,13 @@ export function initBackdrop(animate: boolean) {
     <i class="bd__c bd__c--tl"></i><i class="bd__c bd__c--tr"></i><i class="bd__c bd__c--bl"></i><i class="bd__c bd__c--br"></i>`
   document.body.prepend(bd)
 
+  // v13 · 章节转场：从塔尖发出的一圈广播波 + 一道斜贯全屏的绯红“裁剪”线
+  const fx = document.createElement('div')
+  fx.className = 'fx'
+  fx.setAttribute('aria-hidden', 'true')
+  fx.innerHTML = '<i class="fx__pulse"></i><i class="fx__pulse fx__pulse--2"></i><i class="fx__cut"></i>'
+  document.body.append(fx)
+
   const rail = document.createElement('div')
   rail.className = 'rail'
   rail.setAttribute('aria-hidden', 'true')
@@ -227,6 +235,7 @@ export function initBackdrop(animate: boolean) {
     if (i === current) return
     current = i
     dots.forEach((d, j) => d.classList.toggle('is-on', j <= i))
+    transition()
     const target = (words[i] ?? '').toUpperCase()
     cancelAnimationFrame(raf)
     const t0 = performance.now()
@@ -238,6 +247,16 @@ export function initBackdrop(animate: boolean) {
     raf = requestAnimationFrame(tick)
   }
   dots[0]?.classList.add('is-on')
+  function transition() {
+    const b = qs('.bd__beacon', bd)?.getBoundingClientRect()
+    if (b) {
+      fx.style.setProperty('--fx', `${(b.left + b.width / 2).toFixed(0)}px`)
+      fx.style.setProperty('--fy', `${(b.top + b.height / 2).toFixed(0)}px`)
+    }
+    fx.classList.remove('is-on')
+    void fx.offsetWidth
+    fx.classList.add('is-on')
+  }
   SECTIONS.forEach((id, i) => {
     const sec = document.getElementById(id)
     if (!sec) return
@@ -261,7 +280,7 @@ export function initBackdrop(animate: boolean) {
     if (p === last) return
     last = p
     bd.style.setProperty('--bp', p)
-    // 离开首屏后球里的城市退到背景里，给正文让路
+    // 离开首屏后球体向右侧让位（不再淡出），正文靠左侧的纸色遮罩和面板保证可读
     bd.style.setProperty('--hv', Math.min(1, scrollY / (innerHeight * 0.9)).toFixed(3))
     fill.style.transform = `scaleY(${p})`
   })

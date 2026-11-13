@@ -1,0 +1,533 @@
+/* ==========================================================
+   v13 · 让穗波市的元素站到台前：
+   更大、更亮、更饱和的球体城市（不再淡出，而是让到右侧并持续存在），
+   正文靠左侧纸色遮罩 + 面板 + 文字光晕保证可读；更醒目的店招、晶片、HUD 框；
+   章节转场时的广播波与斜切线。
+   ========================================================== */
+
+/* ---------- 球体：大、偏右、常驻 ---------- */
+.bd__orb {
+  --s: min(104vh, 1120px, 104vw);
+  left: calc(64% + var(--hv, 0) * 8%);
+  top: 50%;
+  translate: calc(-50% + var(--px) * 18px) calc(-50% + var(--py) * 12px + var(--bp, 0) * -4vh);
+  scale: calc(1 - var(--hv, 0) * 0.06 + var(--bp, 0) * 0.08);
+}
+.bd__disc > * {
+  opacity: 1 !important;
+}
+/* 天空：更饱和的虹彩 */
+.bd__city .s0 {
+  stop-color: #6fc6ff;
+}
+.bd__city .s1 {
+  stop-color: #a99bff;
+}
+.bd__city .s2 {
+  stop-color: #ff8fc2;
+}
+.bd__city .s3 {
+  stop-color: #5aa8f0;
+}
+.bd__city .s4 {
+  stop-color: #bfe0ff;
+}
+.bd__far {
+  fill: #93a6dd;
+}
+.bd__mid {
+  fill: #6577b8;
+}
+.bd__near {
+  fill: #34427d;
+}
+.bd__tower path {
+  fill: #232d63;
+}
+.bd__tower ellipse,
+.bd__mast {
+  stroke: #ffe28a;
+  stroke-width: 0.45;
+}
+.bd__tower {
+  filter: drop-shadow(0 0 0.8px #fff) drop-shadow(0 0 3px rgba(255, 170, 220, 0.9));
+}
+.bd__beacon {
+  fill: #ff3d7f;
+  filter: drop-shadow(0 0 1.5px #ff3d7f);
+}
+.bd__win {
+  stroke: #fff4c2;
+  stroke-width: 0.42;
+  opacity: 1;
+}
+.bd__reflect {
+  opacity: 0.55;
+}
+.bd__ripple {
+  stroke-width: 0.45;
+  opacity: 0.95;
+}
+.bd__pulse circle {
+  stroke: #ff5fa2;
+  stroke-width: 0.45;
+}
+[data-theme='dark'] .bd__city .s0 {
+  stop-color: #050a24;
+}
+[data-theme='dark'] .bd__city .s1 {
+  stop-color: #2a1a6e;
+}
+[data-theme='dark'] .bd__city .s2 {
+  stop-color: #a2336f;
+}
+[data-theme='dark'] .bd__city .s3 {
+  stop-color: #0b1a4a;
+}
+[data-theme='dark'] .bd__city .s4 {
+  stop-color: #02040c;
+}
+[data-theme='dark'] .bd__far {
+  fill: #232f6a;
+}
+[data-theme='dark'] .bd__mid {
+  fill: #141c48;
+}
+[data-theme='dark'] .bd__near,
+[data-theme='dark'] .bd__tower path {
+  fill: #070b22;
+}
+[data-theme='dark'] .bd__win {
+  stroke: #8ff0ff;
+}
+/* 虹光：更粗更亮的虹彩边 + 外圈辉光 */
+.bd__rim {
+  inset: -6px;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 5px));
+  opacity: 1;
+  filter: blur(1px) saturate(1.3);
+  animation-duration: 24s;
+}
+.bd__disc {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 90px 24px rgba(120, 200, 255, 0.45),
+    0 0 220px 80px rgba(255, 140, 200, 0.3);
+}
+[data-theme='dark'] .bd__disc {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 90px 24px rgba(120, 120, 255, 0.35),
+    0 0 240px 90px rgba(255, 90, 170, 0.22);
+}
+.bd__sweep {
+  background: conic-gradient(from 0deg, transparent 0 78%, rgba(255, 110, 180, 0.35) 97%, transparent 100%);
+}
+/* 晶片：大、亮、带辉光，并且缓慢浮动 */
+.bd__shards polygon {
+  opacity: 0.85;
+  stroke: #fff;
+  stroke-width: 0.22;
+  filter: drop-shadow(0 0 0.8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 2px rgba(180, 150, 255, 0.8));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    glint 4s ease-in-out infinite,
+    drift 9s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.55s), calc(var(--i) * -0.9s);
+}
+@keyframes glint {
+  50% {
+    opacity: 1;
+  }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+}
+@keyframes drift {
+  50% {
+    transform: translateY(-1.2px) rotate(8deg);
+  }
+}
+.bd__ticks path {
+  stroke-width: 0.2;
+  opacity: 1;
+}
+.bd__orbit circle {
+  stroke: color-mix(in srgb, var(--gold) 70%, transparent);
+  stroke-width: 1.4;
+}
+.bd__orbit text {
+  fill: var(--gold);
+  font-size: 1.35px;
+}
+.bd__node {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px;
+  background: #ff3d7f;
+  box-shadow: 0 0 12px #ff3d7f;
+  transform-origin: 5.5px 5.5px;
+}
+/* 球后的大片辉光：首屏像一张全幅画面 */
+.bd::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(48vmax 40vmax at calc(64% + var(--hv, 0) * 8%) 50%, rgba(140, 200, 255, 0.45), transparent 70%),
+    radial-gradient(36vmax 26vmax at calc(70% + var(--hv, 0) * 8%) 72%, rgba(255, 140, 200, 0.35), transparent 70%);
+}
+[data-theme='dark'] .bd::before {
+  background:
+    radial-gradient(48vmax 40vmax at calc(64% + var(--hv, 0) * 8%) 50%, rgba(90, 80, 255, 0.35), transparent 70%),
+    radial-gradient(36vmax 26vmax at calc(70% + var(--hv, 0) * 8%) 72%, rgba(255, 60, 150, 0.25), transparent 70%);
+}
+/* 可读性：左侧一层纸色遮罩（正文多在左侧），不淡化画面本身 */
+.bd::after {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--paper) 88%, transparent) 0,
+    color-mix(in srgb, var(--paper) 70%, transparent) 30%,
+    transparent 52%
+  );
+}
+[data-theme='dark'] .bd::after {
+  background: linear-gradient(90deg, rgba(7, 10, 20, 0.9) 0, rgba(7, 10, 20, 0.7) 30%, transparent 52%);
+}
+.bd__ghost {
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* ---------- 正文可读：大标题带一圈纸色光晕，右栏文字放在面板里 ---------- */
+.hero__title,
+.sec-title,
+.connect__title,
+.fragment__word {
+  text-shadow:
+    0 0 1px var(--paper),
+    0 0 18px color-mix(in srgb, var(--paper) 85%, transparent),
+    0 0 42px color-mix(in srgb, var(--paper) 60%, transparent);
+}
+.hero__story,
+.play__lede,
+.about__desc,
+.interests,
+.connect__bottom,
+.letter,
+.projects .project__info,
+.lab__bar {
+  position: relative;
+  isolation: isolate;
+}
+.hero__story::before,
+.play__lede::before,
+.about__desc::before,
+.interests::before,
+.connect__bottom::before,
+.letter::before,
+.lab__bar::before {
+  content: '';
+  position: absolute;
+  inset: -16px -20px;
+  z-index: -1;
+  background: color-mix(in srgb, var(--paper) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  pointer-events: none;
+}
+.projects .project__info {
+  padding: 18px 20px 22px;
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+}
+.lab__bar::before {
+  inset: -6px 0;
+}
+.hero__story::before {
+  inset: -12px -16px;
+}
+
+/* ---------- 更醒目的 HUD 框 ---------- */
+.bd__c {
+  width: 30px;
+  height: 30px;
+  border-color: var(--gold);
+  opacity: 0.9;
+}
+.bd__c--tl,
+.bd__c--tr,
+.bd__c--bl,
+.bd__c--br {
+  border-width: 2px;
+}
+.bd__c--tl {
+  border-width: 2px 0 0 2px;
+}
+.bd__c--tr {
+  border-width: 2px 2px 0 0;
+}
+.bd__c--bl {
+  border-width: 0 0 2px 2px;
+}
+.bd__c--br {
+  border-width: 0 2px 2px 0;
+}
+.project__info::before {
+  inset: -6px;
+  --c: var(--gold);
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 22px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 2px 22px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 2px 22px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 2px 22px no-repeat;
+}
+.showcase__stage::after,
+.lab__field::after {
+  --c: var(--gold);
+  inset: 8px;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 26px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 0 / 2px 26px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 26px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 2px 26px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 26px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 2px 26px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 26px 2px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 2px 26px no-repeat;
+}
+.showcase__stage,
+.lab__field {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent),
+    0 30px 80px -40px rgba(40, 30, 120, 0.45);
+}
+.hud {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.hud p {
+  padding: 5px 10px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 50%, transparent);
+}
+
+/* ---------- 店招：更亮、各章不同色、移动端也在 ---------- */
+.sign {
+  padding: 18px 10px 12px;
+  gap: 12px;
+  background: color-mix(in srgb, #0b0d1e 82%, transparent);
+  border: 2px solid var(--neon);
+  box-shadow:
+    0 0 14px color-mix(in srgb, var(--neon) 70%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--neon) 45%, transparent);
+  --neon: #ff5fa2;
+}
+#play .sign {
+  --neon: #4fd8ff;
+}
+#about .sign {
+  --neon: #b48bff;
+}
+#connect .sign {
+  --neon: #ffc45c;
+}
+.sign b {
+  font-size: 34px;
+  color: #fff;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 12px var(--neon),
+    0 0 28px var(--neon),
+    0 0 52px var(--neon);
+}
+.sign::before {
+  border-color: color-mix(in srgb, var(--neon) 55%, transparent);
+}
+.sign small {
+  color: var(--neon);
+  font-size: 11px;
+}
+@media (max-width: 1100px) {
+  .sign {
+    display: flex;
+    top: 24px;
+    right: 12px;
+    padding: 12px 6px 8px;
+    gap: 8px;
+  }
+  .sign b {
+    font-size: 22px;
+  }
+}
+
+/* ---------- 章节转场：广播波 + 斜切线 ---------- */
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx__pulse {
+  position: absolute;
+  left: var(--fx, 64vw);
+  top: var(--fy, 10vh);
+  width: 40px;
+  height: 40px;
+  margin: -20px;
+  border-radius: 50%;
+  border: 3px solid #ff5fa2;
+  box-shadow:
+    0 0 18px rgba(255, 95, 162, 0.7),
+    inset 0 0 18px rgba(79, 216, 255, 0.6);
+  opacity: 0;
+}
+.fx__pulse--2 {
+  border-color: #4fd8ff;
+}
+.fx__cut {
+  position: absolute;
+  left: -20vw;
+  top: 50%;
+  width: 140vw;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--cut) 20%, #fff 50%, var(--cut) 80%, transparent);
+  box-shadow: 0 0 22px 4px color-mix(in srgb, var(--cut) 70%, transparent);
+  rotate: -14deg;
+  opacity: 0;
+}
+.fx.is-on .fx__pulse {
+  animation: fx-pulse 1.5s cubic-bezier(0.15, 0.6, 0.3, 1) both;
+}
+.fx.is-on .fx__pulse--2 {
+  animation-delay: 0.18s;
+}
+.fx.is-on .fx__cut {
+  animation: fx-cut 0.9s cubic-bezier(0.7, 0, 0.2, 1) 0.05s both;
+}
+@keyframes fx-pulse {
+  0% {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(60);
+    opacity: 0;
+  }
+}
+@keyframes fx-cut {
+  0% {
+    translate: -100% -40vh;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    translate: 60% 40vh;
+    opacity: 0;
+  }
+}
+
+/* ---------- 花瓣层在面板之上，但不挡交互 ---------- */
+.petals {
+  z-index: 5;
+}
+
+/* ---------- 移动端：球在上方、保持可见；遮罩改为自下而上 ---------- */
+@media (max-width: 720px) {
+  .bd__orb {
+    --s: 132vw;
+    left: 58%;
+    top: 34%;
+  }
+  .bd::after {
+    background: linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 30%,
+      color-mix(in srgb, var(--paper) 55%, transparent) 70%,
+      color-mix(in srgb, var(--paper) 75%, transparent)
+    );
+  }
+  [data-theme='dark'] .bd::after {
+    background: linear-gradient(180deg, transparent 0, transparent 30%, rgba(7, 10, 20, 0.55) 70%, rgba(7, 10, 20, 0.78));
+  }
+  .bd::before {
+    background:
+      radial-gradient(90vw 70vw at 58% 34%, rgba(140, 200, 255, 0.5), transparent 70%),
+      radial-gradient(70vw 50vw at 66% 52%, rgba(255, 140, 200, 0.35), transparent 70%);
+  }
+  .bd__c {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+  .projects .project__info {
+    padding: 14px 14px 18px;
+  }
+  .hero__story::before,
+  .play__lede::before,
+  .about__desc::before,
+  .interests::before,
+  .connect__bottom::before,
+  .letter::before {
+    inset: -10px -12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx {
+    display: none;
+  }
+  .bd__shards polygon {
+    animation: none !important;
+  }
+}
+
+/* 虹彩字（background-clip:text）不能叠 text-shadow：Chromium 会把阴影画在渐变之上把字洗白。改用 drop-shadow */
+.sec-title em,
+.sec-title em .w__in,
+.connect__title em,
+.connect__title em .w__in,
+.fragment__word em {
+  text-shadow: none;
+}
+.sec-title em,
+.connect__title em,
+.fragment__word em {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--paper) 90%, transparent));
+}
+
+/* 浅色主题里虹彩字用更深的一组色，保证在亮色天空上也有足够对比 */
+:root:not([data-theme='dark']) {
+  --irid: linear-gradient(100deg, #0b78c2, #4b3df0 30%, #c81f74 58%, #b5650c 80%, #0b78c2);
+}
+/* 筛选按钮与章节眉题压在画面上时给一层底 */
+.filters button {
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+}
+.sec-top .eyebrow {
+  padding: 3px 8px;
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+}
+@media (max-width: 1100px) {
+  .sign {
+    top: 8px;
+    right: 6px;
+  }
+  .sign b {
+    font-size: 18px;
+  }
+}
+.hero__edition {
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  justify-self: start;
+}
