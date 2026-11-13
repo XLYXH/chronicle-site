@@ -1,23 +1,25 @@
-import { gsap } from 'gsap'
 import { qs, qsa } from '../lib/env'
 import { fuse, TECHS, UNKNOWN_TITLE, type Recipe, type Tech } from '../lib/chemistry'
+import { orbitPoint } from '../lib/orbit'
 
 /**
- * “A little chemistry”：八颗技术液滴。拖动一颗到另一颗上，或依次点选两颗，
- * 它们在原地融合（SVG goo 滤镜让边缘真的“黏”在一起）；
- * 组合命中原仓库里的配方时，液滴变成通往对应仓库的链接，否则是 “A new possibility”。
- * 视觉层（被滤镜处理的圆）与交互层（清晰的按钮文字）分开，保证文字锐利、可聚焦。
+ * “A little chemistry” —— 轨道版。
+ * 八颗技术液滴排在一条倾斜的 3D 圆环上缓慢公转；指针左右移动让环侧倾、上下移动改变俯仰；
+ * 在场地里横向拖动可以拨转圆环（带惯性）。点选一颗，它离开轨道飞向中心；再点一颗，两颗在中心融合
+ * （SVG goo 滤镜让边缘真的黏在一起），命中原仓库里的配方就变成通往仓库的链接，否则是 “A new possibility”。
+ * 视觉层（被滤镜处理的圆）与交互层（清晰的按钮）分开，按钮可聚焦、可键盘操作。
  */
+type Mode = 'ring' | 'held' | 'fused'
 interface Drop {
   tech: Tech
   blob: HTMLElement
   btn: HTMLButtonElement
-  nx: number
-  ny: number
+  phase: number
+  mode: Mode
   x: number
   y: number
-  r: number
-  used: boolean
+  s: number
+  z: number
 }
 interface Fusion {
   a: Drop
@@ -25,15 +27,8 @@ interface Fusion {
   recipe: Recipe | null
   blob: HTMLElement
   node: HTMLElement
+  grow: number
 }
-
-// 归一化初始位置：桌面与竖屏各一套，避免拥挤
-const LAYOUT_WIDE: [number, number][] = [
-  [0.1, 0.32], [0.26, 0.68], [0.4, 0.28], [0.55, 0.7], [0.66, 0.3], [0.8, 0.66], [0.9, 0.3], [0.13, 0.78],
-]
-const LAYOUT_TALL: [number, number][] = [
-  [0.24, 0.1], [0.74, 0.2], [0.3, 0.33], [0.74, 0.44], [0.26, 0.57], [0.72, 0.7], [0.3, 0.84], [0.76, 0.93],
-]
 
 export function initLab(animate: boolean) {
   const field = qs('[data-lab-field]')
@@ -41,16 +36,18 @@ export function initLab(animate: boolean) {
   const labels = qs('[data-lab-labels]')
   const status = qs('[data-lab-status]')
   const reset = qs<HTMLButtonElement>('[data-lab-reset]')
+  const ring = qs<SVGEllipseElement>('[data-lab-ring] ellipse')
   if (!field || !goo || !labels || !status) return
 
   const say = (msg: string) => (status.textContent = msg)
   const drops: Drop[] = []
-  const fusions: Fusion[] = []
-  let selected: Drop | null = null
+  let fusion: Fusion | null = null
+  const held: Drop[] = []
   let w = 0
   let h = 0
+  let r = 40
 
-  TECHS.forEach(tech => {
+  TECHS.forEach((tech, i) => {
     const blob = document.createElement('i')
     blob.className = 'lab__blob'
     goo.append(blob)
@@ -59,55 +56,91 @@ export function initLab(animate: boolean) {
     btn.className = 'lab__drop'
     btn.textContent = tech.label
     btn.setAttribute('aria-pressed', 'false')
+    btn.dataset.cursor = 'Pick'
     labels.append(btn)
-    drops.push({ tech, blob, btn, nx: 0, ny: 0, x: 0, y: 0, r: 0, used: false })
+    drops.push({ tech, blob, btn, phase: (i / TECHS.length) * Math.PI * 2, mode: 'ring', x: 0, y: 0, s: 1, z: 0 })
   })
 
-  const place = (d: Drop) => {
-    gsap.set([d.blob, d.btn], { x: d.x - d.r, y: d.y - d.r, width: d.r * 2, height: d.r * 2 })
-  }
+  // ---- 轨道状态 ----
+  const orbit = { angle: 0, vel: animate ? 0.16 : 0, pitch: 0.42, roll: -0.06, tPitch: 0.42, tRoll: -0.06 }
+  const AUTO = 0.16
+  let dragging = false
+  let lastX = 0
+  let lastT = 0
+  let moved = 0
 
-  const layout = () => {
+  // 竖屏场地更高：环抬得更“俯视”，液滴间距更大
+  let pitch0 = 0.42
+  const size = () => {
     w = field.clientWidth
     h = field.clientHeight
-    const tall = w < 700
-    const L = tall ? LAYOUT_TALL : LAYOUT_WIDE
-    const r = Math.max(34, Math.min(54, w * 0.042))
-    drops.forEach((d, i) => {
-      const [nx, ny] = L[i]!
-      d.nx = nx
-      d.ny = ny
-      d.r = r * (d.tech.label.length > 6 ? 1.12 : 1)
-      d.x = nx * w
-      d.y = ny * h
-      if (!d.used) place(d)
-    })
-    fusions.forEach(f => placeFusion(f, false))
+    r = Math.max(28, Math.min(50, w * 0.04))
+    pitch0 = h / w > 1 ? 0.95 : 0.42
+    orbit.tPitch = orbit.pitch = pitch0
   }
 
-  const fusionSize = () => Math.max(58, Math.min(92, w * 0.07))
-  const placeFusion = (f: Fusion, anim: boolean) => {
-    const R = fusionSize()
-    const cx = Math.min(w - R - 8, Math.max(R + 8, (f.a.x + f.b.x) / 2))
-    const cy = Math.min(h - R - 8, Math.max(R + 8, (f.a.y + f.b.y) / 2))
-    const v = { x: cx - R, y: cy - R, width: R * 2, height: R * 2 }
-    if (anim) {
-      gsap.fromTo(f.blob, { ...v, scale: 0.2 }, { scale: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)', delay: 0.15 })
-      gsap.fromTo(f.node, { ...v, opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out', delay: 0.35 })
-    } else {
-      gsap.set([f.blob, f.node], v)
+  const target = (d: Drop) => {
+    const cx = w / 2
+    const cy = h / 2
+    if (d.mode === 'ring') {
+      const rx = Math.min(w * (h / w > 1 ? 0.42 : 0.4), 520)
+      const p = orbitPoint(orbit.angle + d.phase, rx, orbit.pitch, orbit.roll)
+      return { x: cx + p.x, y: cy + p.y, s: p.scale, z: p.z }
+    }
+    if (d.mode === 'held') {
+      const i = held.indexOf(d)
+      return { x: cx + (i === 0 ? -r * 0.9 : r * 0.9), y: cy, s: 1.1, z: 2 }
+    }
+    return { x: cx, y: cy, s: 0.4, z: 2 }
+  }
+
+  const render = (snap: boolean) => {
+    const k = snap ? 1 : 0.16
+    drops.forEach(d => {
+      const t = target(d)
+      d.x += (t.x - d.x) * k
+      d.y += (t.y - d.y) * k
+      d.s += (t.s - d.s) * k
+      d.z = t.z
+      const R = r * d.s * (d.tech.label.length > 6 ? 1.14 : 1)
+      const tr = `translate3d(${(d.x - R).toFixed(1)}px, ${(d.y - R).toFixed(1)}px, 0)`
+      d.blob.style.transform = tr
+      d.blob.style.width = d.blob.style.height = `${(R * 2).toFixed(1)}px`
+      d.btn.style.transform = tr
+      d.btn.style.width = d.btn.style.height = `${(R * 2).toFixed(1)}px`
+      d.btn.style.zIndex = String(Math.round((d.z + 1) * 10))
+      // 背面的液滴变淡、文字缩小，前面的清晰
+      const depth = (d.z + 1) / 2
+      d.btn.style.opacity = d.mode === 'fused' ? '0' : String(0.35 + 0.65 * Math.min(1, depth * 1.4))
+      d.btn.style.fontSize = `${(11 + 3 * Math.min(1, d.s)).toFixed(1)}px`
+    })
+    if (ring) {
+      const rx = Math.min(w * (h / w > 1 ? 0.42 : 0.4), 520)
+      ring.setAttribute('cx', String(w / 2))
+      ring.setAttribute('cy', String(h / 2))
+      ring.setAttribute('rx', rx.toFixed(1))
+      ring.setAttribute('ry', (rx * Math.sin(orbit.pitch)).toFixed(1))
+      ring.setAttribute('transform', `rotate(${((orbit.roll * 180) / Math.PI).toFixed(2)} ${w / 2} ${h / 2})`)
+    }
+    if (fusion) {
+      fusion.grow += ((animate ? 1 : 1) - fusion.grow) * (snap ? 1 : 0.12)
+      const R = Math.max(62, Math.min(96, w * 0.075)) * fusion.grow
+      const v = `translate3d(${(w / 2 - R).toFixed(1)}px, ${(h / 2 - R).toFixed(1)}px, 0)`
+      fusion.blob.style.transform = v
+      fusion.blob.style.width = fusion.blob.style.height = `${(R * 2).toFixed(1)}px`
+      fusion.node.style.transform = v
+      fusion.node.style.width = fusion.node.style.height = `${(R * 2).toFixed(1)}px`
+      fusion.node.style.opacity = String(Math.max(0, (fusion.grow - 0.6) / 0.4))
     }
   }
 
-  const select = (d: Drop | null) => {
-    selected = d
-    drops.forEach(x => x.btn.setAttribute('aria-pressed', String(x === d)))
-    if (d) say(`${d.tech.label} selected — pick another drop to fuse.`)
-  }
+  const sync = () =>
+    drops.forEach(d => d.btn.setAttribute('aria-pressed', String(d.mode === 'held')))
 
   const doFuse = (a: Drop, b: Drop) => {
-    select(null)
-    a.used = b.used = true
+    a.mode = b.mode = 'fused'
+    held.length = 0
+    sync()
     const recipe = fuse(a.tech.id, b.tech.id)
     const blob = document.createElement('i')
     blob.className = 'lab__blob lab__blob--fused' + (recipe ? ' is-match' : '')
@@ -120,155 +153,146 @@ export function initLab(animate: boolean) {
       ? `${parts}<a href="${recipe.href}" target="_blank" rel="noopener">${title}<svg aria-hidden="true"><use href="#arrow" /></svg></a><button type="button" class="lab__split" aria-label="Split ${title}">Split</button>`
       : `${parts}<strong>${title}</strong><button type="button" class="lab__split" aria-label="Split">Split</button>`
     labels.append(node)
-    const f: Fusion = { a, b, recipe, blob, node }
-    fusions.push(f)
+    fusion = { a, b, recipe, blob, node, grow: animate ? 0.15 : 1 }
     a.btn.hidden = b.btn.hidden = true
-    const mx = (a.x + b.x) / 2
-    const my = (a.y + b.y) / 2
-    if (animate) {
-      gsap.to([a.blob, b.blob], {
-        x: mx - a.r,
-        y: my - a.r,
-        scale: 0.3,
-        duration: 0.55,
-        ease: 'power3.in',
-        onComplete: () => gsap.set([a.blob, b.blob], { opacity: 0 }),
-      })
-    } else {
-      gsap.set([a.blob, b.blob], { opacity: 0 })
-    }
-    placeFusion(f, animate)
-    qs('.lab__split', node)?.addEventListener('click', () => split(f, true))
+    qs('.lab__split', node)?.addEventListener('click', () => split(true))
     if (recipe) {
       qs(`[data-found-key="${recipe.key}"]`)?.classList.add('is-found')
       say(`${a.tech.label} + ${b.tech.label} = ${recipe.title}. Open its repository.`)
-    } else {
-      say(`${a.tech.label} + ${b.tech.label} = ${UNKNOWN_TITLE}.`)
-    }
-    ;(qs('a', node) ?? qs('button', node))?.focus({ preventScroll: true })
+    } else say(`${a.tech.label} + ${b.tech.label} = ${UNKNOWN_TITLE}.`)
+    setTimeout(() => (qs('a', node) ?? qs('button', node))?.focus({ preventScroll: true }), animate ? 450 : 0)
+    if (!animate) render(true)
   }
 
-  const split = (f: Fusion, focus: boolean) => {
-    fusions.splice(fusions.indexOf(f), 1)
+  const split = (focus: boolean) => {
+    if (!fusion) return
+    const f = fusion
+    fusion = null
     f.blob.remove()
     f.node.remove()
     for (const d of [f.a, f.b]) {
-      d.used = false
+      d.mode = 'ring'
       d.btn.hidden = false
-      d.x = d.nx * w
-      d.y = d.ny * h
-      gsap.set(d.blob, { opacity: 1 })
-      if (animate) {
-        gsap.to([d.blob, d.btn], { x: d.x - d.r, y: d.y - d.r, scale: 1, duration: 0.9, ease: 'elastic.out(1, 0.6)' })
-      } else place(d)
     }
+    sync()
     if (focus) f.a.btn.focus({ preventScroll: true })
     say(`Split back into ${f.a.tech.label} and ${f.b.tech.label}.`)
+    if (!animate) render(true)
   }
 
-  // 拖拽：拖动时检测最近的未使用液滴，足够近就高亮，松手即融合
-  drops.forEach(d => {
-    let sx = 0
-    let sy = 0
-    let ox = 0
-    let oy = 0
-    let dragging = false
-    let target: Drop | null = null
-    d.btn.addEventListener('pointerdown', e => {
-      if (e.button !== 0) return
-      d.btn.setPointerCapture(e.pointerId)
-      sx = e.clientX
-      sy = e.clientY
-      ox = d.x
-      oy = d.y
-      dragging = false
-    })
-    d.btn.addEventListener('pointermove', e => {
-      if (!d.btn.hasPointerCapture(e.pointerId)) return
-      const dx = e.clientX - sx
-      const dy = e.clientY - sy
-      if (!dragging && Math.hypot(dx, dy) < 6) return
-      dragging = true
-      field.classList.add('is-dragging')
-      d.x = Math.min(w - d.r, Math.max(d.r, ox + dx))
-      d.y = Math.min(h - d.r, Math.max(d.r, oy + dy))
-      gsap.set([d.blob, d.btn], { x: d.x - d.r, y: d.y - d.r, scale: 1.06 })
-      target = null
-      let best = Infinity
-      for (const o of drops) {
-        if (o === d || o.used) continue
-        const dist = Math.hypot(o.x - d.x, o.y - d.y)
-        if (dist < (o.r + d.r) * 1.15 && dist < best) {
-          best = dist
-          target = o
-        }
-      }
-      drops.forEach(o => o.btn.classList.toggle('is-target', o === target))
-    })
-    const end = (e: PointerEvent) => {
-      if (!d.btn.hasPointerCapture(e.pointerId)) return
-      d.btn.releasePointerCapture(e.pointerId)
-      field.classList.remove('is-dragging')
-      drops.forEach(o => o.btn.classList.remove('is-target'))
-      gsap.to([d.blob, d.btn], { scale: 1, duration: 0.3 })
-      if (dragging) {
-        // 抑制拖拽结束后的 click
-        d.btn.dataset.dragged = '1'
-        setTimeout(() => delete d.btn.dataset.dragged, 0)
-        if (target) doFuse(d, target)
-        else {
-          // 没融合：记住新位置，作为它的“家”
-          d.nx = d.x / w
-          d.ny = d.y / h
-        }
-      }
-      dragging = false
-      target = null
+  const pick = (d: Drop) => {
+    if (d.mode === 'held') {
+      held.splice(held.indexOf(d), 1)
+      d.mode = 'ring'
+      sync()
+      say('Selection cleared.')
+    } else {
+      if (fusion) split(false)
+      d.mode = 'held'
+      held.push(d)
+      sync()
+      if (held.length === 2) {
+        const [a, b] = held as [Drop, Drop]
+        if (animate) setTimeout(() => doFuse(a, b), 520)
+        else doFuse(a, b)
+      } else say(`${d.tech.label} pulled to the core — pick another drop to fuse.`)
     }
-    d.btn.addEventListener('pointerup', end)
-    d.btn.addEventListener('pointercancel', end)
+    if (!animate) render(true)
+  }
+
+  drops.forEach(d =>
     d.btn.addEventListener('click', () => {
-      if (d.btn.dataset.dragged) return
-      if (!selected) return select(d)
-      if (selected === d) {
-        select(null)
-        return say('Selection cleared.')
-      }
-      doFuse(selected, d)
-    })
+      if (moved > 6) return
+      if (held.length >= 2) return
+      pick(d)
+    }),
+  )
+
+  // ---- 拖动拨转圆环 ----
+  field.addEventListener('pointerdown', e => {
+    if ((e.target as Element).closest('.lab__fused')) return
+    dragging = true
+    moved = 0
+    lastX = e.clientX
+    lastT = performance.now()
+    field.classList.add('is-dragging')
+  })
+  window.addEventListener('pointermove', e => {
+    if (dragging) {
+      const dx = e.clientX - lastX
+      const now = performance.now()
+      moved += Math.abs(dx)
+      const da = (dx / Math.max(1, w)) * Math.PI * 1.6
+      orbit.angle += da
+      orbit.vel = (da / Math.max(1, now - lastT)) * 1000 * 0.6
+      lastX = e.clientX
+      lastT = now
+      if (!animate) render(true)
+    }
+    if (!animate || e.pointerType !== 'mouse') return
+    const b = field.getBoundingClientRect()
+    if (e.clientY < b.top - 200 || e.clientY > b.bottom + 200) return
+    const nx = ((e.clientX - b.left) / b.width) * 2 - 1
+    const ny = ((e.clientY - b.top) / b.height) * 2 - 1
+    orbit.tRoll = Math.max(-1, Math.min(1, nx)) * 0.14
+    orbit.tPitch = pitch0 + Math.max(-1, Math.min(1, ny)) * 0.16
+  })
+  const end = () => {
+    if (!dragging) return
+    dragging = false
+    field.classList.remove('is-dragging')
+    // click 事件在 pointerup 之后触发：稍后再清零移动量
+    setTimeout(() => (moved = 0), 0)
+  }
+  window.addEventListener('pointerup', end)
+  window.addEventListener('pointercancel', end)
+
+  // 键盘：左右方向键拨转
+  field.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+    e.preventDefault()
+    orbit.angle += (e.key === 'ArrowLeft' ? -1 : 1) * (Math.PI / 4)
+    if (!animate) render(true)
   })
 
   reset?.addEventListener('click', () => {
-    ;[...fusions].forEach(f => split(f, false))
+    split(false)
+    held.splice(0).forEach(d => (d.mode = 'ring'))
+    sync()
     qsa('.lab__found li').forEach(li => li.classList.remove('is-found'))
-    select(null)
-    layout()
-    drops.forEach(d => place(d))
-    say('Field reset. Drag or tap two drops to fuse them.')
+    say('Orbit reset. Tap two drops to fuse them.')
+    if (!animate) render(true)
   })
 
-  // 空闲时液滴轻轻漂浮（只改视觉层，交互层随之移动）
-  if (animate) {
-    let on = false
-    let raf = 0
-    const t0 = performance.now()
-    const float = (now: number) => {
-      const t = (now - t0) / 1000
-      drops.forEach((d, i) => {
-        if (d.used || field.classList.contains('is-dragging')) return
-        d.x = d.nx * w + Math.sin(t * 0.6 + i * 1.7) * 7
-        d.y = d.ny * h + Math.cos(t * 0.5 + i * 2.3) * 7
-        gsap.set([d.blob, d.btn], { x: d.x - d.r, y: d.y - d.r })
-      })
-      if (on) raf = requestAnimationFrame(float)
+  // ---- 帧循环：只在可见时运行 ----
+  let on = false
+  let raf = 0
+  let last = 0
+  const tick = (now: number) => {
+    const dt = Math.min(0.05, (now - (last || now)) / 1000)
+    last = now
+    if (!dragging) {
+      orbit.vel += (AUTO - orbit.vel) * (1 - Math.exp(-dt * 1.6))
+      orbit.angle += orbit.vel * dt
     }
+    orbit.pitch += (orbit.tPitch - orbit.pitch) * (1 - Math.exp(-dt * 3))
+    orbit.roll += (orbit.tRoll - orbit.roll) * (1 - Math.exp(-dt * 3))
+    render(false)
+    if (on) raf = requestAnimationFrame(tick)
+  }
+  if (animate) {
     new IntersectionObserver(([en]) => {
       on = !!en?.isIntersecting
       cancelAnimationFrame(raf)
-      if (on) raf = requestAnimationFrame(float)
+      last = 0
+      if (on) raf = requestAnimationFrame(tick)
     }).observe(field)
   }
 
-  new ResizeObserver(layout).observe(field)
-  layout()
+  new ResizeObserver(() => {
+    size()
+    render(true)
+  }).observe(field)
+  size()
+  render(true)
 }

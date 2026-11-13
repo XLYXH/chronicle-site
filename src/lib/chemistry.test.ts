@@ -33,3 +33,18 @@ describe('scrambleFrame', () => {
     expect(out[1]).toMatch(/[a-z]/)
   })
 })
+
+import { orbitPoint, wrapAngle } from './orbit'
+describe('orbit', () => {
+  it('front of the ring is nearer and larger', () => {
+    const front = orbitPoint(Math.PI / 2, 100, 0.4)
+    const back = orbitPoint(-Math.PI / 2, 100, 0.4)
+    expect(front.z).toBeCloseTo(1)
+    expect(front.scale).toBeGreaterThan(back.scale)
+    expect(front.y).toBeGreaterThan(back.y)
+  })
+  it('wraps angles', () => {
+    expect(wrapAngle(Math.PI * 2.5)).toBeCloseTo(Math.PI / 2)
+    expect(wrapAngle(-Math.PI * 2.5)).toBeCloseTo(-Math.PI / 2)
+  })
+})
