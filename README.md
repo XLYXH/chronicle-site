@@ -1,10 +1,21 @@
-# CHRONICLE — Chronicle-IRAS 的个人网站（v8）
+# CHRONICLE — Chronicle-IRAS 的个人网站（v9）
 
 > Ideas take shape. · 在代码与想象之间，让每一个念头，有形可见。
 
 线上地址：<https://xlyxh.github.io/chronicle-site/>
 
 v4 推翻了 v3 的「IRAS.OS」终端 / HUD 风格，重新设计成一套**自己的视觉语言**；内容**只取自原仓库 [Chronicle-IRAS/chronicle](https://github.com/Chronicle-IRAS/chronicle)**，不额外添加。
+
+## v9：JIEJOE 教程手法
+
+灵感来自 B 站 UP 主 [JIEJOE_轻敲代码](https://space.bilibili.com/3546390319860710) 的网页交互教程及其开源仓库 [JIEJOE-WEB-Tutorial](https://github.com/JIEJOE-WEB-Tutorial)（另见视频《你的网站或许离高级，，还差一个跳转动画？》BV1Nk4y1Q7pk、《你的个人网站、应该是什么样的？》BV1XkeF6VEpT）。只借鉴手法，代码按本站的瓷白 / 墨色 / 钴蓝液态玻璃语言重写，不新增文案（`src/modules/motifs.ts` + `src/styles/motifs.css`）：
+
+| 教程 | 本站的用法 |
+| --- | --- |
+| 019 斩切开屏（slash loading） | 每个会话首次进入时，一道钴蓝刃光沿对角线斜切过墨色幕布，幕布沿切口上下分离露出首屏；没有文字，不影响 LCP；带锚点直达、减少动态效果时不出现；任意点击 / 按键可跳过；JS 失效时 2.6s 后 CSS 自动隐藏。 |
+| 006 页面跳转动画 + 020 百叶窗 | 导航 / 锚点跳转距离超过约 1.6 屏时，7 片高度按指数递增的百叶片依次合上 → 瞬移到目标并移交焦点 → 自下而上打开；近距离仍是平滑滚动。 |
+| 016 SVG 波浪线条 | 联系区背后一片钴蓝细竖线，被指针（触屏为手指）速度“拨动”，弹簧回位；离开视口或静止后停止绘制。 |
+| 011-03 SVG 描边按钮 | 主按钮、GitHub 链接、实验区按钮悬停时，一段光沿圆角轮廓追逐并闭合（`pathLength` + `stroke-dasharray` 过渡）。 |
 
 ## v8：签名交互
 
@@ -187,6 +198,7 @@ src/modules/
   showcase.ts            作品展台：液体前沿切换、水波扭曲、读线同步、稳健的筛选序列
   craft.ts               v7 手感层：筛选液滴、章节开场、信笺书写、玻璃球 CTA
   signature.ts           v8 签名交互：变形光标、字重场、墨滴、景深展台
+  motifs.ts              v9 JIEJOE 教程手法：斩切开屏、百叶窗跳转、波浪线条、描边按钮
   work.ts                三张交互概念图
   velocity.ts            滚动速度拖影 + WebGL 漏光
   lab.ts                 A little chemistry 3D 轨道融合实验
@@ -195,7 +207,7 @@ src/modules/
   cursor.ts              圆点光标与磁吸
   scramble.ts            悬停解码（读屏安全）
   smoothScroll.ts        Lenis + ScrollTrigger
-src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature
+src/styles/              fonts / base / chrome / sections / showcase / glass / craft / signature / motifs
 public/                  图标、og 图、manifest、404 与其字体
 scripts/                 字体子集化、部署
 ```

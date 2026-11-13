@@ -39,6 +39,12 @@
         var d = document.documentElement
         d.classList.replace('no-js', 'js')
         if (matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('reduced-motion')
+        else {
+          // v9 斩切开屏：每个会话只放一次；带锚点直达时不放
+          var seen = null
+          try { seen = sessionStorage.getItem('slash') } catch (e) {}
+          if (!seen && !location.hash) d.classList.add('has-slash')
+        }
         var t = null
         try { t = localStorage.getItem('theme') } catch (e) {}
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) d.dataset.theme = 'dark'
@@ -47,6 +53,7 @@
     </script>
   </head>
   <body>
+    <div class="slash" aria-hidden="true"><i class="slash__up"></i><i class="slash__down"></i><i class="slash__blade"></i></div>
     <a class="skip" href="#main">跳到正文</a>
 
     <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">

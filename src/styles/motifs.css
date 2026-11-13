@@ -1,0 +1,168 @@
+/* ==========================================================
+   v9 · JIEJOE 教程手法（斩切开屏 / 百叶窗跳转 / 波浪线条 / 描边按钮）
+   ========================================================== */
+
+/* ---------- 斩切开屏 ---------- */
+.slash {
+  display: none;
+}
+.has-slash .slash {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: auto;
+  /* JS 失效时的保险：2.6s 后自行隐藏 */
+  animation: slash-safety 0s linear 2.6s forwards;
+}
+@keyframes slash-safety {
+  to {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+.slash__up,
+.slash__down {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(90% 70% at 20% 10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+    var(--ink);
+  will-change: transform;
+}
+.slash__down {
+  background:
+    radial-gradient(90% 70% at 80% 95%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    var(--ink);
+}
+[data-theme='dark'] .slash__up,
+[data-theme='dark'] .slash__down {
+  background-color: #08090c;
+}
+/* 刃光：一道短而亮的钴蓝玻璃光，沿切线飞过 */
+.slash__blade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 46vmax;
+  height: 3px;
+  margin: -1.5px 0 0 -46vmax;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gl-a) 60%, #fff) 70%, #fff);
+  box-shadow:
+    0 0 18px 2px color-mix(in srgb, var(--gl-a) 70%, transparent),
+    0 0 60px 6px color-mix(in srgb, var(--gl-a) 35%, transparent);
+  opacity: 0;
+}
+
+/* ---------- 百叶窗跳转 ---------- */
+.blinds {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: none;
+  flex-direction: column;
+  pointer-events: none;
+}
+.blinds.is-on {
+  display: flex;
+  pointer-events: auto;
+}
+.blinds i {
+  display: block;
+  flex: none;
+  background: var(--ink);
+  transform: scaleY(0);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--gl-a) 55%, transparent);
+  will-change: transform;
+}
+[data-theme='dark'] .blinds i {
+  background: var(--paper-2);
+}
+
+/* ---------- 波浪线条 ---------- */
+.connect {
+  position: relative;
+  isolation: isolate;
+}
+.waves {
+  position: absolute;
+  inset: 0 0 auto;
+  height: min(100%, 1100px);
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 62%, transparent);
+}
+.waves svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.waves path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+[data-theme='dark'] .waves path {
+  stroke: color-mix(in srgb, var(--accent) 17%, transparent);
+}
+
+/* ---------- 描边按钮：一段光沿轮廓追逐 ---------- */
+.trace {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+}
+.trace rect {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 0 100;
+  stroke-dashoffset: 0;
+  transition:
+    stroke-dasharray 0.9s var(--ease),
+    stroke-dashoffset 0.9s var(--ease);
+}
+.pill .trace rect {
+  stroke: color-mix(in srgb, var(--gl-a) 55%, #fff);
+}
+@media (hover: hover) {
+  .pill:hover .trace rect,
+  .connect__bottom .link:hover .trace rect,
+  .chip:hover .trace rect {
+    /* 先描出一段，再绕一整圈闭合 */
+    stroke-dasharray: 100 0;
+    stroke-dashoffset: -100;
+  }
+}
+.pill:focus-visible .trace rect,
+.connect__bottom .link:focus-visible .trace rect,
+.chip:focus-visible .trace rect {
+  stroke-dasharray: 100 0;
+}
+.connect__bottom .link {
+  position: relative;
+  padding: 10px 16px;
+  margin: -10px -16px;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slash,
+  .blinds,
+  .waves {
+    display: none !important;
+  }
+}
+@media (max-width: 699px) {
+  .waves path {
+    stroke: color-mix(in srgb, var(--accent) 13%, transparent);
+  }
+}
